@@ -16,7 +16,7 @@
 
 enum class EType
 {
-	RESOURCE, PLAYER, ARTIFACT_TYPE, CREATURE, CREATURE_PLACEHOLDER, ARTIFACT_PLACEHOLDER, ARTIFACT_INSTANCE
+	RESOURCE, PLAYER, ARTIFACT_TYPE, CREATURE, CREATURE_PLACEHOLDER, ARTIFACT_PLACEHOLDER, SECSKILL
 };
 
 class CTradeableItem : public SelectableSlot, public std::enable_shared_from_this<CTradeableItem>
@@ -81,7 +81,7 @@ class ResourcesPanel : public TradePanelBase
 		Point(83, 158)
 	};
 	const Point slotDimension = Point(69, 66);
-	const Point selectedPos = Point(83, 267);
+	const Point showcasePos = Point(83, 267);
 
 public:
 	ResourcesPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback, const UpdateSlotsFunctor & updateSubtitles);
@@ -97,7 +97,7 @@ class ArtifactsPanel : public TradePanelBase
 	};
 	const size_t slotsForTrade = 7;
 	const Point slotDimension = Point(69, 68);
-	const Point selectedPos = Point(83, 266);
+	const Point showcasePos = Point(83, 266);
 
 public:
 	ArtifactsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback,
@@ -113,7 +113,7 @@ class PlayersPanel : public TradePanelBase
 		Point(83, 236)
 	};
 	const Point slotDimension = Point(58, 64);
-	const Point selectedPos = Point(83, 367);
+	const Point showcasePos = Point(83, 367);
 
 public:
 	explicit PlayersPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback);
@@ -128,7 +128,7 @@ class CreaturesPanel : public TradePanelBase
 		Point(83, 196)
 	};
 	const Point slotDimension = Point(59, 64);
-	const Point selectedPos = Point(83, 327);
+	const Point showcasePos = Point(83, 327);
 
 public:
 	using slotsData = std::vector<std::tuple<CreatureID, SlotID, int>>;
@@ -152,8 +152,22 @@ class ArtifactsAltarPanel : public TradePanelBase
 		Point(135, 280)
 	};
 	const Point slotDimension = Point(69, 66);
-	const Point selectedPos = Point(-48, 389);
+	const Point showcasePos = Point(-48, 389);
 
 public:
 	explicit ArtifactsAltarPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback);
+};
+
+class SecondarySkillsPanel : public TradePanelBase
+{
+	const std::vector<Point> slotsPos =
+	{
+		Point(0, 0), Point(104, 0), Point(208, 0), Point(312, 0)
+	};
+
+	const Point slotDimension = Point(44, 44);
+	const Point showcasePos = Point(148, 389);
+
+public:
+	SecondarySkillsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback, std::vector<TradeItemBuy> & skills);
 };

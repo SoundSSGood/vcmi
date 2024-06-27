@@ -780,7 +780,7 @@ bool CGTownInstance::allowsTrade(EMarketMode mode) const
 	case EMarketMode::CREATURE_UNDEAD:
 		return hasBuilt(BuildingSubID::CREATURE_TRANSFORMER);
 
-	case EMarketMode::RESOURCE_SKILL:
+	case EMarketMode::GOLD_SECSKILL:
 		return hasBuilt(BuildingSubID::MAGIC_UNIVERSITY);
 	case EMarketMode::CREATURE_EXP:
 	case EMarketMode::ARTIFACT_EXP:
@@ -803,7 +803,7 @@ std::vector<TradeItemBuy> CGTownInstance::availableItemsIds(EMarketMode mode) co
 				ret.push_back(ArtifactID{});
 		return ret;
 	}
-	else if ( mode == EMarketMode::RESOURCE_SKILL )
+	else if ( mode == EMarketMode::GOLD_SECSKILL )
 	{
 		return cb->gameState()->map->townUniversitySkills;
 	}

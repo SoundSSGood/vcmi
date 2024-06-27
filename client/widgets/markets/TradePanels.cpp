@@ -21,6 +21,7 @@
 #include "../../../CCallback.h"
 
 #include "../../../lib/texts/CGeneralTextHandler.h"
+#include "../../../lib/CSkillHandler.h"
 #include "../../../lib/mapObjects/CGHeroInstance.h"
 
 CTradeableItem::CTradeableItem(const Rect & area, EType Type, int ID, int Serial)
@@ -73,13 +74,13 @@ void CTradeableItem::setType(EType newType)
 			subtitle->moveTo(pos.topLeft() + Point(31, 76));
 			break;
 		case EType::ARTIFACT_PLACEHOLDER:
-		case EType::ARTIFACT_INSTANCE:
 			image->moveTo(pos.topLeft() + Point(0, 1));
 			subtitle->moveTo(pos.topLeft() + Point(21, 56));
 			break;
 		case EType::ARTIFACT_TYPE:
 			subtitle->moveTo(pos.topLeft() + Point(35, 57));
 			image->moveTo(pos.topLeft() + Point(13, 0));
+		case EType::SECSKILL:
 			break;
 		}
 	}
@@ -122,10 +123,11 @@ AnimationPath CTradeableItem::getFilename()
 		return AnimationPath::builtin("CREST58");
 	case EType::ARTIFACT_TYPE:
 	case EType::ARTIFACT_PLACEHOLDER:
-	case EType::ARTIFACT_INSTANCE:
 		return AnimationPath::builtin("artifact");
 	case EType::CREATURE:
 		return AnimationPath::builtin("TWCRPORT");
+	case EType::SECSKILL:
+		return AnimationPath::builtin("SECSKILL");
 	default:
 		return {};
 	}
@@ -142,11 +144,12 @@ int CTradeableItem::getIndex()
 	case EType::PLAYER:
 		return id;
 	case EType::ARTIFACT_TYPE:
-	case EType::ARTIFACT_INSTANCE:
 	case EType::ARTIFACT_PLACEHOLDER:
 		return CGI->artifacts()->getByIndex(id)->getIconIndex();
 	case EType::CREATURE:
 		return CGI->creatures()->getByIndex(id)->getIconIndex();
+	case EType::SECSKILL:
+		return id * 3 + 3;
 	default:
 		return -1;
 	}
@@ -184,6 +187,9 @@ void CTradeableItem::hover(bool on)
 		break;
 	case EType::PLAYER:
 		GH.statusbar()->write(CGI->generaltexth->capColors[id]);
+		break;
+	case EType::SECSKILL:
+		GH.statusbar()->write(CGI->skillh->getByIndex(id)->getNameTranslated());
 		break;
 	}
 }
@@ -279,7 +285,7 @@ ResourcesPanel::ResourcesPanel(const CTradeableItem::ClickPressedFunctor & click
 		slot->setSelectionWidth(selectionWidth);
 	}
 	updateSlotsCallback = updateSubtitles;
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(selectedPos, slotDimension), EType::RESOURCE, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::RESOURCE, 0, 0);
 }
 
 ArtifactsPanel::ArtifactsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback,
@@ -301,7 +307,7 @@ ArtifactsPanel::ArtifactsPanel(const CTradeableItem::ClickPressedFunctor & click
 		}
 	}
 	updateSlotsCallback = updateSubtitles;
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(selectedPos, slotDimension), EType::ARTIFACT_TYPE, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::ARTIFACT_TYPE, 0, 0);
 	showcaseSlot->subtitle->moveBy(Point(0, 1));
 }
 
@@ -327,7 +333,7 @@ PlayersPanel::PlayersPanel(const CTradeableItem::ClickPressedFunctor & clickPres
 		slot->subtitle->setText(CGI->generaltexth->capColors[players[slotNum].num]);
 		slotNum++;
 	}
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(selectedPos, slotDimension), EType::PLAYER, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::PLAYER, 0, 0);
 }
 
 CreaturesPanel::CreaturesPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback, const slotsData & initialSlots)
@@ -345,7 +351,7 @@ CreaturesPanel::CreaturesPanel(const CTradeableItem::ClickPressedFunctor & click
 			slot->subtitle->setText(std::to_string(creaturesNum));
 		slot->setSelectionWidth(selectionWidth);
 	}
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(selectedPos, slotDimension), EType::CREATURE, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::CREATURE, 0, 0);
 }
 
 CreaturesPanel::CreaturesPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback,
@@ -362,7 +368,7 @@ CreaturesPanel::CreaturesPanel(const CTradeableItem::ClickPressedFunctor & click
 		slot->subtitle->setText(emptySlots ? "" : srcSlot->subtitle->getText());
 		slot->setSelectionWidth(selectionWidth);
 	}
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(selectedPos, slotDimension), EType::CREATURE, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::CREATURE, 0, 0);
 }
 
 ArtifactsAltarPanel::ArtifactsAltarPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback)
@@ -378,6 +384,24 @@ ArtifactsAltarPanel::ArtifactsAltarPanel(const CTradeableItem::ClickPressedFunct
 		slot->subtitle->moveBy(Point(0, -1));
 		slotNum++;
 	}
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(selectedPos, slotDimension), EType::ARTIFACT_TYPE, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::ARTIFACT_TYPE, 0, 0);
 	showcaseSlot->subtitle->moveBy(Point(0, 3));
+}
+
+SecondarySkillsPanel::SecondarySkillsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback, std::vector<TradeItemBuy> & skills)
+{
+	assert(skills.size() == slotsPos.size());
+	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+
+	int slotNum = 0;
+	for(const auto & skill : skills)
+	{
+		auto slot = slots.emplace_back(std::make_shared<CTradeableItem>(
+			Rect(slotsPos[slotNum], slotDimension), EType::SECSKILL, skill.getNum(), slotNum));
+		slot->clickPressedCallback = clickPressedCallback;
+		slot->subtitle->setText(CGI->generaltexth->levels[0]);
+		slot->subtitle->moveBy(Point(23, 56));
+		slotNum++;
+	}
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, Point(20, 20)), EType::SECSKILL, 0, 0);
 }

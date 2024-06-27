@@ -954,10 +954,6 @@ CUniversityWindow::CUniversityWindow(const CGHeroInstance * _hero, const IMarket
 {
 	OBJECT_CONSTRUCTION;
 
-
-	std::string titleStr = CGI->generaltexth->allTexts[602];
-	std::string speechStr = CGI->generaltexth->allTexts[603];
-
 	if(auto town = dynamic_cast<const CGTownInstance *>(_market))
 	{
 		auto faction = town->town->faction->getId();
@@ -967,20 +963,14 @@ CUniversityWindow::CUniversityWindow(const CGHeroInstance * _hero, const IMarket
 	else if(auto uni = dynamic_cast<const CGUniversity *>(_market); uni->appearance)
 	{
 		titlePic = std::make_shared<CAnimImage>(uni->appearance->animationFile, 0);
-		titleStr = uni->title;
-		speechStr = uni->speech;
-	}
-	else
-	{
-		titlePic = std::make_shared<CPicture>(ImagePath::builtin("UNIVBLDG"));
 	}
 
 	titlePic->center(Point(232 + pos.x, 76 + pos.y));
 
-	clerkSpeech = std::make_shared<CTextBox>(speechStr, Rect(24, 129, 413, 70), 0, FONT_SMALL, ETextAlignment::CENTER, Colors::WHITE);
-	title = std::make_shared<CLabel>(231, 26, FONT_MEDIUM, ETextAlignment::CENTER, Colors::YELLOW, titleStr);
+	clerkSpeech = std::make_shared<CTextBox>(CGI->generaltexth->allTexts[603], Rect(24, 129, 413, 70), 0, FONT_SMALL, ETextAlignment::CENTER, Colors::WHITE);
+	title = std::make_shared<CLabel>(231, 26, FONT_MEDIUM, ETextAlignment::CENTER, Colors::YELLOW, CGI->generaltexth->allTexts[602]);
 
-	std::vector<TradeItemBuy> goods = market->availableItemsIds(EMarketMode::RESOURCE_SKILL);
+	std::vector<TradeItemBuy> goods = market->availableItemsIds(EMarketMode::GOLD_SECSKILL);
 
 	for(int i=0; i<goods.size(); i++)//prepare clickable items
 		items.push_back(std::make_shared<CItem>(this, goods[i].as<SecondarySkill>(), 54+i*104, 234));
@@ -1005,7 +995,7 @@ void CUniversityWindow::updateSecondarySkills()
 
 void CUniversityWindow::makeDeal(SecondarySkill skill)
 {
-	LOCPLINT->cb->trade(market, EMarketMode::RESOURCE_SKILL, GameResID(GameResID::GOLD), skill, 1, hero);
+	LOCPLINT->cb->trade(market, EMarketMode::GOLD_SECSKILL, GameResID(GameResID::GOLD), skill, 1, hero);
 }
 
 CUnivConfirmWindow::CUnivConfirmWindow(CUniversityWindow * owner_, SecondarySkill SKILL, bool available)

@@ -1664,7 +1664,8 @@ void CPlayerInterface::showUniversityWindow(const IMarket *market, const CGHeroI
 	auto onWindowClosed = [this, queryID](){
 		cb->selectionMade(0, queryID);
 	};
-	GH.windows().createAndPushWindow<CUniversityWindow>(visitor, market, onWindowClosed);
+	//GH.windows().createAndPushWindow<CUniversityWindow>(visitor, market, onWindowClosed);
+	GH.windows().createAndPushWindow<CMarketWindow>(market, visitor, onWindowClosed, EMarketMode::GOLD_SECSKILL);
 }
 
 void CPlayerInterface::showHillFortWindow(const CGObjectInstance *object, const CGHeroInstance *visitor)

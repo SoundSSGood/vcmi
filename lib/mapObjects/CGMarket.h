@@ -24,7 +24,6 @@ public:
 	
 	//window variables
 	std::string title;
-	std::string speech; //currently shown only in university
 	
 	CGMarket(IGameCallback *cb);
 	///IObjectInterface
@@ -43,7 +42,6 @@ public:
 		h & marketModes;
 		h & marketEfficiency;
 		h & title;
-		h & speech;
 	}
 };
 

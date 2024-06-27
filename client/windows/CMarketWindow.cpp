@@ -23,6 +23,7 @@
 #include "../widgets/markets/CFreelancerGuild.h"
 #include "../widgets/markets/CMarketResources.h"
 #include "../widgets/markets/CTransferResources.h"
+#include "../widgets/markets/CUnivercity.h"
 
 #include "../CGameInfo.h"
 #include "../CPlayerInterface.h"
@@ -38,7 +39,7 @@ CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero
 {
 	assert(mode == EMarketMode::RESOURCE_RESOURCE || mode == EMarketMode::RESOURCE_PLAYER || mode == EMarketMode::CREATURE_RESOURCE ||
 		mode == EMarketMode::RESOURCE_ARTIFACT || mode == EMarketMode::ARTIFACT_RESOURCE || mode == EMarketMode::ARTIFACT_EXP ||
-		mode == EMarketMode::CREATURE_EXP);
+		mode == EMarketMode::CREATURE_EXP || mode == EMarketMode::GOLD_SECSKILL);
 	
 	OBJECT_CONSTRUCTION;
 
@@ -56,6 +57,8 @@ CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero
 		createAltarArtifacts(market, hero);
 	else if(mode == EMarketMode::CREATURE_EXP)
 		createAltarCreatures(market, hero);
+	else if(mode == EMarketMode::GOLD_SECSKILL)
+		createUnivercity(market, hero);
 
 	statusbar = CGStatusBar::create(std::make_shared<CPicture>(background->getSurface(), Rect(8, pos.h - 26, pos.w - 16, 19), 8, pos.h - 26));
 }
@@ -162,7 +165,7 @@ void CMarketWindow::createChangeModeButtons(EMarketMode currentMode, const IMark
 	}
 }
 
-void CMarketWindow::initWidgetInternals(const EMarketMode mode, const std::pair<std::string, std::string> & quitButtonHelpContainer)
+void CMarketWindow::initWidgetInternals(const EMarketMode mode, const std::pair<std::string, std::string> & quitButtonHelpContainer, const Point & quitButtonPos)
 {
 	background->center();
 	pos = background->pos;
@@ -263,4 +266,13 @@ void CMarketWindow::createAltarCreatures(const IMarket * market, const CGHeroIns
 	marketWidget = std::make_shared<CAltarCreatures>(market, hero);
 	initWidgetInternals(EMarketMode::CREATURE_EXP, CGI->generaltexth->zelp[568]);
 	updateExperience();
+}
+
+void CMarketWindow::createUnivercity(const IMarket * market, const CGHeroInstance * hero)
+{
+	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+
+	background = createBg(ImagePath::builtin("UNIVERS1"), PLAYER_COLORED);
+	marketWidget = std::make_shared<CUnivercity>(market, hero);
+	initWidgetInternals(EMarketMode::CREATURE_EXP, CGI->generaltexth->zelp[632], Point(200, 313));
 }

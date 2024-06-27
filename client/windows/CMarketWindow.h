@@ -26,7 +26,8 @@ public:
 
 private:
 	void createChangeModeButtons(EMarketMode currentMode, const IMarket * market, const CGHeroInstance * hero);
-	void initWidgetInternals(const EMarketMode mode, const std::pair<std::string, std::string> & quitButtonHelpContainer);
+	void initWidgetInternals(const EMarketMode mode, const std::pair<std::string, std::string> & quitButtonHelpContainer,
+		const Point & quitButtonPos = Point(516, 520));
 
 	void createArtifactsBuying(const IMarket * market, const CGHeroInstance * hero);
 	void createArtifactsSelling(const IMarket * market, const CGHeroInstance * hero);
@@ -35,12 +36,12 @@ private:
 	void createTransferResources(const IMarket * market, const CGHeroInstance * hero);
 	void createAltarArtifacts(const IMarket * market, const CGHeroInstance * hero);
 	void createAltarCreatures(const IMarket * market, const CGHeroInstance * hero);
+	void createUnivercity(const IMarket * market, const CGHeroInstance * hero);
 
 	const int buttonHeightWithMargin = 32 + 3;
 	std::vector<std::shared_ptr<CButton>> changeModeButtons;
 	std::shared_ptr<CButton> quitButton;
 	std::function<void()> windowClosedCallback;
-	const Point quitButtonPos = Point(516, 520);
 	std::shared_ptr<CMarketBase> marketWidget;
 
 	// This is workaround for bug in H3 files where this slot for ragdoll on this screen is missing

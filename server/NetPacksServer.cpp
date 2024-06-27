@@ -326,7 +326,7 @@ void ApplyGhNetPackVisitor::visitTradeOnMarketplace(TradeOnMarketplace & pack)
 		for(int i = 0; i < pack.r1.size(); ++i)
 			result &= gh.transformInUndead(market, hero, pack.r1[i].as<SlotID>());
 		break;
-	case EMarketMode::RESOURCE_SKILL:
+	case EMarketMode::GOLD_SECSKILL:
 		for(int i = 0; i < pack.r2.size(); ++i)
 			result &= gh.buySecSkill(market, hero, pack.r2[i].as<SecondarySkill>());
 		break;

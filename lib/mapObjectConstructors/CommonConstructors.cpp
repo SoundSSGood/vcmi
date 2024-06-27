@@ -234,7 +234,7 @@ CGMarket * MarketInstanceConstructor::createObject(IGameCallback * cb) const
 			case EMarketMode::RESOURCE_ARTIFACT:
 				return new CGBlackMarket(cb);
 
-			case EMarketMode::RESOURCE_SKILL:
+			case EMarketMode::GOLD_SECSKILL:
 				return new CGUniversity(cb);
 		}
 	}
@@ -254,9 +254,6 @@ void MarketInstanceConstructor::initializeObject(CGMarket * market) const
 	market->title = market->getObjectName();
 	if(!title.empty())
 		market->title = VLC->generaltexth->translate(title);
-	
-	if (!speech.empty())
-		market->speech = VLC->generaltexth->translate(speech);
 }
 
 void MarketInstanceConstructor::randomizeObject(CGMarket * object, vstd::RNG & rng) const

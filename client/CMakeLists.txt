@@ -142,6 +142,7 @@ set(client_SRCS
 	widgets/markets/CFreelancerGuild.cpp
 	widgets/markets/CMarketResources.cpp
 	widgets/markets/CTransferResources.cpp
+	widgets/markets/CUnivercity.cpp
 	widgets/markets/CMarketBase.cpp
 	widgets/markets/TradePanels.cpp
 
@@ -349,6 +350,7 @@ set(client_HEADERS
 	widgets/markets/CFreelancerGuild.h
 	widgets/markets/CMarketResources.h
 	widgets/markets/CTransferResources.h
+	widgets/markets/CUnivercity.h
 	widgets/markets/CMarketBase.h
 	widgets/markets/TradePanels.h
 

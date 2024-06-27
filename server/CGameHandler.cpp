@@ -3246,7 +3246,7 @@ bool CGameHandler::buySecSkill(const IMarket *m, const CGHeroInstance *h, Second
 	if (!h->canLearnSkill(skill))
 		COMPLAIN_RET("The hero can't learn this skill!");
 
-	if (!vstd::contains(m->availableItemsIds(EMarketMode::RESOURCE_SKILL), skill))
+	if (!vstd::contains(m->availableItemsIds(EMarketMode::GOLD_SECSKILL), skill))
 		COMPLAIN_RET("That skill is unavailable!");
 
 	if (getResource(h->tempOwner, EGameResID::GOLD) < GameConstants::SKILL_GOLD_COST)//TODO: remove hardcoded resource\summ?
