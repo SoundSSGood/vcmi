@@ -819,7 +819,7 @@ CTownItem::CTownItem(const CGTownInstance * Town)
 	fastArmyPurchase = std::make_shared<CButton>(Point(111, 31), AnimationPath::builtin("castleInterfaceQuickAccess"), CButton::tooltip(), [this]() { std::make_shared<CCastleBuildings>(town)->enterToTheQuickRecruitmentWindow(); });
 	fastArmyPurchase->setOverlay(std::make_shared<CAnimImage>(AnimationPath::builtin("itmcl"), imageIndex));
 
-	fastTavern = std::make_shared<ClickableArea>(Rect(5, 6, 58, 64), [&](const Point & cursorPosition)
+	fastTavern = std::make_shared<ClickableArea>(Point(58, 64), [&](const Point & cursorPosition)
 	{
 		if(town->builtBuildings.count(BuildingID::TAVERN))
 			LOCPLINT->showTavernWindow(town, nullptr, QueryID::NONE);
@@ -827,7 +827,8 @@ CTownItem::CTownItem(const CGTownInstance * Town)
 		if(!town->town->faction->getDescriptionTranslated().empty())
 			CRClickPopup::createAndPush(town->town->faction->getDescriptionTranslated());
 	});
-	fastMarket = std::make_shared<ClickableArea>(Rect(153, 6, 65, 64), [](const Point & cursorPosition)
+	fastTavern->moveTo(pos.topLeft() + Point(5, 6));
+	fastMarket = std::make_shared<ClickableArea>(Point(65, 64), [](const Point & cursorPosition)
 	{
 		std::vector<const CGTownInstance*> towns = LOCPLINT->cb->getTownsInfo(true);
 		for(auto & town : towns)
@@ -840,10 +841,12 @@ CTownItem::CTownItem(const CGTownInstance * Town)
 		}
 		LOCPLINT->showInfoDialog(CGI->generaltexth->translate("vcmi.adventureMap.noTownWithMarket"));
 	});
-	fastTown = std::make_shared<ClickableArea>(Rect(67, 6, 165, 20), [&](const Point & cursorPosition)
+	fastMarket->moveTo(pos.topLeft() + Point(153, 6));
+	fastTown = std::make_shared<ClickableArea>(Point(165, 20), [&](const Point & cursorPosition)
 	{
 		GH.windows().createAndPushWindow<CCastleInterface>(town);
 	});
+	fastTown->moveTo(pos.topLeft() + Point(67, 6));
 }
 
 void CTownItem::updateGarrisons()

@@ -65,9 +65,9 @@ void ClickableAreaWText::showPopupWindow(const Point & cursorPosition)
 }
 
 ClickableAreaWText::ClickableAreaWText(const Rect & pos, const std::string & hoverText, const std::string & clickText)
-	: ClickableArea(pos, nullptr, nullptr, false)
+	: ClickableArea(pos.dimensions(), nullptr, nullptr, false)
 {
-	this->pos = pos + this->pos.topLeft();
+	moveTo(this->pos.topLeft() + pos);
 	this->hoverText = hoverText;
 	text = clickText;
 }
@@ -104,30 +104,14 @@ void LRClickableAreaWTextComp::showPopupWindow(const Point & cursorPosition)
 }
 
 CHeroArea::CHeroArea(int x, int y, const CGHeroInstance * hero)
-	: ClickableArea(Rect(x, y, 58, 64), [hero](const Point & cursorPosition){LOCPLINT->openHeroWindow(hero);})
+	: ClickableArea(Point(58, 64), [hero](const Point & cursorPosition){LOCPLINT->openHeroWindow(hero);})
 	, hero(hero)
-	, clickRFunctor(nullptr)
 {
 	OBJECT_CONSTRUCTION_CAPTURING(255-DISPOSE);
 
-	//pos.x += x;
-	//pos.w = 58;
-	//pos.y += y;
-	//pos.h = 64;
-
+	moveTo(pos.topLeft() + Point(x, y));
 	if(hero)
 		portrait = std::make_shared<CAnimImage>(AnimationPath::builtin("PortraitsLarge"), hero->getIconIndex());
-}
-
-void CHeroArea::addRClickCallback(ClickFunctor callback)
-{
-	clickRFunctor = callback;
-}
-
-void CHeroArea::showPopupWindow(const Point & cursorPosition)
-{
-	if(clickRFunctor)
-		clickRFunctor();
 }
 
 void LRClickableAreaOpenTown::clickPressed(const Point & cursorPosition)
@@ -172,14 +156,15 @@ void ClickableArea::setOnPopupCallback(const OnActionFunctor & onPopup)
 	this->onPopup = onPopup;
 }
 
-ClickableArea::ClickableArea(const Rect & pos, const OnActionFunctor & onClick, const OnActionFunctor & onPopup, const bool isHapticFeedbackEnabled)
+ClickableArea::ClickableArea(const Point & area, const OnActionFunctor & onClick, const OnActionFunctor & onPopup, const bool isHapticFeedbackEnabled)
 	: onClick(onClick)
 	, onPopup(onPopup)
 	, isHapticFeedbackEnabled(isHapticFeedbackEnabled)
 {
+	pos.w = area.x;
+	pos.h = area.y;
 	addUsedEvents(LCLICK);
 	addUsedEvents(SHOW_POPUP);
-	this->pos = pos + this->pos.topLeft();
 }
 
 void CMinorResDataBar::show(Canvas & to)
@@ -425,7 +410,7 @@ void CInteractableTownTooltip::init(const CGTownInstance * town)
 	size_t fortIndex = townInfo.fortLevel ? townInfo.fortLevel - 1 : 3;
 
 	fort = std::make_shared<CAnimImage>(AnimationPath::builtin("ITMCLS"), fortIndex, 0, 105, 31);
-	fastArmyPurchase = std::make_shared<ClickableArea>(Rect(105, 31, 34, 34), [townId](const Point& cursorPosition)
+	fastArmyPurchase = std::make_shared<ClickableArea>(Point(34, 34), [townId](const Point& cursorPosition)
 	{
 		std::vector<const CGTownInstance*> towns = LOCPLINT->cb->getTownsInfo(true);
 		for(auto & town : towns)
@@ -434,7 +419,8 @@ void CInteractableTownTooltip::init(const CGTownInstance * town)
 				std::make_shared<CCastleBuildings>(town)->enterToTheQuickRecruitmentWindow();
 		}
 	});
-	fastTavern = std::make_shared<ClickableArea>(Rect(3, 2, 58, 64), [townId](const Point & cursorPosition)
+	fastArmyPurchase->moveTo(pos.topLeft() + Point(105, 31));
+	fastTavern = std::make_shared<ClickableArea>(Point(58, 64), [townId](const Point & cursorPosition)
 	{
 		std::vector<const CGTownInstance*> towns = LOCPLINT->cb->getTownsInfo(true);
 		for(auto & town : towns)
@@ -446,7 +432,8 @@ void CInteractableTownTooltip::init(const CGTownInstance * town)
 		if(!town->town->faction->getDescriptionTranslated().empty())
 			CRClickPopup::createAndPush(town->town->faction->getDescriptionTranslated());
 	});
-	fastMarket = std::make_shared<ClickableArea>(Rect(143, 31, 30, 34), [](const Point & cursorPosition)
+	fastTavern->moveTo(pos.topLeft() + Point(3, 2));
+	fastMarket = std::make_shared<ClickableArea>(Point(30, 34), [](const Point & cursorPosition)
 	{
 		std::vector<const CGTownInstance*> towns = LOCPLINT->cb->getTownsInfo(true);
 		for(auto & town : towns)
@@ -459,6 +446,7 @@ void CInteractableTownTooltip::init(const CGTownInstance * town)
 		}
 		LOCPLINT->showInfoDialog(CGI->generaltexth->translate("vcmi.adventureMap.noTownWithMarket"));
 	});
+	fastMarket->moveTo(pos.topLeft() + Point(143, 31));
 
 	assert(townInfo.tType);
 
@@ -470,7 +458,7 @@ void CInteractableTownTooltip::init(const CGTownInstance * town)
 	if(townInfo.details)
 	{
 		hall = std::make_shared<CAnimImage>(AnimationPath::builtin("ITMTLS"), townInfo.details->hallLevel, 0, 67, 31);
-		fastTownHall = std::make_shared<ClickableArea>(Rect(67, 31, 34, 34), [townId](const Point & cursorPosition)
+		fastTownHall = std::make_shared<ClickableArea>(Point(34, 34), [townId](const Point & cursorPosition)
 		{
 			std::vector<const CGTownInstance*> towns = LOCPLINT->cb->getTownsInfo(true);
 			for(auto & town : towns)
@@ -479,6 +467,7 @@ void CInteractableTownTooltip::init(const CGTownInstance * town)
 					std::make_shared<CCastleBuildings>(town)->enterTownHall();
 			}
 		});
+		fastTownHall->moveTo(pos.topLeft() + Point(67, 31));
 
 		if(townInfo.details->goldIncome)
 		{

@@ -49,7 +49,7 @@ class ClickableArea : virtual public CIntObject
 public:
 	using OnActionFunctor = std::function<void(const Point & cursorPosition)>;
 
-	ClickableArea(const Rect & pos, const OnActionFunctor & onClick, const OnActionFunctor & onPopup = nullptr,
+	ClickableArea(const Point & area, const OnActionFunctor & onClick, const OnActionFunctor & onPopup = nullptr,
 		const bool isHapticFeedbackEnabled = true);
 	void clickPressed(const Point & cursorPosition) override;
 	void showPopupWindow(const Point & cursorPosition) override;
@@ -199,18 +199,11 @@ public:
 class CHeroArea: public CHoverableArea, public ClickableArea
 {
 public:
-	using ClickFunctor = std::function<void()>;
-
 	CHeroArea(int x, int y, const CGHeroInstance * hero);
-	//void addClickCallback(ClickFunctor callback);
-	void addRClickCallback(ClickFunctor callback);
-	void showPopupWindow(const Point & cursorPosition) override;
+
 private:
 	const CGHeroInstance * hero;
 	std::shared_ptr<CAnimImage> portrait;
-	//ClickFunctor clickFunctor;
-	ClickFunctor clickRFunctor;
-	ClickFunctor showPopupHandler;
 };
 
 /// Can interact on left and right mouse clicks
