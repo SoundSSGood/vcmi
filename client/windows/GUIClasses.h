@@ -23,7 +23,7 @@ class IMarket;
 VCMI_LIB_NAMESPACE_END
 
 class CButton;
-class LRClickableArea;
+class ClickableArea;
 class CreatureCostBox;
 class CCreaturePic;
 class CMinorResDataBar;
@@ -246,7 +246,7 @@ public:
 		std::function<void(CGHeroInstance*)> onChoose;
 
 		std::vector<std::shared_ptr<CAnimImage>> portraits;
-		std::vector<std::shared_ptr<LRClickableArea>> portraitAreas;
+		std::vector<std::shared_ptr<ClickableArea>> portraitAreas;
 	};
 
 	//recruitable heroes
@@ -272,7 +272,7 @@ public:
 	
 	std::shared_ptr<CLabel> inviteHero;
 	std::shared_ptr<CAnimImage> inviteHeroImage;
-	std::shared_ptr<LRClickableArea> inviteHeroImageArea;
+	std::shared_ptr<ClickableArea> inviteHeroImageArea;
 	std::map<HeroTypeID, CGHeroInstance*> inviteableHeroes;
 	CGHeroInstance* heroToInvite;
 	void addInvite();

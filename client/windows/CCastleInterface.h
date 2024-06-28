@@ -36,7 +36,7 @@ class CTownList;
 class CGarrisonInt;
 class CComponent;
 class CComponentBox;
-class LRClickableArea;
+class ClickableArea;
 
 /// Building "button"
 class CBuildingRect : public CShowableAnim
@@ -230,8 +230,8 @@ class CCastleInterface : public CStatusbarWindow, public IGarrisonHolder
 	std::shared_ptr<CButton> exit;
 	std::shared_ptr<CButton> fastTownHall;
 	std::shared_ptr<CButton> fastArmyPurchase;
-	std::shared_ptr<LRClickableArea> fastMarket;
-	std::shared_ptr<LRClickableArea> fastTavern;
+	std::shared_ptr<ClickableArea> fastMarket;
+	std::shared_ptr<ClickableArea> fastTavern;
 
 	std::vector<std::shared_ptr<CCreaInfo>> creainfo;//small icons of creatures (bottom-left corner);
 

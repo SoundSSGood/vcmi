@@ -32,7 +32,7 @@ class CGarrisonInt;
 class CCreatureAnim;
 class CComponent;
 class CAnimImage;
-class LRClickableArea;
+class ClickableArea;
 class TransparentFilledRectangle;
 
 /// Shows a text by moving the mouse cursor over the object
@@ -137,10 +137,10 @@ class CInteractableTownTooltip : public CIntObject
 	std::shared_ptr<CAnimImage> res2;
 	std::shared_ptr<CGarrisonInt> garrison;
 	
-	std::shared_ptr<LRClickableArea> fastTavern;
-	std::shared_ptr<LRClickableArea> fastMarket;
-	std::shared_ptr<LRClickableArea> fastTownHall;
-	std::shared_ptr<LRClickableArea> fastArmyPurchase;
+	std::shared_ptr<ClickableArea> fastTavern;
+	std::shared_ptr<ClickableArea> fastMarket;
+	std::shared_ptr<ClickableArea> fastTownHall;
+	std::shared_ptr<ClickableArea> fastArmyPurchase;
 
 	void init(const CGTownInstance * town);
 public:
@@ -226,14 +226,21 @@ public:
 };
 
 /// Can do action on click
-class LRClickableArea: public CIntObject
+class ClickableArea: virtual public CIntObject
 {
-	std::function<void()> onClick;
-	std::function<void()> onPopup;
 public:
+	using OnActionFunctor = std::function<void()>;
+
+	ClickableArea(const Rect & pos, const OnActionFunctor & onClick, const OnActionFunctor & onPopup = nullptr,
+		const bool isHapticFeedbackEnabled = true);
 	void clickPressed(const Point & cursorPosition) override;
 	void showPopupWindow(const Point & cursorPosition) override;
-	LRClickableArea(const Rect & Pos, std::function<void()> onClick = nullptr, std::function<void()> onPopup = nullptr);
+	void setHapticFeedbackEnabled(bool enable);
+
+private:
+	OnActionFunctor onClick;
+	OnActionFunctor onPopup;
+	bool isHapticFeedbackEnabled;
 };
 
 class MoraleLuckBox : public LRClickableAreaWTextComp

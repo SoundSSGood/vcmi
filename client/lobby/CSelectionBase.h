@@ -39,7 +39,7 @@ class CFlagBox;
 class CLabelGroup;
 class TransparentFilledRectangle;
 class FilledTexturePlayerColored;
-class LRClickableArea;
+class ClickableArea;
 
 class ISelectionScreenInfo
 {
@@ -160,7 +160,7 @@ public:
 class TownSelector : public CIntObject
 {
 	std::map<FactionID, std::shared_ptr<CAnimImage>> towns;
-	std::map<FactionID, std::shared_ptr<LRClickableArea>> townsArea;
+	std::map<FactionID, std::shared_ptr<ClickableArea>> townsArea;
 	std::shared_ptr<CSlider> slider;
 
 	void sliderMove(int slidPos);

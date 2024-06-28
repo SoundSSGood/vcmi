@@ -276,9 +276,9 @@ class CTownItem : public CIntObject, public IGarrisonHolder
 
 	std::shared_ptr<CButton> fastTownHall;
 	std::shared_ptr<CButton> fastArmyPurchase;
-	std::shared_ptr<LRClickableArea> fastMarket;
-	std::shared_ptr<LRClickableArea> fastTavern;
-	std::shared_ptr<LRClickableArea> fastTown;
+	std::shared_ptr<ClickableArea> fastMarket;
+	std::shared_ptr<ClickableArea> fastTavern;
+	std::shared_ptr<ClickableArea> fastTown;
 
 public:
 	const CGTownInstance * town;
