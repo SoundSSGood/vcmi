@@ -31,7 +31,7 @@ class CListBox;
 class CCommanderArtPlace;
 class ClickableArea;
 
-class CCommanderSkillIcon : public LRClickableAreaWText //TODO: maybe bring commander skill button initialization logic inside?
+class CCommanderSkillIcon : public ClickableAreaWText //TODO: maybe bring commander skill button initialization logic inside?
 {
 	std::shared_ptr<CIntObject> object; // passive object that will be used to determine clickable area
 	bool isMasterAbility; // refers to WoG abilities obtainable via combining master skills (for example attack + speed unlocks shoot)
@@ -72,7 +72,7 @@ class CStackWindow : public CWindowObject
 	class ActiveSpellsSection : public CWindowSection
 	{
 		std::vector<std::shared_ptr<CAnimImage>> spellIcons;
-		std::vector<std::shared_ptr<LRClickableAreaWText>> clickableAreas;
+		std::vector<std::shared_ptr<ClickableAreaWText>> clickableAreas;
 		std::vector<std::shared_ptr<CLabel>> labels;
 	public:
 		ActiveSpellsSection(CStackWindow * owner, int yOffset);
@@ -142,7 +142,7 @@ class CStackWindow : public CWindowObject
 		std::vector<std::shared_ptr<CLabel>> stats;
 
 		std::shared_ptr<CAnimImage> expRankIcon;
-		std::shared_ptr<LRClickableAreaWText> expArea;
+		std::shared_ptr<ClickableAreaWText> expArea;
 		std::shared_ptr<CLabel> expLabel;
 
 		void addStatLabel(EStat index, int64_t value1, int64_t value2);

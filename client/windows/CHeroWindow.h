@@ -24,7 +24,7 @@ VCMI_LIB_NAMESPACE_END
 class CButton;
 class CHeroWindow;
 class LClickableAreaHero;
-class LRClickableAreaWText;
+class ClickableAreaWText;
 class LRClickableAreaWTextComp;
 class CArtifactsOfHeroMain;
 class MoraleLuckBox;
@@ -56,7 +56,7 @@ class CHeroWindow : public CStatusbarWindow, public IGarrisonHolder, public CWin
 	std::vector<std::shared_ptr<CHeroSwitcher>> heroList;
 	std::shared_ptr<CPicture> listSelection;
 
-	std::shared_ptr<LRClickableAreaWText> portraitArea;
+	std::shared_ptr<ClickableAreaWText> portraitArea;
 	std::shared_ptr<CAnimImage> portraitImage;
 
 	std::vector<std::shared_ptr<LRClickableAreaWTextComp>> primSkillAreas;
@@ -64,12 +64,12 @@ class CHeroWindow : public CStatusbarWindow, public IGarrisonHolder, public CWin
 	std::vector<std::shared_ptr<CLabel>> primSkillValues;
 
 	std::shared_ptr<CLabel> expValue;
-	std::shared_ptr<LRClickableAreaWText> expArea;
+	std::shared_ptr<ClickableAreaWText> expArea;
 
 	std::shared_ptr<CLabel> manaValue;
-	std::shared_ptr<LRClickableAreaWText> spellPointsArea;
+	std::shared_ptr<ClickableAreaWText> spellPointsArea;
 
-	std::shared_ptr<LRClickableAreaWText> specArea;
+	std::shared_ptr<ClickableAreaWText> specArea;
 	std::shared_ptr<CAnimImage> specImage;
 	std::shared_ptr<CLabel> specName;
 	std::shared_ptr<MoraleLuckBox> morale;

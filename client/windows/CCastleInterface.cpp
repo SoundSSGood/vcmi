@@ -1380,12 +1380,12 @@ void CCastleInterface::recreateIcons()
 	fastArmyPurchase = std::make_shared<CButton>(Point(122, 413), AnimationPath::builtin("castleInterfaceQuickAccess"), CButton::tooltip(), [this](){ builds->enterToTheQuickRecruitmentWindow(); }, EShortcut::TOWN_OPEN_RECRUITMENT);
 	fastArmyPurchase->setOverlay(std::make_shared<CAnimImage>(AnimationPath::builtin("itmcl"), imageIndex));
 
-	fastMarket = std::make_shared<ClickableArea>(Rect(163, 410, 64, 42), [this]() { builds->enterAnyMarket(); });
-	fastTavern = std::make_shared<ClickableArea>(Rect(15, 387, 58, 64), [&]()
+	fastMarket = std::make_shared<ClickableArea>(Rect(163, 410, 64, 42), [this](const Point & cursorPosition) { builds->enterAnyMarket(); });
+	fastTavern = std::make_shared<ClickableArea>(Rect(15, 387, 58, 64), [&](const Point & cursorPosition)
 	{
 		if(town->builtBuildings.count(BuildingID::TAVERN))
 			LOCPLINT->showTavernWindow(town, nullptr, QueryID::NONE);
-	}, [this]{
+	}, [this](const Point & cursorPosition){
 		if(!town->town->faction->getDescriptionTranslated().empty())
 			CRClickPopup::createAndPush(town->town->faction->getDescriptionTranslated());
 	});

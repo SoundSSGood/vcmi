@@ -27,7 +27,7 @@ VCMI_LIB_NAMESPACE_END
 class CButton;
 class CToggleButton;
 class CComponentBox;
-class LRClickableAreaWText;
+class ClickableAreaWText;
 class CButton;
 class CPicture;
 class CCreaturePic;
@@ -38,7 +38,7 @@ class CLabel;
 const int QUEST_COUNT = 6;
 const int DESCRIPTION_HEIGHT_MAX = 355;
 
-class CQuestLabel : public LRClickableAreaWText, public CMultiLineLabel
+class CQuestLabel : public ClickableAreaWText, public CMultiLineLabel
 {
 public:
 	std::function<void()> callback;

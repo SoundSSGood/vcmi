@@ -231,7 +231,7 @@ CStackWindow::ActiveSpellsSection::ActiveSpellsSection(CStackWindow * owner, int
 
 			spellIcons.push_back(std::make_shared<CAnimImage>(AnimationPath::builtin("SpellInt"), effect + 1, 0, firstPos.x + offset.x * printed, firstPos.y + offset.y * printed));
 			labels.push_back(std::make_shared<CLabel>(firstPos.x + offset.x * printed + 46, firstPos.y + offset.y * printed + 36, EFonts::FONT_TINY, ETextAlignment::BOTTOMRIGHT, Colors::WHITE, std::to_string(duration)));
-			clickableAreas.push_back(std::make_shared<LRClickableAreaWText>(Rect(firstPos + offset * printed, Point(50, 38)), spellText, spellText));
+			clickableAreas.push_back(std::make_shared<ClickableAreaWText>(Rect(firstPos + offset * printed, Point(50, 38)), spellText, spellText));
 			if(++printed >= 8) // interface limit reached
 				break;
 		}
@@ -405,7 +405,7 @@ CStackWindow::CommanderMainSection::CommanderMainSection(CStackWindow * owner, i
 			LOCPLINT->showInfoDialog(getSkillDescription(index));
 		});
 
-		icon->text = getSkillDescription(index); //used to handle right click description via LRClickableAreaWText::ClickRight()
+		icon->text = getSkillDescription(index); //used to handle right click description via ClickableAreaWText::ClickRight()
 
 		if(parent->selectedSkill == index)
 			parent->selectedIcon = icon;
@@ -518,7 +518,7 @@ CStackWindow::MainSection::MainSection(CStackWindow * owner, int yOffset, bool s
 	};
 
 	animation = std::make_shared<CCreaturePic>(5, 41, parent->info->creature);
-	animationArea = std::make_shared<ClickableArea>(Rect(5, 41, 100, 130), nullptr, [&]{
+	animationArea = std::make_shared<ClickableArea>(Rect(5, 41, 100, 130), nullptr, [&](const Point & cursorPosition){
 		if(!parent->info->creature->getDescriptionTranslated().empty())
 			CRClickPopup::createAndPush(parent->info->creature->getDescriptionTranslated());
 	});
@@ -599,7 +599,7 @@ CStackWindow::MainSection::MainSection(CStackWindow * owner, int yOffset, bool s
 		else
 		{
 			expRankIcon = std::make_shared<CAnimImage>(AnimationPath::builtin("stackWindow/levels"), stack->getExpRank(), 0, pos.x, pos.y);
-			expArea = std::make_shared<LRClickableAreaWText>(Rect(pos.x, pos.y, 44, 44));
+			expArea = std::make_shared<ClickableAreaWText>(Rect(pos.x, pos.y, 44, 44));
 			expArea->text = parent->generateStackExpDescription();
 		}
 		expLabel = std::make_shared<CLabel>(

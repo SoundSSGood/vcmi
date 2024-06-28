@@ -116,7 +116,7 @@ CHeroWindow::CHeroWindow(const CGHeroInstance * hero)
 		heroList.push_back(std::make_shared<CHeroSwitcher>(this, Point(612, 87 + i * 54), LOCPLINT->cb->getHeroBySerial(i, false)));
 
 	//areas
-	portraitArea = std::make_shared<LRClickableAreaWText>(Rect(18, 18, 58, 64));
+	portraitArea = std::make_shared<ClickableAreaWText>(Rect(18, 18, 58, 64));
 	portraitImage = std::make_shared<CAnimImage>(AnimationPath::builtin("PortraitsLarge"), 0, 0, 19, 19);
 
 	for(int v = 0; v < GameConstants::PRIMARY_SKILLS; ++v)
@@ -141,13 +141,13 @@ CHeroWindow::CHeroWindow(const CGHeroInstance * hero)
 	primSkillImages.push_back(std::make_shared<CAnimImage>(primSkills, 5, 0, 242, 111));
 
 	specImage = std::make_shared<CAnimImage>(AnimationPath::builtin("UN44"), 0, 0, 18, 180);
-	specArea = std::make_shared<LRClickableAreaWText>(Rect(18, 180, 136, 42), CGI->generaltexth->heroscrn[27]);
+	specArea = std::make_shared<ClickableAreaWText>(Rect(18, 180, 136, 42), CGI->generaltexth->heroscrn[27]);
 	specName = std::make_shared<CLabel>(69, 205);
 
-	expArea = std::make_shared<LRClickableAreaWText>(Rect(18, 228, 136, 42), CGI->generaltexth->heroscrn[9]);
+	expArea = std::make_shared<ClickableAreaWText>(Rect(18, 228, 136, 42), CGI->generaltexth->heroscrn[9]);
 	morale = std::make_shared<MoraleLuckBox>(true, Rect(175, 179, 53, 45));
 	luck = std::make_shared<MoraleLuckBox>(false, Rect(233, 179, 53, 45));
-	spellPointsArea = std::make_shared<LRClickableAreaWText>(Rect(162,228, 136, 42), CGI->generaltexth->heroscrn[22]);
+	spellPointsArea = std::make_shared<ClickableAreaWText>(Rect(162,228, 136, 42), CGI->generaltexth->heroscrn[22]);
 
 	expValue = std::make_shared<CLabel>(68, 252);
 	manaValue = std::make_shared<CLabel>(211, 252);

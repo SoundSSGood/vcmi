@@ -30,9 +30,9 @@ class CExchangeWindow : public CStatusbarWindow, public IGarrisonHolder, public 
 	std::array<std::vector<std::shared_ptr<LRClickableAreaWTextComp>>, 2> secSkillAreas;
 
 	std::array<std::shared_ptr<CHeroArea>, 2> heroAreas;
-	std::array<std::shared_ptr<LRClickableAreaWText>, 2> specialtyAreas;
-	std::array<std::shared_ptr<LRClickableAreaWText>, 2> experienceAreas;
-	std::array<std::shared_ptr<LRClickableAreaWText>, 2> spellPointsAreas;
+	std::array<std::shared_ptr<ClickableAreaWText>, 2> specialtyAreas;
+	std::array<std::shared_ptr<ClickableAreaWText>, 2> experienceAreas;
+	std::array<std::shared_ptr<ClickableAreaWText>, 2> spellPointsAreas;
 
 	std::array<std::shared_ptr<MoraleLuckBox>, 2> morale;
 	std::array<std::shared_ptr<MoraleLuckBox>, 2> luck;

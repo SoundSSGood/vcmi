@@ -148,18 +148,18 @@ CExchangeWindow::CExchangeWindow(ObjectInstanceID hero1, ObjectInstanceID hero2,
 		}
 
 		heroAreas[b] = std::make_shared<CHeroArea>(257 + 228 * b, 13, hero);
-		heroAreas[b]->addClickCallback([this, hero]() -> void
+		heroAreas[b]->setOnClickCallback([this, hero](const Point & cursorPosition) -> void
 									   {
 										   if(getPickedArtifact() == nullptr)
 											   LOCPLINT->openHeroWindow(hero);
 									   });
 
-		specialtyAreas[b] = std::make_shared<LRClickableAreaWText>();
+		specialtyAreas[b] = std::make_shared<ClickableAreaWText>();
 		specialtyAreas[b]->pos = Rect(Point(pos.x + 69 + 490 * b, pos.y + (qeLayout ? 41 : 45)), Point(32, 32));
 		specialtyAreas[b]->hoverText = CGI->generaltexth->heroscrn[27];
 		specialtyAreas[b]->text = hero->type->getSpecialtyDescriptionTranslated();
 
-		experienceAreas[b] = std::make_shared<LRClickableAreaWText>();
+		experienceAreas[b] = std::make_shared<ClickableAreaWText>();
 		experienceAreas[b]->pos = Rect(Point(pos.x + 105 + 490 * b, pos.y + (qeLayout ? 41 : 45)), Point(32, 32));
 		experienceAreas[b]->hoverText = CGI->generaltexth->heroscrn[9];
 		experienceAreas[b]->text = CGI->generaltexth->allTexts[2];
@@ -167,7 +167,7 @@ CExchangeWindow::CExchangeWindow(ObjectInstanceID hero1, ObjectInstanceID hero2,
 		boost::algorithm::replace_first(experienceAreas[b]->text, "%d", std::to_string(CGI->heroh->reqExp(hero->level+1)));
 		boost::algorithm::replace_first(experienceAreas[b]->text, "%d", std::to_string(hero->exp));
 
-		spellPointsAreas[b] = std::make_shared<LRClickableAreaWText>();
+		spellPointsAreas[b] = std::make_shared<ClickableAreaWText>();
 		spellPointsAreas[b]->pos = Rect(Point(pos.x + 141 + 490 * b, pos.y + (qeLayout ? 41 : 45)), Point(32, 32));
 		spellPointsAreas[b]->hoverText = CGI->generaltexth->heroscrn[22];
 		spellPointsAreas[b]->text = CGI->generaltexth->allTexts[205];

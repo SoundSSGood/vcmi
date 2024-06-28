@@ -32,7 +32,6 @@ class CGarrisonInt;
 class CCreatureAnim;
 class CComponent;
 class CAnimImage;
-class ClickableArea;
 class TransparentFilledRectangle;
 
 /// Shows a text by moving the mouse cursor over the object
@@ -40,24 +39,37 @@ class CHoverableArea: public virtual CIntObject
 {
 public:
 	std::string hoverText;
-
-	void hover (bool on) override;
-
 	CHoverableArea();
-	virtual ~CHoverableArea();
+	void hover(bool on) override;
+};
+
+/// Can do action on click
+class ClickableArea : virtual public CIntObject
+{
+public:
+	using OnActionFunctor = std::function<void(const Point & cursorPosition)>;
+
+	ClickableArea(const Rect & pos, const OnActionFunctor & onClick, const OnActionFunctor & onPopup = nullptr,
+		const bool isHapticFeedbackEnabled = true);
+	void clickPressed(const Point & cursorPosition) override;
+	void showPopupWindow(const Point & cursorPosition) override;
+	void setHapticFeedbackEnabled(bool enable);
+	void setOnClickCallback(const OnActionFunctor & onClick);
+	void setOnPopupCallback(const OnActionFunctor & onPopup);
+
+private:
+	OnActionFunctor onClick;
+	OnActionFunctor onPopup;
+	bool isHapticFeedbackEnabled;
 };
 
 /// Can interact on left and right mouse clicks, plus it shows a text when by hovering over it
-class LRClickableAreaWText: public CHoverableArea
+class ClickableAreaWText : public CHoverableArea, public ClickableArea
 {
 public:
 	std::string text;
 
-	LRClickableAreaWText();
-	LRClickableAreaWText(const Rect & Pos, const std::string & HoverText = "", const std::string & ClickText = "");
-	virtual ~LRClickableAreaWText();
-	void init();
-
+	ClickableAreaWText(const Rect & pos = Rect(0,0,0,0), const std::string & hoverText = "", const std::string & clickText = "");
 	void clickPressed(const Point & cursorPosition) override;
 	void showPopupWindow(const Point & cursorPosition) override;
 };
@@ -184,27 +196,25 @@ public:
 };
 
 /// Performs an action by left-clicking on it. Opens hero window by default
-class CHeroArea: public CIntObject
+class CHeroArea: public CHoverableArea, public ClickableArea
 {
 public:
 	using ClickFunctor = std::function<void()>;
 
 	CHeroArea(int x, int y, const CGHeroInstance * hero);
-	void addClickCallback(ClickFunctor callback);
+	//void addClickCallback(ClickFunctor callback);
 	void addRClickCallback(ClickFunctor callback);
-	void clickPressed(const Point & cursorPosition) override;
 	void showPopupWindow(const Point & cursorPosition) override;
-	void hover(bool on) override;
 private:
 	const CGHeroInstance * hero;
 	std::shared_ptr<CAnimImage> portrait;
-	ClickFunctor clickFunctor;
+	//ClickFunctor clickFunctor;
 	ClickFunctor clickRFunctor;
 	ClickFunctor showPopupHandler;
 };
 
 /// Can interact on left and right mouse clicks
-class LRClickableAreaWTextComp: public LRClickableAreaWText
+class LRClickableAreaWTextComp: public ClickableAreaWText
 {
 public:
 	Component component;
@@ -223,24 +233,6 @@ public:
 	const CGTownInstance * town;
 	void clickPressed(const Point & cursorPosition) override;
 	LRClickableAreaOpenTown(const Rect & Pos, const CGTownInstance * Town);
-};
-
-/// Can do action on click
-class ClickableArea: virtual public CIntObject
-{
-public:
-	using OnActionFunctor = std::function<void()>;
-
-	ClickableArea(const Rect & pos, const OnActionFunctor & onClick, const OnActionFunctor & onPopup = nullptr,
-		const bool isHapticFeedbackEnabled = true);
-	void clickPressed(const Point & cursorPosition) override;
-	void showPopupWindow(const Point & cursorPosition) override;
-	void setHapticFeedbackEnabled(bool enable);
-
-private:
-	OnActionFunctor onClick;
-	OnActionFunctor onPopup;
-	bool isHapticFeedbackEnabled;
 };
 
 class MoraleLuckBox : public LRClickableAreaWTextComp

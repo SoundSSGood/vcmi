@@ -414,7 +414,7 @@ CLevelWindow::CLevelWindow(const CGHeroInstance * hero, PrimarySkill pskill, std
 	}
 
 	portrait = std::make_shared<CHeroArea>(170, 66, hero);
-	portrait->addClickCallback(nullptr);
+	portrait->setOnClickCallback(nullptr);
 	portrait->addRClickCallback([hero](){ GH.windows().createAndPushWindow<CRClickPopupInt>(std::make_shared<CHeroWindow>(hero)); });
 	ok = std::make_shared<CButton>(Point(297, 413), AnimationPath::builtin("IOKAY"), CButton::tooltip(), std::bind(&CLevelWindow::close, this), EShortcut::GLOBAL_ACCEPT);
 
@@ -550,7 +550,7 @@ void CTavernWindow::addInvite()
 
 		inviteHero = std::make_shared<CLabel>(170, 444, EFonts::FONT_MEDIUM, ETextAlignment::CENTER, Colors::WHITE, CGI->generaltexth->translate("vcmi.tavernWindow.inviteHero"));
 		inviteHeroImage = std::make_shared<CAnimImage>(AnimationPath::builtin("PortraitsSmall"), (*CGI->heroh)[heroToInvite->getHeroType()]->imageIndex, 0, 245, 428);
-		inviteHeroImageArea = std::make_shared<ClickableArea>(Rect(245, 428, 48, 32), [this](){ GH.windows().createAndPushWindow<HeroSelector>(inviteableHeroes, [this](CGHeroInstance* h){ heroToInvite = h; addInvite(); }); }, [this](){ GH.windows().createAndPushWindow<CRClickPopupInt>(std::make_shared<CHeroWindow>(heroToInvite)); });
+		inviteHeroImageArea = std::make_shared<ClickableArea>(Rect(245, 428, 48, 32), [this](const Point & cursorPosition){ GH.windows().createAndPushWindow<HeroSelector>(inviteableHeroes, [this](CGHeroInstance* h){ heroToInvite = h; addInvite(); }); }, [this](const Point & cursorPosition){ GH.windows().createAndPushWindow<CRClickPopupInt>(std::make_shared<CHeroWindow>(heroToInvite)); });
 	}
 }
 
@@ -677,7 +677,7 @@ CTavernWindow::HeroSelector::HeroSelector(std::map<HeroTypeID, CGHeroInstance*> 
 	for(auto & h : inviteableHeroes)
 	{
 		portraits.push_back(std::make_shared<CAnimImage>(AnimationPath::builtin("PortraitsSmall"), (*CGI->heroh)[h.first]->imageIndex, 0, x * 48, y * 32));
-		portraitAreas.push_back(std::make_shared<ClickableArea>(Rect(x * 48, y * 32, 48, 32), [this, h](){ close(); onChoose(inviteableHeroes[h.first]); }, [this, h](){ GH.windows().createAndPushWindow<CRClickPopupInt>(std::make_shared<CHeroWindow>(inviteableHeroes[h.first])); }));
+		portraitAreas.push_back(std::make_shared<ClickableArea>(Rect(x * 48, y * 32, 48, 32), [this, h](const Point & cursorPosition){ close(); onChoose(inviteableHeroes[h.first]); }, [this, h](const Point & cursorPosition){ GH.windows().createAndPushWindow<CRClickPopupInt>(std::make_shared<CHeroWindow>(inviteableHeroes[h.first])); }));
 
 		if(x > 0 && x % 15 == 0)
 		{
