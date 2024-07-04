@@ -72,28 +72,28 @@ void CMarketBase::update()
 		offerTradePanel->update();
 }
 
-void CMarketBase::updateSubtitlesForBid(EMarketMode marketMode, int bidId)
+void CMarketBase::updateSubtitlesForBid(EMarketMode marketMode, const std::optional<int> & bidId)
 {
-	if(bidId == -1)
-	{
-		if(offerTradePanel)
-			offerTradePanel->clearSubtitles();
-	}
-	else
+	if(bidId && bidId.value() != -1)
 	{
 		for(const auto & slot : offerTradePanel->slots)
 		{
 			int slotBidQty = 0;
 			int slotOfferQty = 0;
-			market->getOffer(bidId, slot->id, slotBidQty, slotOfferQty, marketMode);
+			market->getOffer(bidId.value(), slot->id, slotBidQty, slotOfferQty, marketMode);
 			offerTradePanel->updateOffer(*slot, slotBidQty, slotOfferQty);
 		}
+	}
+	else
+	{
+		if(offerTradePanel)
+			offerTradePanel->clearSubtitles();
 	}
 };
 
 void CMarketBase::updateShowcases()
 {
-	const auto updateSelectedBody = [](const std::shared_ptr<TradePanelBase> & tradePanel, const std::optional<const ShowcaseParams> & params)
+	const auto updateShowcase = [](const std::shared_ptr<TradePanelBase> & tradePanel, const std::optional<const ShowcaseParams> & params)
 	{
 		if(params.has_value())
 		{
@@ -109,9 +109,9 @@ void CMarketBase::updateShowcases()
 
 	const auto params = getShowcasesParams();
 	if(bidTradePanel)
-		updateSelectedBody(bidTradePanel, params.bidParams);
+		updateShowcase(bidTradePanel, params.bidParams);
 	if(offerTradePanel)
-		updateSelectedBody(offerTradePanel, params.offerParams);
+		updateShowcase(offerTradePanel, params.offerParams);
 }
 
 void CMarketBase::highlightingChanged()

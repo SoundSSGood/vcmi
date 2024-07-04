@@ -56,7 +56,7 @@ public:
 
 protected:
 	virtual void onSlotClickPressed(const std::shared_ptr<CTradeableItem> & newSlot, std::shared_ptr<TradePanelBase> & curPanel);
-	virtual void updateSubtitlesForBid(EMarketMode marketMode, int bidId);
+	virtual void updateSubtitlesForBid(EMarketMode marketMode, const std::optional<int> & bidId);
 	virtual void updateShowcases();
 	virtual MarketShowcasesParams getShowcasesParams() const = 0;
 	virtual void highlightingChanged();

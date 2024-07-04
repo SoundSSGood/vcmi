@@ -56,7 +56,7 @@ CArtifactsSelling::CArtifactsSelling(const IMarket * market, const CGHeroInstanc
 	offerTradePanel->showcaseSlot->subtitle->moveBy(Point(0, 1));
 	
 	// Hero's artifacts
-	heroArts = std::make_shared<CArtifactsOfHeroMarket>(Point(-361, 46), offerTradePanel->selectionWidth);
+	heroArts = std::make_shared<CArtifactsOfHeroMarket>(Point(-361, 46), offerTradePanel->highlightWidth);
 	heroArts->setHero(hero);
 	heroArts->onSelectArtCallback = [this](const CArtPlace * artPlace)
 	{
@@ -87,7 +87,8 @@ void CArtifactsSelling::makeDeal()
 {
 	const auto art = hero->getArt(selectedHeroSlot);
 	assert(art);
-	LOCPLINT->cb->trade(market, EMarketMode::ARTIFACT_RESOURCE, art->getId(), GameResID(offerTradePanel->getSelectedItemId()), offerQty, hero);
+	assert(offerTradePanel->getHighlightedItemId());
+	LOCPLINT->cb->trade(market, EMarketMode::ARTIFACT_RESOURCE, art->getId(), GameResID(offerTradePanel->getHighlightedItemId().value()), offerQty, hero);
 	CMarketTraderText::makeDeal();
 }
 
@@ -137,7 +138,7 @@ CMarketBase::MarketShowcasesParams CArtifactsSelling::getShowcasesParams() const
 		return MarketShowcasesParams
 		{
 			std::nullopt,
-			ShowcaseParams {std::to_string(offerQty), offerTradePanel->getSelectedItemId()}
+			ShowcaseParams {std::to_string(offerQty), offerTradePanel->getHighlightedItemId().value()}
 		};
 	else
 		return MarketShowcasesParams {std::nullopt, std::nullopt};
@@ -155,7 +156,7 @@ void CArtifactsSelling::highlightingChanged()
 	const auto art = hero->getArt(selectedHeroSlot);
 	if(art && offerTradePanel->isHighlighted())
 	{
-		market->getOffer(art->getTypeId(), offerTradePanel->getSelectedItemId(), bidQty, offerQty, EMarketMode::ARTIFACT_RESOURCE);
+		market->getOffer(art->getTypeId(), offerTradePanel->getHighlightedItemId().value(), bidQty, offerQty, EMarketMode::ARTIFACT_RESOURCE);
 		deal->block(!LOCPLINT->makingTurn);
 	}
 	CMarketBase::highlightingChanged();
@@ -170,7 +171,7 @@ std::string CArtifactsSelling::getTraderText()
 		MetaString message = MetaString::createFromTextID("core.genrltxt.268");
 		message.replaceNumber(offerQty);
 		message.replaceRawString(offerQty == 1 ? CGI->generaltexth->allTexts[161] : CGI->generaltexth->allTexts[160]);
-		message.replaceName(GameResID(offerTradePanel->getSelectedItemId()));
+		message.replaceName(GameResID(offerTradePanel->getHighlightedItemId().value()));
 		message.replaceName(art->getTypeId());
 		return message.toString();
 	}

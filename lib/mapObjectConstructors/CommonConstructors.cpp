@@ -234,7 +234,8 @@ CGMarket * MarketInstanceConstructor::createObject(IGameCallback * cb) const
 			case EMarketMode::RESOURCE_ARTIFACT:
 				return new CGBlackMarket(cb);
 
-			case EMarketMode::GOLD_SECSKILL:
+			case EMarketMode::GOLD_SECSKILL_BASIC:
+			case EMarketMode::GOLD_SECSKILL_EXPERT:
 				return new CGUniversity(cb);
 		}
 	}

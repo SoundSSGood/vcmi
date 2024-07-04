@@ -40,7 +40,7 @@ CUnivercity::CUnivercity(const IMarket * market, const CGHeroInstance * hero)
 	offerTradePanel = std::make_shared<SecondarySkillsPanel>([this](const std::shared_ptr<CTradeableItem> & skillSlot)
 		{
 			CUnivercity::onSlotClickPressed(skillSlot, offerTradePanel);
-		}, market->availableItemsIds(EMarketMode::GOLD_SECSKILL));
+		}, market->availableItemsIds(EMarketMode::GOLD_SECSKILL_BASIC));
 	offerTradePanel->moveTo(pos.topLeft() + Point(54, 234));
 
 	for(const auto & tradeSlot : offerTradePanel->slots)
@@ -81,8 +81,8 @@ CMarketBase::MarketShowcasesParams CUnivercity::getShowcasesParams() const
 	/*if (offerTradePanel->isHighlighted())
 		return MarketShowcasesParams
 	{
-		ShowcaseParams {std::to_string(bidQty * offerSlider->getValue()), CGI->creatures()->getByIndex(bidTradePanel->getSelectedItemId())->getIconIndex()},
-		ShowcaseParams {std::to_string(offerQty * offerSlider->getValue()), offerTradePanel->getSelectedItemId()}
+		ShowcaseParams {std::to_string(bidQty * offerSlider->getValue()), CGI->creatures()->getByIndex(bidTradePanel->getHighlightedItemId())->getIconIndex()},
+		ShowcaseParams {std::to_string(offerQty * offerSlider->getValue()), offerTradePanel->getHighlightedItemId()}
 	};
 	else*/
 	return MarketShowcasesParams{std::nullopt, std::nullopt};
@@ -100,12 +100,12 @@ std::string CUnivercity::getTraderText()
 		MetaString message = MetaString::createFromTextID("core.genrltxt.269");
 		message.replaceNumber(offerQty);
 		message.replaceRawString(offerQty == 1 ? CGI->generaltexth->allTexts[161] : CGI->generaltexth->allTexts[160]);
-		message.replaceName(GameResID(offerTradePanel->getSelectedItemId()));
+		message.replaceName(GameResID(offerTradePanel->getHighlightedItemId()));
 		message.replaceNumber(bidQty);
 		if (bidQty == 1)
-			message.replaceNameSingular(bidTradePanel->getSelectedItemId());
+			message.replaceNameSingular(bidTradePanel->getHighlightedItemId());
 		else
-			message.replaceNamePlural(bidTradePanel->getSelectedItemId());
+			message.replaceNamePlural(bidTradePanel->getHighlightedItemId());
 		return message.toString();
 	}
 	else

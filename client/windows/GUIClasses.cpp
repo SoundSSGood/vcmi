@@ -970,7 +970,7 @@ CUniversityWindow::CUniversityWindow(const CGHeroInstance * _hero, const IMarket
 	clerkSpeech = std::make_shared<CTextBox>(CGI->generaltexth->allTexts[603], Rect(24, 129, 413, 70), 0, FONT_SMALL, ETextAlignment::CENTER, Colors::WHITE);
 	title = std::make_shared<CLabel>(231, 26, FONT_MEDIUM, ETextAlignment::CENTER, Colors::YELLOW, CGI->generaltexth->allTexts[602]);
 
-	std::vector<TradeItemBuy> goods = market->availableItemsIds(EMarketMode::GOLD_SECSKILL);
+	std::vector<TradeItemBuy> goods = market->availableItemsIds(EMarketMode::GOLD_SECSKILL_BASIC);
 
 	for(int i=0; i<goods.size(); i++)//prepare clickable items
 		items.push_back(std::make_shared<CItem>(this, goods[i].as<SecondarySkill>(), 54+i*104, 234));
@@ -995,7 +995,7 @@ void CUniversityWindow::updateSecondarySkills()
 
 void CUniversityWindow::makeDeal(SecondarySkill skill)
 {
-	LOCPLINT->cb->trade(market, EMarketMode::GOLD_SECSKILL, GameResID(GameResID::GOLD), skill, 1, hero);
+	LOCPLINT->cb->trade(market, EMarketMode::GOLD_SECSKILL_BASIC, GameResID(GameResID::GOLD), skill, 1, hero);
 }
 
 CUnivConfirmWindow::CUnivConfirmWindow(CUniversityWindow * owner_, SecondarySkill SKILL, bool available)

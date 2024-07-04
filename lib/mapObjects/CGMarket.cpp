@@ -100,7 +100,7 @@ std::vector<TradeItemBuy> CGUniversity::availableItemsIds(EMarketMode mode) cons
 {
 	switch (mode)
 	{
-		case EMarketMode::GOLD_SECSKILL:
+		case EMarketMode::GOLD_SECSKILL_BASIC:
 			return skills;
 
 		default:

@@ -66,7 +66,6 @@ void CTradeableItem::setType(EType newType)
 			subtitle->moveTo(pos.topLeft() + Point(35, 55));
 			image->moveTo(pos.topLeft() + Point(19, 8));
 			break;
-		case EType::CREATURE_PLACEHOLDER:
 		case EType::CREATURE:
 			subtitle->moveTo(pos.topLeft() + Point(30, 77));
 			break;
@@ -74,8 +73,7 @@ void CTradeableItem::setType(EType newType)
 			subtitle->moveTo(pos.topLeft() + Point(31, 76));
 			break;
 		case EType::ARTIFACT_PLACEHOLDER:
-			image->moveTo(pos.topLeft() + Point(0, 1));
-			subtitle->moveTo(pos.topLeft() + Point(21, 56));
+			subtitle->moveTo(pos.topLeft() + Point(21, 55));
 			break;
 		case EType::ARTIFACT_TYPE:
 			subtitle->moveTo(pos.topLeft() + Point(35, 57));
@@ -172,7 +170,6 @@ void CTradeableItem::hover(bool on)
 	switch(type)
 	{
 	case EType::CREATURE:
-	case EType::CREATURE_PLACEHOLDER:
 		GH.statusbar()->write(boost::str(boost::format(CGI->generaltexth->allTexts[481]) % CGI->creh->objects[id]->getNamePluralTranslated()));
 		break;
 	case EType::ARTIFACT_TYPE:
@@ -199,7 +196,6 @@ void CTradeableItem::showPopupWindow(const Point & cursorPosition)
 	switch(type)
 	{
 	case EType::CREATURE:
-	case EType::CREATURE_PLACEHOLDER:
 		break;
 	case EType::ARTIFACT_TYPE:
 	case EType::ARTIFACT_PLACEHOLDER:
@@ -247,12 +243,12 @@ void TradePanelBase::setShowcaseSubtitle(const std::string & text)
 	showcaseSlot->subtitle->setText(text);
 }
 
-int TradePanelBase::getSelectedItemId() const
+std::optional<int> TradePanelBase::getHighlightedItemId() const
 {
 	if(highlightedSlot)
 		return highlightedSlot->id;
 	else
-		return -1;
+		return std::nullopt;
 }
 
 void TradePanelBase::onSlotClickPressed(const std::shared_ptr<CTradeableItem> & newSlot)
@@ -269,7 +265,7 @@ void TradePanelBase::onSlotClickPressed(const std::shared_ptr<CTradeableItem> & 
 
 bool TradePanelBase::isHighlighted() const
 {
-	return getSelectedItemId() != -1;
+	return highlightedSlot != nullptr;
 }
 
 ResourcesPanel::ResourcesPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback,
@@ -282,7 +278,7 @@ ResourcesPanel::ResourcesPanel(const CTradeableItem::ClickPressedFunctor & click
 	{
 		auto slot = slots.emplace_back(std::make_shared<CTradeableItem>(Rect(slotsPos[res.num], slotDimension), EType::RESOURCE, res.num, res.num));
 		slot->clickPressedCallback = clickPressedCallback;
-		slot->setSelectionWidth(selectionWidth);
+		slot->setSelectionWidth(highlightWidth);
 	}
 	updateSlotsCallback = updateSubtitles;
 	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::RESOURCE, 0, 0);
@@ -303,7 +299,7 @@ ArtifactsPanel::ArtifactsPanel(const CTradeableItem::ClickPressedFunctor & click
 			auto slot = slots.emplace_back(std::make_shared<CTradeableItem>(Rect(slotsPos[slotIdx], slotDimension),
 				EType::ARTIFACT_TYPE, artType, slotIdx));
 			slot->clickPressedCallback = clickPressedCallback;
-			slot->setSelectionWidth(selectionWidth);
+			slot->setSelectionWidth(highlightWidth);
 		}
 	}
 	updateSlotsCallback = updateSubtitles;
@@ -329,7 +325,7 @@ PlayersPanel::PlayersPanel(const CTradeableItem::ClickPressedFunctor & clickPres
 	{
 		slot = std::make_shared<CTradeableItem>(Rect(slotsPos[slotNum], slotDimension), EType::PLAYER, players[slotNum].num, slotNum);
 		slot->clickPressedCallback = clickPressedCallback;
-		slot->setSelectionWidth(selectionWidth);
+		slot->setSelectionWidth(highlightWidth);
 		slot->subtitle->setText(CGI->generaltexth->capColors[players[slotNum].num]);
 		slotNum++;
 	}
@@ -345,11 +341,11 @@ CreaturesPanel::CreaturesPanel(const CTradeableItem::ClickPressedFunctor & click
 	for(const auto & [creatureId, slotId, creaturesNum] : initialSlots)
 	{
 		auto slot = slots.emplace_back(std::make_shared<CTradeableItem>(Rect(slotsPos[slotId.num], slotDimension),
-			creaturesNum == 0 ? EType::CREATURE_PLACEHOLDER : EType::CREATURE, creatureId.num, slotId));
+			 EType::CREATURE, creaturesNum == 0 ? -1 : creatureId.num, slotId));
 		slot->clickPressedCallback = clickPressedCallback;
 		if(creaturesNum != 0)
 			slot->subtitle->setText(std::to_string(creaturesNum));
-		slot->setSelectionWidth(selectionWidth);
+		slot->setSelectionWidth(highlightWidth);
 	}
 	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::CREATURE, 0, 0);
 }
@@ -363,10 +359,10 @@ CreaturesPanel::CreaturesPanel(const CTradeableItem::ClickPressedFunctor & click
 	for(const auto & srcSlot : srcSlots)
 	{
 		auto slot = slots.emplace_back(std::make_shared<CTradeableItem>(Rect(slotsPos[srcSlot->serial], srcSlot->pos.dimensions()),
-			emptySlots ? EType::CREATURE_PLACEHOLDER : EType::CREATURE, srcSlot->id, srcSlot->serial));
+			EType::CREATURE, emptySlots ? -1 : srcSlot->id, srcSlot->serial));
 		slot->clickPressedCallback = clickPressedCallback;
 		slot->subtitle->setText(emptySlots ? "" : srcSlot->subtitle->getText());
-		slot->setSelectionWidth(selectionWidth);
+		slot->setSelectionWidth(highlightWidth);
 	}
 	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::CREATURE, 0, 0);
 }

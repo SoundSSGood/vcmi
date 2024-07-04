@@ -39,7 +39,7 @@ CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero
 {
 	assert(mode == EMarketMode::RESOURCE_RESOURCE || mode == EMarketMode::RESOURCE_PLAYER || mode == EMarketMode::CREATURE_RESOURCE ||
 		mode == EMarketMode::RESOURCE_ARTIFACT || mode == EMarketMode::ARTIFACT_RESOURCE || mode == EMarketMode::ARTIFACT_EXP ||
-		mode == EMarketMode::CREATURE_EXP || mode == EMarketMode::GOLD_SECSKILL);
+		mode == EMarketMode::CREATURE_EXP || mode == EMarketMode::GOLD_SECSKILL_BASIC);
 	
 	OBJECT_CONSTRUCTION;
 
@@ -57,7 +57,7 @@ CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero
 		createAltarArtifacts(market, hero);
 	else if(mode == EMarketMode::CREATURE_EXP)
 		createAltarCreatures(market, hero);
-	else if(mode == EMarketMode::GOLD_SECSKILL)
+	else if(mode == EMarketMode::GOLD_SECSKILL_BASIC)
 		createUnivercity(market, hero);
 
 	statusbar = CGStatusBar::create(std::make_shared<CPicture>(background->getSurface(), Rect(8, pos.h - 26, pos.w - 16, 19), 8, pos.h - 26));

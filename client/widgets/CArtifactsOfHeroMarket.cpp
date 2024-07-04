@@ -12,14 +12,14 @@
 
 #include "../../lib/mapObjects/CGHeroInstance.h"
 
-CArtifactsOfHeroMarket::CArtifactsOfHeroMarket(const Point & position, const int selectionWidth)
+CArtifactsOfHeroMarket::CArtifactsOfHeroMarket(const Point & position, const int highlightWidth)
 {
 	init(position, std::bind(&CArtifactsOfHeroBase::scrollBackpack, this, _1));
 
 	for(const auto & [slot, artPlace] : artWorn)
-		artPlace->setSelectionWidth(selectionWidth);
+		artPlace->setSelectionWidth(highlightWidth);
 	for(auto artPlace : backpack)
-		artPlace->setSelectionWidth(selectionWidth);
+		artPlace->setSelectionWidth(highlightWidth);
 };
 
 void CArtifactsOfHeroMarket::clickPrassedArtPlace(CArtPlace & artPlace, const Point & cursorPosition)

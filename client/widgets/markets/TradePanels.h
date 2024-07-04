@@ -16,7 +16,7 @@
 
 enum class EType
 {
-	RESOURCE, PLAYER, ARTIFACT_TYPE, CREATURE, CREATURE_PLACEHOLDER, ARTIFACT_PLACEHOLDER, SECSKILL
+	RESOURCE, PLAYER, ARTIFACT_TYPE, CREATURE, ARTIFACT_PLACEHOLDER, SECSKILL
 };
 
 class CTradeableItem : public SelectableSlot, public std::enable_shared_from_this<CTradeableItem>
@@ -52,7 +52,7 @@ public:
 	std::vector<std::shared_ptr<CTradeableItem>> slots;
 	UpdateSlotsFunctor updateSlotsCallback;
 	DeleteSlotsCheck deleteSlotsCheck;
-	const int selectionWidth = 2;
+	const int highlightWidth = 2;
 	std::shared_ptr<CTradeableItem> showcaseSlot;		// Separate slot that displays the contents for trading
 	std::shared_ptr<CTradeableItem> highlightedSlot;	// One of the slots highlighted by a frame
 
@@ -61,7 +61,7 @@ public:
 	virtual void clearSubtitles();
 	void updateOffer(CTradeableItem & slot, int, int);
 	void setShowcaseSubtitle(const std::string & text);
-	int getSelectedItemId() const;
+	std::optional<int> getHighlightedItemId() const;
 	void onSlotClickPressed(const std::shared_ptr<CTradeableItem> & newSlot);
 	bool isHighlighted() const;
 };

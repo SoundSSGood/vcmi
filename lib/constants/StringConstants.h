@@ -213,7 +213,8 @@ namespace MappedKeys
 		{ "artifact-experience", EMarketMode::ARTIFACT_EXP },
 		{ "creature-experience", EMarketMode::CREATURE_EXP },
 		{ "creature-undead", EMarketMode::CREATURE_UNDEAD },
-		{ "resource-skill", EMarketMode::GOLD_SECSKILL },
+		{ "resource-skill", EMarketMode::GOLD_SECSKILL_BASIC },
+		{ "resource-skill-expert", EMarketMode::GOLD_SECSKILL_EXPERT },
 	};
 }
 

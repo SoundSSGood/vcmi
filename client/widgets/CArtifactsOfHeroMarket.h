@@ -17,6 +17,6 @@ public:
 	std::function<void(const CArtPlace*)> onSelectArtCallback;
 	std::function<void()> onClickNotTradableCallback;
 
-	CArtifactsOfHeroMarket(const Point & position, const int selectionWidth);
+	CArtifactsOfHeroMarket(const Point & position, const int highlightWidth);
 	void clickPrassedArtPlace(CArtPlace & artPlace, const Point & cursorPosition) override;
 };

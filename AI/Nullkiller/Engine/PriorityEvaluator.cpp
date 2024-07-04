@@ -421,7 +421,7 @@ int RewardEvaluator::getGoldCost(const CGObjectInstance * target, const CGHeroIn
 	
 	if(auto * m = dynamic_cast<const IMarket *>(target))
 	{
-		if(m->allowsTrade(EMarketMode::GOLD_SECSKILL))
+		if(m->allowsTrade(EMarketMode::GOLD_SECSKILL_BASIC) || m->allowsTrade(EMarketMode::GOLD_SECSKILL_EXPERT))
 			return 2000;
 	}
 
