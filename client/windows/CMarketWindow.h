@@ -15,7 +15,7 @@
 class CMarketWindow final : public CStatusbarWindow, public CWindowWithArtifacts, public IGarrisonHolder, public IMarketHolder
 {
 public:
-	CMarketWindow(const IMarket * market, const CGHeroInstance * hero, const std::function<void()> & onWindowClosed, EMarketMode mode);
+	CMarketWindow(const IMarket * market, const CGHeroInstance * hero, const std::function<void()> & onWindowClosed, const EMarketMode & mode);
 	void updateResources() override;
 	void updateArtifacts() override;
 	void updateGarrisons() override;
@@ -37,6 +37,7 @@ private:
 	void createAltarArtifacts(const IMarket * market, const CGHeroInstance * hero);
 	void createAltarCreatures(const IMarket * market, const CGHeroInstance * hero);
 	void createUnivercity(const IMarket * market, const CGHeroInstance * hero);
+	void createSeafaringAcademy(const IMarket * market, const CGHeroInstance * hero);
 
 	const int buttonHeightWithMargin = 32 + 3;
 	std::vector<std::shared_ptr<CButton>> changeModeButtons;

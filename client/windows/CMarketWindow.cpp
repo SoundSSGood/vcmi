@@ -33,13 +33,14 @@
 #include "../../lib/mapObjects/CGMarket.h"
 #include "../../lib/mapObjects/CGHeroInstance.h"
 
-CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero, const std::function<void()> & onWindowClosed, EMarketMode mode)
+CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero, const std::function<void()> & onWindowClosed,
+	const EMarketMode & mode)
 	: CWindowObject(PLAYER_COLORED)
 	, windowClosedCallback(onWindowClosed)
 {
 	assert(mode == EMarketMode::RESOURCE_RESOURCE || mode == EMarketMode::RESOURCE_PLAYER || mode == EMarketMode::CREATURE_RESOURCE ||
 		mode == EMarketMode::RESOURCE_ARTIFACT || mode == EMarketMode::ARTIFACT_RESOURCE || mode == EMarketMode::ARTIFACT_EXP ||
-		mode == EMarketMode::CREATURE_EXP || mode == EMarketMode::GOLD_SECSKILL_BASIC);
+		mode == EMarketMode::CREATURE_EXP || mode == EMarketMode::GOLD_SECSKILL_BASIC || mode == EMarketMode::GOLD_SECSKILL_EXPERT);
 	
 	OBJECT_CONSTRUCTION;
 
@@ -59,6 +60,8 @@ CMarketWindow::CMarketWindow(const IMarket * market, const CGHeroInstance * hero
 		createAltarCreatures(market, hero);
 	else if(mode == EMarketMode::GOLD_SECSKILL_BASIC)
 		createUnivercity(market, hero);
+	else if(mode == EMarketMode::GOLD_SECSKILL_EXPERT)
+		createSeafaringAcademy(market, hero);
 
 	statusbar = CGStatusBar::create(std::make_shared<CPicture>(background->getSurface(), Rect(8, pos.h - 26, pos.w - 16, 19), 8, pos.h - 26));
 }
@@ -273,6 +276,16 @@ void CMarketWindow::createUnivercity(const IMarket * market, const CGHeroInstanc
 	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
 
 	background = createBg(ImagePath::builtin("UNIVERS1"), PLAYER_COLORED);
-	marketWidget = std::make_shared<CUnivercity>(market, hero);
+	marketWidget = std::make_shared<CUnivercity>(market, hero, EMarketMode::GOLD_SECSKILL_BASIC);
+	initWidgetInternals(EMarketMode::CREATURE_EXP, CGI->generaltexth->zelp[632], Point(200, 313));
+}
+
+void CMarketWindow::createSeafaringAcademy(const IMarket * market, const CGHeroInstance * hero)
+{
+	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+
+	// TODO There must be a suitable background
+	background = createBg(ImagePath::builtin("UNIVERS1"), PLAYER_COLORED);
+	marketWidget = std::make_shared<CUnivercity>(market, hero, EMarketMode::GOLD_SECSKILL_EXPERT);
 	initWidgetInternals(EMarketMode::CREATURE_EXP, CGI->generaltexth->zelp[632], Point(200, 313));
 }

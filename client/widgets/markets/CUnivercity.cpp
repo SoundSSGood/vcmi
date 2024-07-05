@@ -17,17 +17,25 @@
 #include "../../widgets/TextControls.h"
 
 #include "../../CGameInfo.h"
+#include "../../CPlayerInterface.h"
 
-#include "../../../lib/CGeneralTextHandler.h"
+#include "../../../CCallback.h"
+
+#include "../../../lib/entities/building/CBuilding.h"
+#include "../../../lib/texts/CGeneralTextHandler.h"
 #include "../../../lib/CSkillHandler.h"
+#include "../../../lib/mapObjects/CGHeroInstance.h"
 #include "../../../lib/mapObjects/CGMarket.h"
 #include "../../../lib/mapObjects/CGTownInstance.h"
 #include "../../../lib/mapObjects/ObjectTemplate.h"
+#include "../../../lib/entities/faction/CTownHandler.h"
 
-CUnivercity::CUnivercity(const IMarket * market, const CGHeroInstance * hero)
+CUnivercity::CUnivercity(const IMarket * market, const CGHeroInstance * hero, const EMarketMode & mode)
 	: CMarketBase(market, hero)
 	, CMarketTraderText(Point(24, 129))
+	, mode(mode)
 {
+	assert(mode == EMarketMode::GOLD_SECSKILL_BASIC || mode == EMarketMode::GOLD_SECSKILL_EXPERT);
 	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
 
 	if(auto town = dynamic_cast<const CGTownInstance*>(market))
@@ -37,10 +45,17 @@ CUnivercity::CUnivercity(const IMarket * market, const CGHeroInstance * hero)
 		titlePic = std::make_shared<CAnimImage>(university->appearance->animationFile, 0);
 	titlePic->moveTo(pos.topLeft() + Point(157, 39));
 
-	offerTradePanel = std::make_shared<SecondarySkillsPanel>([this](const std::shared_ptr<CTradeableItem> & skillSlot)
+	state = getSkillsState();
+	std::shared_ptr<SecondarySkillsPanel> skillsPanel = std::make_shared<SecondarySkillsPanel>(
+		[this](const std::shared_ptr<CTradeableItem> & skillSlot)
 		{
 			CUnivercity::onSlotClickPressed(skillSlot, offerTradePanel);
-		}, market->availableItemsIds(EMarketMode::GOLD_SECSKILL_BASIC));
+		}, 
+		[this, &skillsPanel]()
+		{
+			
+		}, state);
+	offerTradePanel = skillsPanel;
 	offerTradePanel->moveTo(pos.topLeft() + Point(54, 234));
 
 	for(const auto & tradeSlot : offerTradePanel->slots)
@@ -49,19 +64,28 @@ CUnivercity::CUnivercity(const IMarket * market, const CGHeroInstance * hero)
 			CGI->skillh->getByIndex(tradeSlot->id)->getNameTranslated()));
 		skillName->moveTo(tradeSlot->pos.topLeft() + Point(23, -13));
 	}
-	
 
 	// Showcase stuff
-	showcaseBack = std::make_shared<CPicture>(ImagePath::builtin("UNIVERS2.PCX"));
-	showcaseBack->disable();
+	showcaseBackground = std::make_shared<CPicture>(ImagePath::builtin("UNIVERS2.PCX"));
 	
-	deal = std::make_shared<CButton>(Point(200, 313), AnimationPath::builtin("IBY6432.DEF"),
-		CGI->generaltexth->zelp[595], [this]() {}, EShortcut::GLOBAL_ACCEPT);
-	deal->disable();
+	deal = std::make_shared<CButton>(Point(148, 299), AnimationPath::builtin("IBY6432.DEF"),
+		CGI->generaltexth->zelp[595], [this]()
+		{
+			CUnivercity::makeDeal();
+		}, EShortcut::GLOBAL_ACCEPT);
+	showcaseClose = std::make_shared<CButton>(Point(252, 299), AnimationPath::builtin("ICANCEL.DEF"),
+		CGI->generaltexth->zelp[631], [this]()
+		{
+			CUnivercity::deselect();
+			GH.statusbar()->clear(); // TODO should not be here
+			redraw();
+		}, EShortcut::GLOBAL_CANCEL);
 
 	traderText->pos.w = 413;
 	traderText->pos.h = 70;
 
+	addChild(offerTradePanel->showcaseSlot.get());
+	moveChildForeground(traderText.get());
 	CUnivercity::deselect();
 }
 
@@ -69,6 +93,9 @@ void CUnivercity::deselect()
 {
 	CMarketBase::deselect();
 	CMarketTraderText::deselect();
+	showcaseBackground->disable();
+	deal->disable();
+	showcaseClose->disable();
 }
 
 void CUnivercity::makeDeal()
@@ -78,40 +105,77 @@ void CUnivercity::makeDeal()
 
 CMarketBase::MarketShowcasesParams CUnivercity::getShowcasesParams() const
 {
-	/*if (offerTradePanel->isHighlighted())
+	if(offerTradePanel->isHighlighted())
 		return MarketShowcasesParams
-	{
-		ShowcaseParams {std::to_string(bidQty * offerSlider->getValue()), CGI->creatures()->getByIndex(bidTradePanel->getHighlightedItemId())->getIconIndex()},
-		ShowcaseParams {std::to_string(offerQty * offerSlider->getValue()), offerTradePanel->getHighlightedItemId()}
-	};
-	else*/
-	return MarketShowcasesParams{std::nullopt, std::nullopt};
+		{
+			std::nullopt,
+			ShowcaseParams {offerTradePanel->highlightedSlot->subtitle->getText(),
+			offerTradePanel->getHighlightedItemId().value() * 3 + 2 + state[offerTradePanel->highlightedSlot->serial].level}
+		};
+	else
+		return MarketShowcasesParams{std::nullopt, std::nullopt};
 }
 
-void CUnivercity::onSlotClickPressed(const std::shared_ptr<CTradeableItem> & newSlot, std::shared_ptr<TradePanelBase> & curPanel)
+void CUnivercity::highlightingChanged()
 {
+	CMarketBase::highlightingChanged();
+	CMarketTraderText::highlightingChanged();
+}
 
+void CUnivercity::onSlotClickPressed(const std::shared_ptr<CTradeableItem> & slot, std::shared_ptr<TradePanelBase> & curPanel)
+{
+	if(state[slot->serial].availability == SecondarySkillsPanel::SkillAvailability::canBeLearned)
+	{
+		showcaseBackground->enable();
+		deal->enable();
+		showcaseClose->enable();
+
+		market->getOffer(GameResID::GOLD, state[slot->serial].skill.num, bidQty, offerQty, mode);
+		deal->block(LOCPLINT->cb->getResourceAmount(GameResID::GOLD) < bidQty || !LOCPLINT->makingTurn);
+
+		curPanel->highlightedSlot = slot;
+		highlightingChanged();
+	}
 }
 
 std::string CUnivercity::getTraderText()
 {
-	/*if (offerTradePanel->isHighlighted())
+	if(offerTradePanel->isHighlighted())
 	{
-		MetaString message = MetaString::createFromTextID("core.genrltxt.269");
-		message.replaceNumber(offerQty);
-		message.replaceRawString(offerQty == 1 ? CGI->generaltexth->allTexts[161] : CGI->generaltexth->allTexts[160]);
-		message.replaceName(GameResID(offerTradePanel->getHighlightedItemId()));
+		MetaString message = MetaString::createFromRawString(CGI->generaltexth->allTexts[608]);
+		message.replaceRawString(offerTradePanel->highlightedSlot->subtitle->getText());
+		message.replaceName(SecondarySkill(offerTradePanel->getHighlightedItemId().value()));
 		message.replaceNumber(bidQty);
-		if (bidQty == 1)
-			message.replaceNameSingular(bidTradePanel->getHighlightedItemId());
-		else
-			message.replaceNamePlural(bidTradePanel->getHighlightedItemId());
 		return message.toString();
 	}
 	else
 	{
-		return madeTransaction ? CGI->generaltexth->allTexts[162] : CGI->generaltexth->allTexts[163];
-	}*/
-	return CGI->generaltexth->allTexts[603];
+		return CGI->generaltexth->allTexts[603];
+	}
+}
+
+CUnivercity::SkillsState CUnivercity::getSkillsState()
+{
+	std::vector<SecondarySkillsPanel::SkillState> state;
+	ui8 maxSkillLevel = mode == EMarketMode::GOLD_SECSKILL_BASIC ? 1 : 3;
+
+	for(const auto & skill : market->availableItemsIds(EMarketMode::GOLD_SECSKILL_BASIC))
+	{
+		auto skillAvailability = SecondarySkillsPanel::SkillAvailability::canBeLearned;
+		auto skillLevel = hero->getSecSkillLevel(skill.getNum());
+		skillLevel += 1;	// next level
+		if(skillLevel == 1)
+		{
+			if(!hero->canLearnSkill(skill.getNum()))
+				skillAvailability = SecondarySkillsPanel::SkillAvailability::cantBeLearned;
+		}
+		else if(skillLevel > maxSkillLevel)
+		{
+			skillAvailability = SecondarySkillsPanel::SkillAvailability::alreadyLearned;
+			skillLevel = maxSkillLevel;
+		}
+		state.emplace_back(SecondarySkillsPanel::SkillState{skill.getNum(), skillLevel, skillAvailability});
+	}
+	return state;
 }
  

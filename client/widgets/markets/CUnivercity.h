@@ -14,16 +14,22 @@
 class CUnivercity : public CMarketTraderText
 {
 public:
-	CUnivercity(const IMarket * market, const CGHeroInstance * hero);
+	CUnivercity(const IMarket * market, const CGHeroInstance * hero, const EMarketMode & mode);
 	void deselect() override;
 	void makeDeal() override;
 
 private:
-	std::shared_ptr<CAnimation> bars;
+	using SkillsState = std::vector<SecondarySkillsPanel::SkillState>;
+
 	std::shared_ptr<CAnimImage> titlePic;
-	std::shared_ptr<CPicture> showcaseBack;
+	std::shared_ptr<CPicture> showcaseBackground;
+	std::shared_ptr<CButton> showcaseClose;
+	const EMarketMode mode;
+	SkillsState state;
 
 	MarketShowcasesParams getShowcasesParams() const override;
-	void onSlotClickPressed(const std::shared_ptr<CTradeableItem> & newSlot, std::shared_ptr<TradePanelBase> & curPanel);
+	void highlightingChanged() override;
+	void onSlotClickPressed(const std::shared_ptr<CTradeableItem> & slot, std::shared_ptr<TradePanelBase> & curPanel);
 	std::string getTraderText() override;
+	SkillsState getSkillsState();
 };

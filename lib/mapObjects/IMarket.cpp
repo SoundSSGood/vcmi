@@ -114,6 +114,11 @@ bool IMarket::getOffer(int id1, int id2, int &val1, int &val2, EMarketMode mode)
 			val2 = expPerClass[givenClass];
 		}
 		break;
+	case EMarketMode::GOLD_SECSKILL_BASIC:
+	case EMarketMode::GOLD_SECSKILL_EXPERT:
+		val1 = 2000;
+		val2 = 1;
+		break;
 	default:
 		assert(0);
 		return false;

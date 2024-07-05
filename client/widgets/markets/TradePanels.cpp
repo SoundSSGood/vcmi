@@ -186,7 +186,7 @@ void CTradeableItem::hover(bool on)
 		GH.statusbar()->write(CGI->generaltexth->capColors[id]);
 		break;
 	case EType::SECSKILL:
-		GH.statusbar()->write(CGI->skillh->getByIndex(id)->getNameTranslated());
+		GH.statusbar()->write(CGI->skills()->getByIndex(id)->getNameTranslated());
 		break;
 	}
 }
@@ -384,20 +384,52 @@ ArtifactsAltarPanel::ArtifactsAltarPanel(const CTradeableItem::ClickPressedFunct
 	showcaseSlot->subtitle->moveBy(Point(0, 3));
 }
 
-SecondarySkillsPanel::SecondarySkillsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback, std::vector<TradeItemBuy> & skills)
+SecondarySkillsPanel::SecondarySkillsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback,
+	const UpdateSlotsFunctor & updateSlot, const std::vector<SkillState> & skillsState)
 {
-	assert(skills.size() == slotsPos.size());
+	assert(skillsState.size() <= slotsPos.size());
 	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
 
+	updateSlotsCallback = updateSlot;
 	int slotNum = 0;
-	for(const auto & skill : skills)
+	slots.resize(skillsState.size());
+	setSkillsState(skillsState);
+	for(auto & slot : slots)
 	{
-		auto slot = slots.emplace_back(std::make_shared<CTradeableItem>(
-			Rect(slotsPos[slotNum], slotDimension), EType::SECSKILL, skill.getNum(), slotNum));
+		slot = std::make_shared<CTradeableItem>(Rect(slotsPos[slotNum], slotDimension), EType::SECSKILL, skillsState[slotNum].skill.num, slotNum);
 		slot->clickPressedCallback = clickPressedCallback;
-		slot->subtitle->setText(CGI->generaltexth->levels[0]);
+		slot->subtitle->setText(skillsState[slotNum].level > 0 ? CGI->generaltexth->levels[skillsState[slotNum].level - 1] : "");
 		slot->subtitle->moveBy(Point(23, 56));
 		slotNum++;
 	}
-	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, Point(20, 20)), EType::SECSKILL, 0, 0);
+	showcaseSlot = std::make_shared<CTradeableItem>(Rect(showcasePos, slotDimension), EType::SECSKILL, -1, 0);
+	showcaseSlot->moveTo(pos.topLeft() + showcasePos);
+	showcaseSlot->subtitle->moveBy(Point(23, 56));
+}
+
+void SecondarySkillsPanel::setSkillsState(const std::vector<SkillState> & state)
+{
+	assert(slots.size() == state.size());
+
+	int slotNum = 0;
+	for(auto & slot : slots)
+	{
+		ImagePath image;
+		switch(state[slotNum].availability)
+		{
+		case SkillAvailability::alreadyLearned:
+			image = ImagePath::builtin("UNIVGOLD");
+			break;
+		case SkillAvailability::canBeLearned:
+			image = ImagePath::builtin("UNIVGREN");
+			break;
+		default:
+			image = ImagePath::builtin("UNIVRED");
+		}
+
+		OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+		bars.emplace_back(std::make_shared<CPicture>(image))->moveTo(pos.topLeft() + slotsPos[slotNum] + Point(-28, -22));
+		bars.emplace_back(std::make_shared<CPicture>(image))->moveTo(pos.topLeft() + slotsPos[slotNum] + Point(-28, 48));
+		slotNum++;
+	}
 }

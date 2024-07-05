@@ -166,8 +166,25 @@ class SecondarySkillsPanel : public TradePanelBase
 	};
 
 	const Point slotDimension = Point(44, 44);
-	const Point showcasePos = Point(148, 389);
+	const Point showcasePos = Point(155, -184);
+
+	std::vector<std::shared_ptr<CPicture>> bars;
 
 public:
-	SecondarySkillsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback, std::vector<TradeItemBuy> & skills);
+	enum class SkillAvailability
+	{
+		alreadyLearned,
+		canBeLearned,
+		cantBeLearned
+	};
+	struct SkillState
+	{
+		SecondarySkill skill;
+		ui8 level;
+		SkillAvailability availability;
+	};
+
+	SecondarySkillsPanel(const CTradeableItem::ClickPressedFunctor & clickPressedCallback,
+		const UpdateSlotsFunctor & updateSlot, const std::vector<SkillState> & skillsState);
+	void setSkillsState(const std::vector<SkillState> & state);
 };
