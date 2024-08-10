@@ -388,7 +388,7 @@ SecondarySkillsPanel::SecondarySkillsPanel(const CTradeableItem::ClickPressedFun
 	const UpdateSlotsFunctor & updateSlot, const std::vector<SkillState> & skillsState)
 {
 	assert(skillsState.size() <= slotsPos.size());
-	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+	OBJECT_CONSTRUCTION;
 
 	updateSlotsCallback = updateSlot;
 	int slotNum = 0;
@@ -427,7 +427,7 @@ void SecondarySkillsPanel::setSkillsState(const std::vector<SkillState> & state)
 			image = ImagePath::builtin("UNIVRED");
 		}
 
-		OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+		OBJECT_CONSTRUCTION;
 		bars.emplace_back(std::make_shared<CPicture>(image))->moveTo(pos.topLeft() + slotsPos[slotNum] + Point(-28, -22));
 		bars.emplace_back(std::make_shared<CPicture>(image))->moveTo(pos.topLeft() + slotsPos[slotNum] + Point(-28, 48));
 		slotNum++;

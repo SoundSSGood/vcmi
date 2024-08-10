@@ -36,7 +36,7 @@ CUnivercity::CUnivercity(const IMarket * market, const CGHeroInstance * hero, co
 	, mode(mode)
 {
 	assert(mode == EMarketMode::GOLD_SECSKILL_BASIC || mode == EMarketMode::GOLD_SECSKILL_EXPERT);
-	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+	OBJECT_CONSTRUCTION;
 
 	if(auto town = dynamic_cast<const CGTownInstance*>(market))
 		titlePic = std::make_shared<CAnimImage>((*CGI->townh)[town->town->faction->getId()]->town->clientInfo.buildingsIcons,

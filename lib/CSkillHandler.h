@@ -22,19 +22,13 @@ class JsonSerializeFormat;
 
 class DLL_LINKAGE CSkill : public Skill
 {
-public:
-	struct LevelInfo
-	{
-		std::string iconSmall;
-		std::string iconMedium;
-		std::string iconLarge;
-		std::vector<std::shared_ptr<Bonus>> effects;
-	};
-
 private:
-	std::vector<LevelInfo> levels; // bonuses provided by basic, advanced and expert level
 	void addNewBonus(const std::shared_ptr<Bonus> & b, int level);
 
+	std::string iconSmall;
+	std::string iconMedium;
+	std::string iconLarge;
+	std::shared_ptr<Bonus> effect;
 	SecondarySkill id;
 	std::string modScope;
 	std::string identifier;
@@ -62,10 +56,6 @@ public:
 	std::string getDescriptionTextID(int level) const override;
 	std::string getDescriptionTranslated(int level) const override;
 
-	const LevelInfo & at(int level) const;
-	LevelInfo & at(int level);
-
-	std::string toString() const;
 	bool obligatory(Obligatory val) const { return val == Obligatory::MAJOR ? obligatoryMajor : obligatoryMinor; };
 
 	std::array<si32, 2> gainChance; // gainChance[0/1] = default gain chance on level-up for might/magic heroes
@@ -76,8 +66,6 @@ public:
 	bool onlyOnWaterMap;
 
 	friend class CSkillHandler;
-	friend DLL_LINKAGE std::ostream & operator<<(std::ostream & out, const CSkill & skill);
-	friend DLL_LINKAGE std::ostream & operator<<(std::ostream & out, const CSkill::LevelInfo & info);
 private:
 	bool obligatoryMajor;
 	bool obligatoryMinor;
@@ -92,6 +80,7 @@ public:
 	void beforeValidate(JsonNode & object) override;
 
 	std::set<SecondarySkill> getDefaultAllowed() const;
+	void loadObject(std::string scope, std::string name, const JsonNode & data, size_t index) override;
 
 protected:
 	const std::vector<std::string> & getTypeNames() const override;

@@ -628,9 +628,9 @@ void CGHeroInstance::recreateSecondarySkillsBonuses()
 void CGHeroInstance::updateSkillBonus(const SecondarySkill & which, int val)
 {
 	removeBonuses(Selector::source(BonusSource::SECONDARY_SKILL, BonusSourceID(which)));
-	auto skillBonus = (*VLC->skillh)[which]->at(val).effects;
-	for(const auto & b : skillBonus)
-		addNewBonus(std::make_shared<Bonus>(*b));
+	//auto skillBonus = (*VLC->skillh)[which]->at(val).effects;
+	//for(const auto & b : skillBonus)
+	//	addNewBonus(std::make_shared<Bonus>(*b));
 }
 
 void CGHeroInstance::setPropertyDer(ObjProperty what, ObjPropertyID identifier)

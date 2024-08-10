@@ -273,7 +273,7 @@ void CMarketWindow::createAltarCreatures(const IMarket * market, const CGHeroIns
 
 void CMarketWindow::createUnivercity(const IMarket * market, const CGHeroInstance * hero)
 {
-	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+	OBJECT_CONSTRUCTION;
 
 	background = createBg(ImagePath::builtin("UNIVERS1"), PLAYER_COLORED);
 	marketWidget = std::make_shared<CUnivercity>(market, hero, EMarketMode::GOLD_SECSKILL_BASIC);
@@ -282,7 +282,7 @@ void CMarketWindow::createUnivercity(const IMarket * market, const CGHeroInstanc
 
 void CMarketWindow::createSeafaringAcademy(const IMarket * market, const CGHeroInstance * hero)
 {
-	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255 - DISPOSE);
+	OBJECT_CONSTRUCTION;
 
 	// TODO There must be a suitable background
 	background = createBg(ImagePath::builtin("UNIVERS1"), PLAYER_COLORED);

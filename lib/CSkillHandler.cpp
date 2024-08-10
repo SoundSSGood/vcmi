@@ -35,7 +35,6 @@ CSkill::CSkill(const SecondarySkill & id, std::string identifier, bool obligator
 	obligatoryMinor(obligatoryMinor)
 {
 	gainChance[0] = gainChance[1] = 0; //affects CHeroClassHandler::afterLoadFinalization()
-	levels.resize(NSecondarySkill::levels.size() - 1);
 }
 
 int32_t CSkill::getIndex() const
@@ -82,14 +81,10 @@ std::string CSkill::getDescriptionTranslated(int level) const
 
 void CSkill::registerIcons(const IconRegistar & cb) const
 {
-	for(int level = 1; level <= 3; level++)
-	{
-		int frame = 2 + level + 3 * id.getNum();
-		const LevelInfo & skillAtLevel = at(level);
-		cb(frame, 0, "SECSK32", skillAtLevel.iconSmall);
-		cb(frame, 0, "SECSKILL", skillAtLevel.iconMedium);
-		cb(frame, 0, "SECSK82", skillAtLevel.iconLarge);
-	}
+	int frame = 2 + 3 * id.getNum();
+	cb(frame, 0, "SECSK32", iconSmall);
+	cb(frame, 0, "SECSKILL", iconMedium);
+	cb(frame, 0, "SECSK82", iconLarge);
 }
 
 SecondarySkill CSkill::getId() const
@@ -104,41 +99,7 @@ void CSkill::addNewBonus(const std::shared_ptr<Bonus> & b, int level)
 	b->duration = BonusDuration::PERMANENT;
 	b->description.appendTextID(getNameTextID());
 	b->description.appendRawString(" %+d");
-	levels[level-1].effects.push_back(b);
-}
-
-const CSkill::LevelInfo & CSkill::at(int level) const
-{
-	assert(1 <= level && level < NSecondarySkill::levels.size());
-	return levels[level - 1];
-}
-
-CSkill::LevelInfo & CSkill::at(int level)
-{
-	assert(1 <= level && level < NSecondarySkill::levels.size());
-	return levels[level - 1];
-}
-
-DLL_LINKAGE std::ostream & operator<<(std::ostream & out, const CSkill::LevelInfo & info)
-{
-	for(int i=0; i < info.effects.size(); i++)
-		out << (i ? "," : "") << info.effects[i]->Description();
-	return out << "])";
-}
-
-DLL_LINKAGE std::ostream & operator<<(std::ostream & out, const CSkill & skill)
-{
-	out << "Skill(" << skill.id.getNum() << "," << skill.identifier << "): [";
-	for(int i=0; i < skill.levels.size(); i++)
-		out << (i ? "," : "") << skill.levels[i];
-	return out << "]";
-}
-
-std::string CSkill::toString() const
-{
-	std::ostringstream ss;
-	ss << *this;
-	return ss.str();
+	effect = b;
 }
 
 void CSkill::updateFrom(const JsonNode & data)
@@ -188,6 +149,7 @@ std::vector<JsonNode> CSkillHandler::loadLegacyData()
 		}
 		legacyData.push_back(skillNode);
 	}
+	//objects.resize(legacyData.size() * NSecondarySkill::levels.size() - 1);
 	objects.resize(legacyData.size());
 	return legacyData;
 }
@@ -236,11 +198,10 @@ std::shared_ptr<CSkill> CSkillHandler::loadFromJson(const std::string & scope, c
 			auto bonus = JsonUtils::parseBonus(b.second);
 			skill->addNewBonus(bonus, level);
 		}
-		CSkill::LevelInfo & skillAtLevel = skill->at(level);
 		VLC->generaltexth->registerString(scope, skill->getDescriptionTextID(level), levelNode["description"].String());
-		skillAtLevel.iconSmall = levelNode["images"]["small"].String();
-		skillAtLevel.iconMedium = levelNode["images"]["medium"].String();
-		skillAtLevel.iconLarge = levelNode["images"]["large"].String();
+		skill->iconSmall = levelNode["images"]["small"].String();
+		skill->iconMedium = levelNode["images"]["medium"].String();
+		skill->iconLarge = levelNode["images"]["large"].String();
 	}
 	logMod->debug("loaded secondary skill %s(%d)", identifier, skill->id.getNum());
 
@@ -250,6 +211,15 @@ std::shared_ptr<CSkill> CSkillHandler::loadFromJson(const std::string & scope, c
 void CSkillHandler::afterLoadFinalization()
 {
 }
+
+void CSkillHandler::loadObject(std::string scope, std::string name, const JsonNode & data, size_t index)
+{
+	assert(objects[index] == nullptr); // ensure that this id was not loaded before
+	objects[index] = loadFromJson(scope, data, name, index);
+
+	for(const auto & type_name : getTypeNames())
+		registerObject(scope, type_name, name, objects[index]->getIndex());
+};
 
 void CSkillHandler::beforeValidate(JsonNode & object)
 {
