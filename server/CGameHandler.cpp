@@ -179,8 +179,19 @@ void CGameHandler::levelUpHero(const CGHeroInstance * hero)
 	}
 	else if (hlu.skills.size() > 1)
 	{
-		auto levelUpQuery = std::make_shared<CHeroLevelUpDialogQuery>(this, hlu, hero);
+		auto levelUpQuery = std::make_shared<CHeroLevelUpDialogQuery>(this, hero);
 		hlu.queryID = levelUpQuery->queryID;
+		levelUpQuery->setOnRemovalCallback([this, hero, hlu](const PlayerColor & player, const ui32 answer)
+		{
+			levelUpHero(hero, hlu.skills[answer]);
+			const auto & [heroId, objId] = queries->getActiveVisitorAndObj(hero->getOwner());
+			if(objId != ObjectInstanceID::NONE)
+			{
+				const auto obj = getObj(objId);
+				assert(obj);
+				obj->heroLevelUpDone(hero);
+			}
+		});
 		queries->addQuery(levelUpQuery);
 		sendAndApply(hlu);
 		//level up will be called on query reply
@@ -323,8 +334,19 @@ void CGameHandler::levelUpCommander(const CCommanderInstance * c)
 	}
 	else if (skillAmount > 1) //apply and ask for secondary skill
 	{
-		auto commanderLevelUp = std::make_shared<CCommanderLevelUpDialogQuery>(this, clu, hero);
+		auto commanderLevelUp = std::make_shared<CCommanderLevelUpDialogQuery>(this, hero);
 		clu.queryID = commanderLevelUp->queryID;
+		commanderLevelUp->setOnRemovalCallback([this, hero, clu](const PlayerColor & player, const ui32 answer)
+		{
+			levelUpCommander(hero->commander, clu.skills[answer]);
+			const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
+			if(objId != ObjectInstanceID::NONE)
+			{
+				const auto obj = getObj(objId);
+				assert(obj);
+				obj->heroLevelUpDone(hero);
+			}
+		});
 		queries->addQuery(commanderLevelUp);
 		sendAndApply(clu);
 	}
@@ -1103,16 +1125,34 @@ void CGameHandler::setOwner(const CGObjectInstance * obj, const PlayerColor owne
 
 void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CBlockingDialogQuery>(this, caller, *iw);
+	auto dialogQuery = std::make_shared<CBlockingDialogQuery>(this, iw->player);
 	queries->addQuery(dialogQuery);
+	dialogQuery->setOnRemovalCallback([this, caller](const PlayerColor & player, const ui32 answer)
+	{
+		const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
+		const auto hero = getHero(heroId);
+		assert(hero);
+		caller->blockingDialogAnswered(hero, answer);
+	});
 	iw->queryID = dialogQuery->queryID;
 	sendToAllClients(*iw);
 }
 
 void CGameHandler::showTeleportDialog(TeleportDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CTeleportDialogQuery>(this, *iw);
+	auto dialogQuery = std::make_shared<CTeleportDialogQuery>(this, getOwner(iw->hero));
 	queries->addQuery(dialogQuery);
+	dialogQuery->setOnRemovalCallback([this, iw](const PlayerColor & player, const ui32 answer)
+	{
+		const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
+		const auto hero = getHero(heroId);
+		assert(hero);
+		if(const auto teleport = dynamic_cast<const CGTeleport*>(getObj(objId)))
+			teleport->teleportDialogAnswered(hero, answer, iw->exits);
+		else
+			logGlobal->error("Invalid instance in teleport query");
+
+	});
 	iw->queryID = dialogQuery->queryID;
 	sendToAllClients(*iw);
 }
@@ -1428,6 +1468,10 @@ void CGameHandler::heroExchange(ObjectInstanceID hero1, ObjectInstanceID hero2)
 		auto exchange = std::make_shared<CGarrisonDialogQuery>(this, h1, h2);
 		ExchangeDialog hex;
 		hex.queryID = exchange->queryID;
+		exchange->setOnRemovalCallback([h1, h2](const PlayerColor & player, const ui32 answer)
+		{
+			h2->garrisonDialogClosed(h1);
+		});
 		hex.player = h1->getOwner();
 		hex.hero1 = hero1;
 		hex.hero2 = hero2;
@@ -3266,6 +3310,7 @@ bool CGameHandler::queryReply(QueryID qid, std::optional<int32_t> answer, Player
 
 	COMPLAIN_RET_FALSE_IF(!topQuery, "This player doesn't have any queries!");
 
+	std::cout << "ans Q " << qid << " " << player << std::endl;
 	if(topQuery->queryID != qid)
 	{
 		auto currentQuery = queries->getQuery(qid);
@@ -3278,6 +3323,7 @@ bool CGameHandler::queryReply(QueryID qid, std::optional<int32_t> answer, Player
 	COMPLAIN_RET_FALSE_IF(!topQuery->endsByPlayerAnswer(), "This query cannot be ended by player's answer!");
 
 	topQuery->setReply(answer);
+	std::cout << "rem Q " << topQuery->queryID << std::endl;
 	queries->popQuery(topQuery);
 	return true;
 }
@@ -3297,15 +3343,18 @@ bool CGameHandler::complain(const std::string &problem)
 
 void CGameHandler::showGarrisonDialog(ObjectInstanceID upobj, ObjectInstanceID hid, bool removableUnits)
 {
-	//PlayerColor player = getOwner(hid);
 	auto upperArmy = dynamic_cast<const CArmedInstance*>(getObj(upobj));
-	auto lowerArmy = dynamic_cast<const CArmedInstance*>(getObj(hid));
+	auto lowerArmy = getHero(hid);
 
 	assert(lowerArmy);
 	assert(upperArmy);
 
 	auto garrisonQuery = std::make_shared<CGarrisonDialogQuery>(this, upperArmy, lowerArmy);
 	queries->addQuery(garrisonQuery);
+	garrisonQuery->setOnRemovalCallback([upperArmy, lowerArmy](const PlayerColor & player, const ui32 answer)
+	{
+		upperArmy->garrisonDialogClosed(lowerArmy);
+	});
 
 	GarrisonDialog gd;
 	gd.hid = hid;

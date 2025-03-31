@@ -7,10 +7,10 @@
  * Full text of license available in license.txt file, in main folder
  *
  */
-#include "StdInc.h"
-#include "QueriesProcessor.h"
-
 #include "CQuery.h"
+#include "VisitQueries.h"
+
+#include "QueriesProcessor.h"
 
 void QueriesProcessor::popQuery(PlayerColor player, QueryPtr query)
 {
@@ -23,7 +23,7 @@ void QueriesProcessor::popQuery(PlayerColor player, QueryPtr query)
 
 	queries[player] -= query;
 	auto nextQuery = topQuery(player);
-
+	std::cout << "deleted " << query->queryID << " " << player << std::endl;
 	query->onRemoval(player);
 
 	//Exposure on query below happens only if removal didn't trigger any new query
@@ -71,6 +71,7 @@ void QueriesProcessor::addQuery(QueryPtr query)
 void QueriesProcessor::addQuery(PlayerColor player, QueryPtr query)
 {
 	LOG_TRACE_PARAMS(logGlobal, "player='%d', query='%s'", player.getNum() % query);
+	std::cout << "add Q " << query << std::endl;
 	query->onAdding(player);
 	queries[player].push_back(query);
 }
@@ -124,4 +125,14 @@ QueryPtr QueriesProcessor::getQuery(QueryID queryID)
 			if(query->queryID == queryID)
 				return query;
 	return nullptr;
+}
+
+const std::tuple<const ObjectInstanceID, const ObjectInstanceID> QueriesProcessor::getActiveVisitorAndObj(const PlayerColor & player)
+{
+	for(const auto & query : queries[player])
+	{
+		if(const auto visitingQuery = std::dynamic_pointer_cast<MapObjectVisitQuery>(query))
+			return std::make_tuple(visitingQuery->visitingHeroId, visitingQuery->visitingObjectId);
+	}
+	return std::make_tuple(ObjectInstanceID::NONE, ObjectInstanceID::NONE);
 }

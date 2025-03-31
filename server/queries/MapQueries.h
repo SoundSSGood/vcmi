@@ -53,7 +53,6 @@ public:
 	std::array<const CArmedInstance *,2> exchangingArmies;
 
 	CGarrisonDialogQuery(CGameHandler * owner, const CArmedInstance *up, const CArmedInstance *down);
-	void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const override;
 	bool blocksPack(const CPackForServer *pack) const override;
 };
 
@@ -61,12 +60,7 @@ public:
 class CBlockingDialogQuery : public CDialogQuery
 {
 public:
-	const IObjectInterface * caller;
-	BlockingDialog bd; //copy of pack... debug purposes
-
-	CBlockingDialogQuery(CGameHandler * owner, const IObjectInterface * caller, const BlockingDialog &bd);
-
-	void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const override;
+	CBlockingDialogQuery(CGameHandler * owner, const PlayerColor & player);
 };
 
 class OpenWindowQuery : public CDialogQuery
@@ -82,33 +76,23 @@ public:
 class CTeleportDialogQuery : public CDialogQuery
 {
 public:
-	TeleportDialog td; //copy of pack... debug purposes
-
-	CTeleportDialogQuery(CGameHandler * owner, const TeleportDialog &td);
-
-	void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const override;
+	CTeleportDialogQuery(CGameHandler * owner, const PlayerColor & player);
 };
 
 class CHeroLevelUpDialogQuery : public CDialogQuery
 {
 public:
-	CHeroLevelUpDialogQuery(CGameHandler * owner, const HeroLevelUp &Hlu, const CGHeroInstance * Hero);
-
+	CHeroLevelUpDialogQuery(CGameHandler * owner, const CGHeroInstance * hero);
 	void onRemoval(PlayerColor color) override;
-	void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const override;
 
-	HeroLevelUp hlu;
 	const CGHeroInstance * hero;
 };
 
 class CCommanderLevelUpDialogQuery : public CDialogQuery
 {
 public:
-	CCommanderLevelUpDialogQuery(CGameHandler * owner, const CommanderLevelUp &Clu, const CGHeroInstance * Hero);
-
+	CCommanderLevelUpDialogQuery(CGameHandler * owner, const CGHeroInstance * hero);
 	void onRemoval(PlayerColor color) override;
-	void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const override;
 
-	CommanderLevelUp clu;
 	const CGHeroInstance * hero;
 };

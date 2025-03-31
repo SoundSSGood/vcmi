@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include "StdInc.h"
 #include "../../lib/GameConstants.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
@@ -80,12 +81,15 @@ std::ostream &operator<<(std::ostream &out, QueryPtr query);
 class CDialogQuery : public CQuery
 {
 public:
-	CDialogQuery(CGameHandler * owner);
+	CDialogQuery(CGameHandler * owner, const PlayerColor & player);
 	bool endsByPlayerAnswer() const override;
 	bool blocksPack(const CPackForServer *pack) const override;
 	void setReply(std::optional<int32_t> reply) override;
+	void onRemoval(PlayerColor color) override;
+	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const ui32 answer)> & onRemovalCallback);
 protected:
 	std::optional<ui32> answer;
+	std::function<void(const PlayerColor & player, const ui32 answer)> onRemovalCallback;
 };
 
 class CGenericQuery : public CQuery

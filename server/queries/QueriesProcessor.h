@@ -28,6 +28,7 @@ public:
 	void popQuery(QueryPtr query);
 	void popIfTop(const CQuery &query); //removes this query if it is at the top (otherwise, do nothing)
 	void popIfTop(QueryPtr query); //removes this query if it is at the top (otherwise, do nothing)
+	const std::tuple<const ObjectInstanceID, const ObjectInstanceID> getActiveVisitorAndObj(const PlayerColor & player);
 
 	QueryPtr topQuery(PlayerColor player);
 

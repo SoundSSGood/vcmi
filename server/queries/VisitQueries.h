@@ -26,6 +26,9 @@ public:
 	const CGObjectInstance * visitedObject;
 	const CGHeroInstance * visitingHero;
 
+	const ObjectInstanceID visitingObjectId;
+	const ObjectInstanceID visitingHeroId;
+
 	bool blocksPack(const CPackForServer * pack) const final;
 };
 

@@ -27,6 +27,7 @@ void CBattleQuery::notifyObjectAboutRemoval(const CGObjectInstance * visitedObje
 {
 	assert(result);
 
+	std::cout << "notifyObjectAboutRemoval !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 	if(result)
 		visitedObject->battleFinished(visitingHero, *result);
 }
@@ -78,11 +79,10 @@ void CBattleQuery::onExposure(QueryPtr topQuery)
 }
 
 CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi, std::optional<BattleResult> Br):
-	CDialogQuery(owner),
+	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER)),
 	bi(bi),
 	result(Br)
 {
-	addPlayer(bi->getSidePlayer(BattleSide::ATTACKER));
 	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));
 }
 

@@ -20,6 +20,8 @@ VisitQuery::VisitQuery(CGameHandler * owner, const CGObjectInstance * Obj, const
 	: CQuery(owner)
 	, visitedObject(Obj)
 	, visitingHero(Hero)
+	, visitingObjectId(Obj->id)
+	, visitingHeroId(Hero->id)
 {
 	addPlayer(Hero->tempOwner);
 }

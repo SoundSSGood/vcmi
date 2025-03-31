@@ -88,7 +88,7 @@ bool CQuery::blocksPack(const CPackForServer * pack) const
 
 void CQuery::notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const
 {
-
+	std::cout << "notifyObjectAboutRemoval empty" << std::endl;
 }
 
 void CQuery::onExposure(QueryPtr topQuery)
@@ -121,10 +121,10 @@ bool CQuery::blockAllButReply(const CPackForServer * pack) const
 	return true;
 }
 
-CDialogQuery::CDialogQuery(CGameHandler * owner):
+CDialogQuery::CDialogQuery(CGameHandler * owner, const PlayerColor & player):
 	CQuery(owner)
 {
-
+	addPlayer(player);
 }
 
 bool CDialogQuery::endsByPlayerAnswer() const
@@ -141,6 +141,19 @@ void CDialogQuery::setReply(std::optional<int32_t> reply)
 {
 	if(reply.has_value())
 		answer = *reply;
+}
+
+
+void CDialogQuery::onRemoval(PlayerColor color)
+{
+	assert(answer);
+	if(onRemovalCallback)
+		onRemovalCallback(color, answer.value());
+}
+
+void CDialogQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const ui32 answer)> & onRemovalCallback)
+{
+	this->onRemovalCallback = onRemovalCallback;
 }
 
 CGenericQuery::CGenericQuery(CGameHandler * gh, PlayerColor color, std::function<void(std::optional<int32_t>)> Callback):
