@@ -61,8 +61,7 @@ public:
 	/// called when query immediately above is removed and this is exposed (becomes top)
 	virtual void onExposure(QueryPtr topQuery);
 
-	/// called when this query is being removed and must report its result to currently visited object
-	virtual void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const;
+	void setOnRemovalCallback(const std::function<void(const PlayerColor & player)> & onRemovalCallback);
 
 	virtual void setReply(std::optional<int32_t> reply);
 	virtual std::string toString() const;
@@ -73,6 +72,7 @@ protected:
 	CGameHandler * gh;
 	void addPlayer(PlayerColor color);
 	bool blockAllButReply(const CPackForServer * pack) const;
+	std::function<void(const PlayerColor & player)> onRemovalCallback;
 };
 
 std::ostream &operator<<(std::ostream &out, const CQuery &query);
@@ -85,24 +85,7 @@ public:
 	bool endsByPlayerAnswer() const override;
 	bool blocksPack(const CPackForServer *pack) const override;
 	void setReply(std::optional<int32_t> reply) override;
-	void onRemoval(PlayerColor color) override;
-	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const ui32 answer)> & onRemovalCallback);
+	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const std::optional<int32_t> & answer)> & onRemovalCallback);
 protected:
-	std::optional<ui32> answer;
-	std::function<void(const PlayerColor & player, const ui32 answer)> onRemovalCallback;
-};
-
-class CGenericQuery : public CQuery
-{
-public:
-	CGenericQuery(CGameHandler * gh, PlayerColor color, std::function<void(std::optional<int32_t>)> Callback);
-
-	bool blocksPack(const CPackForServer * pack) const override;
-	bool endsByPlayerAnswer() const override;
-	void onExposure(QueryPtr topQuery) override;
-	void setReply(std::optional<int32_t> reply) override;
-	void onRemoval(PlayerColor color) override;
-private:
-	std::function<void(std::optional<int32_t>)> callback;
-	std::optional<int32_t> reply;
+	std::optional<int32_t> answer;
 };

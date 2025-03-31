@@ -9,36 +9,18 @@
  */
 #include "StdInc.h"
 #include "BattleQueries.h"
-#include "MapQueries.h"
 #include "QueriesProcessor.h"
 
 #include "../CGameHandler.h"
 #include "../battles/BattleProcessor.h"
 
 #include "../../lib/battle/IBattleState.h"
-#include "../../lib/battle/SideInBattle.h"
 #include "../../lib/battle/BattleLayout.h"
-#include "../../lib/CPlayerState.h"
-#include "../../lib/mapObjects/CGObjectInstance.h"
-#include "../../lib/mapObjects/CGTownInstance.h"
-#include "../../lib/networkPacks/PacksForServer.h"
-
-void CBattleQuery::notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const
-{
-	assert(result);
-
-	std::cout << "notifyObjectAboutRemoval !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	if(result)
-		visitedObject->battleFinished(visitingHero, *result);
-}
 
 CBattleQuery::CBattleQuery(CGameHandler * owner, const IBattleInfo * bi):
 	CQuery(owner),
 	battleID(bi->getBattleID())
 {
-	belligerents[BattleSide::ATTACKER] = bi->getSideArmy(BattleSide::ATTACKER);
-	belligerents[BattleSide::DEFENDER] = bi->getSideArmy(BattleSide::DEFENDER);
-
 	addPlayer(bi->getSidePlayer(BattleSide::ATTACKER));
 	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));
 }
@@ -46,8 +28,15 @@ CBattleQuery::CBattleQuery(CGameHandler * owner, const IBattleInfo * bi):
 CBattleQuery::CBattleQuery(CGameHandler * owner):
 	CQuery(owner)
 {
-	belligerents[BattleSide::ATTACKER] = nullptr;
-	belligerents[BattleSide::DEFENDER] = nullptr;
+}
+
+void CBattleQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const BattleResult & result)> & onRemovalCallback)
+{
+	CQuery::setOnRemovalCallback([onRemovalCallback, this](const PlayerColor & player)
+	{
+		assert(result);
+		onRemovalCallback(player, result.value());
+	});
 }
 
 bool CBattleQuery::blocksPack(const CPackForServer * pack) const
@@ -61,27 +50,19 @@ bool CBattleQuery::blocksPack(const CPackForServer * pack) const
 	return true;
 }
 
-void CBattleQuery::onRemoval(PlayerColor color)
-{
-	assert(result);
-
-	if(result)
-		gh->battles->battleAfterLevelUp(battleID, *result);
-}
-
 void CBattleQuery::onExposure(QueryPtr topQuery)
 {
 	// this method may be called in two cases:
 	// 1) when requesting battle replay (but before replay starts -> no valid result)
 	// 2) when aswering on levelup queries after accepting battle result -> valid result
+	CQuery::onExposure(topQuery);
 	if(result)
 		owner->popQuery(*this);
 }
 
-CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi, std::optional<BattleResult> Br):
+CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi):
 	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER)),
-	bi(bi),
-	result(Br)
+	bi(bi)
 {
 	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));
 }

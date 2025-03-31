@@ -7,7 +7,6 @@
  * Full text of license available in license.txt file, in main folder
  *
  */
-#include "StdInc.h"
 #include "ServerSpellCastEnvironment.h"
 
 #include "CGameHandler.h"
@@ -99,9 +98,10 @@ void ServerSpellCastEnvironment::createBoat(const int3 & visitablePosition, Boat
 	return gh->createBoat(visitablePosition, type, initiator);
 }
 
-void ServerSpellCastEnvironment::genericQuery(Query * request, PlayerColor color, std::function<void(std::optional<int32_t>)> callback)
+void ServerSpellCastEnvironment::dialogQuery(Query * request, PlayerColor color, std::function<void(const PlayerColor & player, const std::optional<int32_t> &)> callback)
 {
-	auto query = std::make_shared<CGenericQuery>(gh, color, callback);
+	auto query = std::make_shared<CDialogQuery>(gh, color);
+	query->setOnRemovalCallback(callback);
 	request->queryID = query->queryID;
 	gh->queries->addQuery(query);
 	gh->sendAndApply(*request);

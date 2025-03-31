@@ -181,17 +181,14 @@ void CGameHandler::levelUpHero(const CGHeroInstance * hero)
 	{
 		auto levelUpQuery = std::make_shared<CDialogQuery>(this, hero->getOwner());
 		hlu.queryID = levelUpQuery->queryID;
-		levelUpQuery->setOnRemovalCallback([this, hero, hlu](const PlayerColor & player, const ui32 answer)
+		levelUpQuery->setOnRemovalCallback([this, hero, skills = hlu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
-			levelUpHero(hero, hlu.skills[answer]);
+			assert(answer.has_value());
+			logGlobal->trace("Completing hero level-up query. %s gains skill %d", hero->getObjectName(), answer.value());
+			levelUpHero(hero, skills[answer.value()]);
 			const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
-			if(objId != ObjectInstanceID::NONE)
-			{
-				const auto obj = getObj(objId);
-				assert(obj);
+			if(const auto obj = getObjInstance(objId))
 				obj->heroLevelUpDone(hero);
-			}
-			logGlobal->trace("Completing hero level-up query. %s gains skill %d", hero->getObjectName(), answer);
 		});
 		queries->addQuery(levelUpQuery);
 		sendAndApply(hlu);
@@ -337,17 +334,14 @@ void CGameHandler::levelUpCommander(const CCommanderInstance * c)
 	{
 		auto commanderLevelUp = std::make_shared<CDialogQuery>(this, hero->getOwner());
 		clu.queryID = commanderLevelUp->queryID;
-		commanderLevelUp->setOnRemovalCallback([this, hero, clu](const PlayerColor & player, const ui32 answer)
+		commanderLevelUp->setOnRemovalCallback([this, hero, skills = clu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
-			levelUpCommander(hero->commander, clu.skills[answer]);
+			assert(answer.has_value());
+			logGlobal->trace("Completing commander level-up query. Commander of hero %s gains skill %s", hero->getObjectName(), answer.value());
+			levelUpCommander(hero->commander, skills[answer.value()]);
 			const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
-			if(objId != ObjectInstanceID::NONE)
-			{
-				const auto obj = getObj(objId);
-				assert(obj);
+			if(const auto obj = getObjInstance(objId))
 				obj->heroLevelUpDone(hero);
-			}
-			logGlobal->trace("Completing commander level-up query. Commander of hero %s gains skill %s", hero->getObjectName(), answer);
 		});
 		queries->addQuery(commanderLevelUp);
 		sendAndApply(clu);
@@ -1129,12 +1123,13 @@ void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingD
 {
 	auto dialogQuery = std::make_shared<CDialogQuery>(this, iw->player);
 	queries->addQuery(dialogQuery);
-	dialogQuery->setOnRemovalCallback([this, caller](const PlayerColor & player, const ui32 answer)
+	dialogQuery->setOnRemovalCallback([this, caller](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
+		assert(answer.has_value());
 		const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
 		const auto hero = getHero(heroId);
 		assert(hero);
-		caller->blockingDialogAnswered(hero, answer);
+		caller->blockingDialogAnswered(hero, answer.value());
 	});
 	iw->queryID = dialogQuery->queryID;
 	sendToAllClients(*iw);
@@ -1144,13 +1139,14 @@ void CGameHandler::showTeleportDialog(TeleportDialog *iw)
 {
 	auto dialogQuery = std::make_shared<CDialogQuery>(this, getOwner(iw->hero));
 	queries->addQuery(dialogQuery);
-	dialogQuery->setOnRemovalCallback([this, iw](const PlayerColor & player, const ui32 answer)
+	dialogQuery->setOnRemovalCallback([this, exits = iw->exits](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
+		assert(answer.has_value());
 		const auto & [heroId, objId] = queries->getActiveVisitorAndObj(player);
 		const auto hero = getHero(heroId);
 		assert(hero);
 		if(const auto teleport = dynamic_cast<const CGTeleport*>(getObj(objId)))
-			teleport->teleportDialogAnswered(hero, answer, iw->exits);
+			teleport->teleportDialogAnswered(hero, answer.value(), exits);
 		else
 			logGlobal->error("Invalid instance in teleport query");
 
@@ -1470,7 +1466,7 @@ void CGameHandler::heroExchange(ObjectInstanceID hero1, ObjectInstanceID hero2)
 		auto exchange = std::make_shared<CGarrisonDialogQuery>(this, h1, h2);
 		ExchangeDialog hex;
 		hex.queryID = exchange->queryID;
-		exchange->setOnRemovalCallback([h1, h2](const PlayerColor & player, const ui32 answer)
+		exchange->setOnRemovalCallback([h1, h2](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
 			h2->garrisonDialogClosed(h1);
 		});
@@ -3353,7 +3349,7 @@ void CGameHandler::showGarrisonDialog(ObjectInstanceID upobj, ObjectInstanceID h
 
 	auto garrisonQuery = std::make_shared<CGarrisonDialogQuery>(this, upperArmy, lowerArmy);
 	queries->addQuery(garrisonQuery);
-	garrisonQuery->setOnRemovalCallback([upperArmy, lowerArmy](const PlayerColor & player, const ui32 answer)
+	garrisonQuery->setOnRemovalCallback([upperArmy, lowerArmy](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
 		upperArmy->garrisonDialogClosed(lowerArmy);
 	});

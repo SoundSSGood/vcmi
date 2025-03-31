@@ -78,7 +78,8 @@ bool CQuery::endsByPlayerAnswer() const
 
 void CQuery::onRemoval(PlayerColor color)
 {
-
+	if(onRemovalCallback)
+		onRemovalCallback(color);
 }
 
 bool CQuery::blocksPack(const CPackForServer * pack) const
@@ -86,15 +87,14 @@ bool CQuery::blocksPack(const CPackForServer * pack) const
 	return false;
 }
 
-void CQuery::notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const
+void CQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player)> & onRemovalCallback)
 {
-	std::cout << "notifyObjectAboutRemoval empty" << std::endl;
+	this->onRemovalCallback = onRemovalCallback;
 }
 
 void CQuery::onExposure(QueryPtr topQuery)
 {
 	logGlobal->trace("Exposed query with id %d", queryID);
-	owner->popQuery(*this);
 }
 
 void CQuery::onAdding(PlayerColor color)
@@ -143,46 +143,10 @@ void CDialogQuery::setReply(std::optional<int32_t> reply)
 		answer = *reply;
 }
 
-
-void CDialogQuery::onRemoval(PlayerColor color)
+void CDialogQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const std::optional<int32_t> & answer)> & onRemovalCallback)
 {
-	assert(answer);
-	if(onRemovalCallback)
-		onRemovalCallback(color, answer.value());
-}
-
-void CDialogQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const ui32 answer)> & onRemovalCallback)
-{
-	this->onRemovalCallback = onRemovalCallback;
-}
-
-CGenericQuery::CGenericQuery(CGameHandler * gh, PlayerColor color, std::function<void(std::optional<int32_t>)> Callback):
-	CQuery(gh), callback(Callback)
-{
-	addPlayer(color);
-}
-
-bool CGenericQuery::blocksPack(const CPackForServer * pack) const
-{
-	return blockAllButReply(pack);
-}
-
-bool CGenericQuery::endsByPlayerAnswer() const
-{
-	return true;
-}
-
-void CGenericQuery::onExposure(QueryPtr topQuery)
-{
-	//do nothing
-}
-
-void CGenericQuery::setReply(std::optional<int32_t> reply)
-{
-	this->reply = reply;
-}
-
-void CGenericQuery::onRemoval(PlayerColor color)
-{
-	callback(reply);
+	CQuery::setOnRemovalCallback([onRemovalCallback, this](const PlayerColor & player)
+	{
+		onRemovalCallback(player, answer);
+	});
 }

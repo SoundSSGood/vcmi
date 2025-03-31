@@ -117,11 +117,6 @@ OpenWindowQuery::OpenWindowQuery(CGameHandler * owner, const CGHeroInstance *her
 {
 }
 
-void OpenWindowQuery::onExposure(QueryPtr topQuery)
-{
-	//do nothing - wait for reply
-}
-
 bool OpenWindowQuery::blocksPack(const CPackForServer *pack) const
 {
 	if (mode == EOpenWindowMode::RECRUITMENT_FIRST || mode == EOpenWindowMode::RECRUITMENT_ALL)
@@ -170,26 +165,15 @@ bool OpenWindowQuery::blocksPack(const CPackForServer *pack) const
 	return CDialogQuery::blocksPack(pack);
 }
 
+void CHeroMovementQuery::onExposure(QueryPtr topQuery)
+{
+	owner->popIfTop(*this);
+}
+
 CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero, bool VisitDestAfterVictory):
 	CQuery(owner), tmh(Tmh), visitDestAfterVictory(VisitDestAfterVictory), hero(Hero)
 {
 	players.push_back(hero->tempOwner);
-}
-
-void CHeroMovementQuery::onExposure(QueryPtr topQuery)
-{
-	assert(players.size() == 1);
-
-	if(visitDestAfterVictory && hero->tempOwner == players[0]) //hero still alive, so he won with the guard
-		//TODO what if there were H4-like escape? we should also check pos
-	{
-		logGlobal->trace("Hero %s after victory over guard finishes visit to %s", hero->getNameTranslated(), tmh.end.toString());
-		//finish movement
-		visitDestAfterVictory = false;
-		gh->visitObjectOnTile(*gh->getTile(hero->convertToVisitablePos(tmh.end)), hero);
-	}
-
-	owner->popIfTop(*this);
 }
 
 void CHeroMovementQuery::onRemoval(PlayerColor color)

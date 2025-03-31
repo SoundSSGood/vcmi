@@ -21,17 +21,15 @@ VCMI_LIB_NAMESPACE_END
 class CBattleQuery : public CQuery
 {
 public:
-	BattleSideArray<const CArmedInstance *> belligerents;
 	BattleSideArray<int> initialHeroMana;
 
 	BattleID battleID;
 	std::optional<BattleResult> result;
 
 	CBattleQuery(CGameHandler * owner);
-	CBattleQuery(CGameHandler * owner, const IBattleInfo * Bi); //TODO
-	void notifyObjectAboutRemoval(const CGObjectInstance * visitedObject, const CGHeroInstance * visitingHero) const override;
+	CBattleQuery(CGameHandler * owner, const IBattleInfo * Bi);
+	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const BattleResult & result)> & onRemovalCallback);
 	bool blocksPack(const CPackForServer *pack) const override;
-	void onRemoval(PlayerColor color) override;
 	void onExposure(QueryPtr topQuery) override;
 };
 
@@ -39,9 +37,8 @@ class CBattleDialogQuery : public CDialogQuery
 {
 	bool resultProcessed = false;
 	const IBattleInfo * bi;
-	std::optional<BattleResult> result;
 
 public:
-	CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * Bi, std::optional<BattleResult> Br);
+	CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * Bi);
 	void onRemoval(PlayerColor color) override;
 };

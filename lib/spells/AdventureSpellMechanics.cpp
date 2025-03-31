@@ -605,7 +605,7 @@ ESpellCastResult TownPortalMechanics::beginCast(SpellCastEnvironment * env, cons
 
 	if(!parameters.pos.isValid() && parameters.caster->getSpellSchoolLevel(owner) >= 2)
 	{
-		auto queryCallback = [this, env, parameters](std::optional<int32_t> reply) -> void
+		auto queryCallback = [this, env, parameters](const PlayerColor &, const std::optional<int32_t> & reply) -> void
 		{
 			if(reply.has_value())
 			{
@@ -653,7 +653,7 @@ ESpellCastResult TownPortalMechanics::beginCast(SpellCastEnvironment * env, cons
 		request.description.appendLocalString(EMetaText::JK_TXT, 41);
 		request.icon = Component(ComponentType::SPELL, owner->id);
 
-		env->genericQuery(&request, request.player, queryCallback);
+		env->dialogQuery(&request, request.player, queryCallback);
 
 		return ESpellCastResult::PENDING;
 	}

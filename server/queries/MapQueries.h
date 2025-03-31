@@ -40,11 +40,10 @@ public:
 	bool visitDestAfterVictory; //if hero moved to guarded tile and it should be visited once guard is defeated
 	const CGHeroInstance *hero;
 
-	void onExposure(QueryPtr topQuery) override;
-
 	CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero, bool VisitDestAfterVictory = false);
 	void onAdding(PlayerColor color) override;
 	void onRemoval(PlayerColor color) override;
+	void onExposure(QueryPtr topQuery) override;
 };
 
 class CGarrisonDialogQuery : public CDialogQuery //used also for hero exchange dialogs
@@ -63,5 +62,4 @@ public:
 	OpenWindowQuery(CGameHandler * owner, const CGHeroInstance *hero, EOpenWindowMode mode);
 
 	bool blocksPack(const CPackForServer *pack) const override;
-	void onExposure(QueryPtr topQuery) override;
 };

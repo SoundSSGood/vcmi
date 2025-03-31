@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include "StdInc.h"
 #include "../lib/spells/ISpellMechanics.h"
 
 class CGameHandler;
@@ -38,7 +39,7 @@ public:
 	const CGameInfoCallback * getCb() const override;
 	bool moveHero(ObjectInstanceID hid, int3 dst, EMovementMode mode) override;
 	void createBoat(const int3 & visitablePosition, BoatId type, PlayerColor initiator) override;
-	void genericQuery(Query * request, PlayerColor color, std::function<void(std::optional<int32_t>)> callback) override;
+	void dialogQuery(Query * request, PlayerColor color, std::function<void(const PlayerColor & player, const std::optional<int32_t> &)> callback) override;
 private:
 	CGameHandler * gh;
 };

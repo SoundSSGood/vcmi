@@ -133,6 +133,11 @@ void BattleProcessor::startBattle(const CArmedInstance *army1, const CArmedInsta
 	else
 	{
 		auto newBattleQuery = std::make_shared<CBattleQuery>(gameHandler, battle);
+		newBattleQuery->setOnRemovalCallback([this, hero1, army2, battleID](const PlayerColor & player, const BattleResult & result)
+		{
+			army2->battleFinished(hero1, result);
+			battleAfterLevelUp(battleID, result);
+		});
 
 		// store initial mana to reset if battle has been restarted
 		for(auto i : {BattleSide::ATTACKER, BattleSide::DEFENDER})

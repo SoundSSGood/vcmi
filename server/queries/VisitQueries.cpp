@@ -35,10 +35,7 @@ bool VisitQuery::blocksPack(const CPackForServer * pack) const
 
 void MapObjectVisitQuery::onExposure(QueryPtr topQuery)
 {
-	//Object may have been removed and deleted.
-	if(gh->isValidObject(visitedObject))
-		topQuery->notifyObjectAboutRemoval(visitedObject, visitingHero);
-
+	CQuery::onExposure(topQuery);
 	owner->popIfTop(*this);
 }
 
@@ -69,8 +66,7 @@ TownBuildingVisitQuery::TownBuildingVisitQuery(CGameHandler * owner, const CGTow
 
 void TownBuildingVisitQuery::onExposure(QueryPtr topQuery)
 {
-	topQuery->notifyObjectAboutRemoval(visitedObject, visitingHero);
-
+	CQuery::onExposure(topQuery);
 	onAdded(players.front());
 }
 
