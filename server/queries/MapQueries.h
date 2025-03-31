@@ -56,13 +56,6 @@ public:
 	bool blocksPack(const CPackForServer *pack) const override;
 };
 
-//yes/no and component selection dialogs
-class CBlockingDialogQuery : public CDialogQuery
-{
-public:
-	CBlockingDialogQuery(CGameHandler * owner, const PlayerColor & player);
-};
-
 class OpenWindowQuery : public CDialogQuery
 {
 	EOpenWindowMode mode;
@@ -71,28 +64,4 @@ public:
 
 	bool blocksPack(const CPackForServer *pack) const override;
 	void onExposure(QueryPtr topQuery) override;
-};
-
-class CTeleportDialogQuery : public CDialogQuery
-{
-public:
-	CTeleportDialogQuery(CGameHandler * owner, const PlayerColor & player);
-};
-
-class CHeroLevelUpDialogQuery : public CDialogQuery
-{
-public:
-	CHeroLevelUpDialogQuery(CGameHandler * owner, const CGHeroInstance * hero);
-	void onRemoval(PlayerColor color) override;
-
-	const CGHeroInstance * hero;
-};
-
-class CCommanderLevelUpDialogQuery : public CDialogQuery
-{
-public:
-	CCommanderLevelUpDialogQuery(CGameHandler * owner, const CGHeroInstance * hero);
-	void onRemoval(PlayerColor color) override;
-
-	const CGHeroInstance * hero;
 };

@@ -111,11 +111,6 @@ bool CGarrisonDialogQuery::blocksPack(const CPackForServer * pack) const
 	return CDialogQuery::blocksPack(pack);
 }
 
-CBlockingDialogQuery::CBlockingDialogQuery(CGameHandler * owner, const PlayerColor & player)
-	: CDialogQuery(owner, player)
-{
-}
-
 OpenWindowQuery::OpenWindowQuery(CGameHandler * owner, const CGHeroInstance *hero, EOpenWindowMode mode):
 	CDialogQuery(owner, hero->getOwner()),
 	mode(mode)
@@ -173,33 +168,6 @@ bool OpenWindowQuery::blocksPack(const CPackForServer *pack) const
 	}
 
 	return CDialogQuery::blocksPack(pack);
-}
-
-CTeleportDialogQuery::CTeleportDialogQuery(CGameHandler * owner, const PlayerColor & player):
-	CDialogQuery(owner, player)
-{
-}
-
-CHeroLevelUpDialogQuery::CHeroLevelUpDialogQuery(CGameHandler * owner, const CGHeroInstance * hero):
-	CDialogQuery(owner, hero->getCasterOwner()), hero(hero)
-{
-}
-
-void CHeroLevelUpDialogQuery::onRemoval(PlayerColor color)
-{
-	logGlobal->trace("Completing hero level-up query. %s gains skill %d", hero->getObjectName(), answer.value());
-	CDialogQuery::onRemoval(color);
-}
-
-CCommanderLevelUpDialogQuery::CCommanderLevelUpDialogQuery(CGameHandler * owner, const CGHeroInstance * hero):
-	CDialogQuery(owner, hero->getCasterOwner()), hero(hero)
-{
-}
-
-void CCommanderLevelUpDialogQuery::onRemoval(PlayerColor color)
-{
-	logGlobal->trace("Completing commander level-up query. Commander of hero %s gains skill %s", hero->getObjectName(), answer.value());
-	CDialogQuery::onRemoval(color);
 }
 
 CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero, bool VisitDestAfterVictory):
