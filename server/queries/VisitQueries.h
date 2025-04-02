@@ -20,14 +20,11 @@ VCMI_LIB_NAMESPACE_END
 class VisitQuery : public CQuery
 {
 protected:
-	VisitQuery(CGameHandler * owner, const std::string queryName, const CGObjectInstance * Obj, const CGHeroInstance * Hero);
+	VisitQuery(CGameHandler * owner, const ObjectInstanceID & objId, const ObjectInstanceID & heroId);
 
 public:
-	const CGObjectInstance * visitedObject;
-	const CGHeroInstance * visitingHero;
-
-	const ObjectInstanceID visitingObjectId;
-	const ObjectInstanceID visitingHeroId;
+	ObjectInstanceID visitedObject;
+	ObjectInstanceID visitingHero;
 
 	bool blocksPack(const CPackForServer * pack) const final;
 };

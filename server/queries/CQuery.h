@@ -41,7 +41,7 @@ public:
 	std::vector<PlayerColor> players; //players that are affected (often "blocked") by query
 	QueryID queryID;
 
-	CQuery(CGameHandler * gh, const std::string & queryName, const bool isAnswerRequired);
+	CQuery(CGameHandler * gh, const bool isAnswerRequired);
 
 	/// query can block attempting actions by player. Eg. he can't move hero during the battle.
 	virtual bool blocksPack(const CPackForServer *pack) const;
@@ -73,7 +73,6 @@ protected:
 	void addPlayer(PlayerColor color);
 	bool blockAllButReply(const CPackForServer * pack) const;
 	std::function<void(const PlayerColor & player)> onRemovalCallback;
-	const std::string name;
 	const bool isAnswerRequired;
 };
 
@@ -83,7 +82,7 @@ std::ostream &operator<<(std::ostream &out, QueryPtr query);
 class CDialogQuery : public CQuery
 {
 public:
-	CDialogQuery(CGameHandler * owner, const PlayerColor & player, const std::string & queryName);
+	CDialogQuery(CGameHandler * owner, const PlayerColor & player);
 	bool blocksPack(const CPackForServer *pack) const override;
 	void setReply(std::optional<int32_t> reply) override;
 	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const std::optional<int32_t> & answer)> & onRemovalCallback);

@@ -18,7 +18,7 @@
 #include "../../lib/battle/BattleLayout.h"
 
 CBattleQuery::CBattleQuery(CGameHandler * owner, const IBattleInfo * bi):
-	CQuery(owner, "BattleQuery", false),
+	CQuery(owner, false),
 	battleID(bi->getBattleID())
 {
 	addPlayer(bi->getSidePlayer(BattleSide::ATTACKER));
@@ -56,7 +56,7 @@ void CBattleQuery::onExposure(QueryPtr topQuery)
 }
 
 CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi):
-	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER), "BattleDialogQuery"),
+	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER)),
 	bi(bi)
 {
 	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));

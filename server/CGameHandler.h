@@ -167,8 +167,8 @@ public:
 	void castSpell(const spells::Caster * caster, SpellID spellID, const int3 &pos) override;
 
 	/// Returns hero that is currently visiting this object, or nullptr if no visit is active
-	const CGHeroInstance * getVisitingHero(const CGObjectInstance *obj);
-	const CGObjectInstance * getVisitingObject(const CGHeroInstance *hero);
+	const CGHeroInstance * getVisitingHero(const PlayerColor & player, const ObjectInstanceID & visitingObjId);
+	const CGObjectInstance * getVisitingObject(const PlayerColor & player, const ObjectInstanceID & visitingHeroId);
 	bool isVisitCoveredByAnotherQuery(const CGObjectInstance *obj, const CGHeroInstance *hero) override;
 	void setObjPropertyValue(ObjectInstanceID objid, ObjProperty prop, int32_t value) override;
 	void setObjPropertyID(ObjectInstanceID objid, ObjProperty prop, ObjPropertyID identifier) override;

@@ -191,7 +191,7 @@ bool HeroPoolProcessor::hireHero(const ObjectInstanceID & objectID, const HeroTy
 
 	if(mapObject->ID == Obj::TAVERN)
 	{
-		const CGHeroInstance * visitor = gameHandler->getVisitingHero(mapObject);
+		const CGHeroInstance * visitor = gameHandler->getVisitingHero(player, mapObject->id);
 
 		if (!visitor || visitor->getOwner() != player)
 		{

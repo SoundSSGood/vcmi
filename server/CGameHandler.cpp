@@ -179,7 +179,7 @@ void CGameHandler::levelUpHero(const CGHeroInstance * hero)
 	}
 	else if (hlu.skills.size() > 1)
 	{
-		auto levelUpQuery = std::make_shared<CDialogQuery>(this, hero->getOwner(), "levelUpQuery");
+		auto levelUpQuery = std::make_shared<CHeroLevelUpDialogQuery>(this, hero->getOwner());
 		hlu.queryID = levelUpQuery->queryID;
 		levelUpQuery->setOnRemovalCallback([this, hero, skills = hlu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
@@ -332,7 +332,7 @@ void CGameHandler::levelUpCommander(const CCommanderInstance * c)
 	}
 	else if (skillAmount > 1) //apply and ask for secondary skill
 	{
-		auto commanderLevelUp = std::make_shared<CDialogQuery>(this, hero->getOwner(), "commanderLevelUpQuery");
+		auto commanderLevelUp = std::make_shared<CCommanderLevelUpDialogQuery>(this, hero->getOwner());
 		clu.queryID = commanderLevelUp->queryID;
 		commanderLevelUp->setOnRemovalCallback([this, hero, skills = clu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
@@ -884,10 +884,10 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 		return false;
 	};
 
-	if (guardian && getVisitingHero(guardian) != nullptr)
+	if (guardian && getVisitingHero(asker, guardian->id) != nullptr)
 		return complainRet("You cannot move your hero there. Simultaneous turns are active and another player is interacting with this wandering monster!");
 
-	if (objectToVisit && getVisitingHero(objectToVisit) != nullptr && getVisitingHero(objectToVisit) != h)
+	if (objectToVisit && getVisitingHero(asker, objectToVisit->id) != nullptr && getVisitingHero(asker, objectToVisit->id) != h)
 		return complainRet("You cannot move your hero there. Simultaneous turns are active and another player is interacting with this map object!");
 
 	if (objectToVisit &&
@@ -1119,7 +1119,7 @@ void CGameHandler::setOwner(const CGObjectInstance * obj, const PlayerColor owne
 
 void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CDialogQuery>(this, iw->player, "blockingDialogQuery");
+	auto dialogQuery = std::make_shared<CBlockingDialogQuery>(this, iw->player);
 	queries->addQuery(dialogQuery);
 	dialogQuery->setOnRemovalCallback([this, caller](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
@@ -1135,7 +1135,7 @@ void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingD
 
 void CGameHandler::showTeleportDialog(TeleportDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CDialogQuery>(this, getOwner(iw->hero), "teleportDialogQuery");
+	auto dialogQuery = std::make_shared<CTeleportDialogQuery>(this, getOwner(iw->hero));
 	queries->addQuery(dialogQuery);
 	dialogQuery->setOnRemovalCallback([this, exits = iw->exits](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
@@ -2386,7 +2386,7 @@ bool CGameHandler::recruitCreatures(ObjectInstanceID objid, ObjectInstanceID dst
 	}
 	else
 	{
-		COMPLAIN_RET_FALSE_IF(getVisitingHero(dwelling) != hero, "Cannot recruit: can only recruit by visiting hero!");
+		COMPLAIN_RET_FALSE_IF(getVisitingHero(player, dwelling->id) != hero, "Cannot recruit: can only recruit by visiting hero!");
 		COMPLAIN_RET_FALSE_IF(!hero || hero->getOwner() != player, "Cannot recruit: can only recruit to owned hero!");
 	}
 
@@ -3442,7 +3442,7 @@ void CGameHandler::objectVisited(const CGObjectInstance * obj, const CGHeroInsta
 
 	logGlobal->debug("%s visits %s (%d)", h->nodeName(), obj->getObjectName(), obj->ID);
 
-	if (getVisitingHero(obj) != nullptr)
+	if (getVisitingHero(h->getOwner(), obj->id) != nullptr)
 	{
 		logGlobal->error("Attempt to visit object that is being visited by another hero!");
 		throw std::runtime_error("Can not visit object that is being visited");
@@ -4142,7 +4142,7 @@ void CGameHandler::removeAfterVisit(const CGObjectInstance *object)
 	{
 		if (auto someVistQuery = std::dynamic_pointer_cast<MapObjectVisitQuery>(query))
 		{
-			if (someVistQuery->visitedObject == object)
+			if (someVistQuery->visitedObject == object->id)
 			{
 				someVistQuery->removeObjectAfterVisit = true;
 				return;
@@ -4196,30 +4196,18 @@ void CGameHandler::changeFogOfWar(const std::unordered_set<int3> &tiles, PlayerC
 		sendAndApply(fow);
 }
 
-const CGHeroInstance * CGameHandler::getVisitingHero(const CGObjectInstance *obj)
+const CGHeroInstance * CGameHandler::getVisitingHero(const PlayerColor & player, const ObjectInstanceID & visitingObjId)
 {
 	assert(obj);
-
-	for(const auto & query : queries->allQueries())
-	{
-		auto visit = std::dynamic_pointer_cast<const VisitQuery>(query);
-		if (visit && visit->visitedObject == obj)
-			return visit->visitingHero;
-	}
-	return nullptr;
+	const auto & [herId, objId] = queries->getActiveVisitorAndObj(player);
+	return objId == visitingObjId ? getHero(herId) : nullptr;
 }
 
-const CGObjectInstance * CGameHandler::getVisitingObject(const CGHeroInstance *hero)
+const CGObjectInstance * CGameHandler::getVisitingObject(const PlayerColor & player, const ObjectInstanceID & visitingHeroId)
 {
 	assert(hero);
-
-	for(const auto & query : queries->allQueries())
-	{
-		auto visit = std::dynamic_pointer_cast<const VisitQuery>(query);
-		if (visit && visit->visitingHero == hero)
-			return visit->visitedObject;
-	}
-	return nullptr;
+	const auto & [herId, objId] = queries->getActiveVisitorAndObj(player);
+	return herId == visitingHeroId ? getObj(objId) : nullptr;
 }
 
 bool CGameHandler::isVisitCoveredByAnotherQuery(const CGObjectInstance *obj, const CGHeroInstance *hero)
@@ -4233,7 +4221,7 @@ bool CGameHandler::isVisitCoveredByAnotherQuery(const CGObjectInstance *obj, con
 
 	if (auto topQuery = queries->topQuery(hero->getOwner()))
 		if (auto visit = std::dynamic_pointer_cast<const VisitQuery>(topQuery))
-			return !(visit->visitedObject == obj && visit->visitingHero == hero);
+			return !(visit->visitedObject == obj->id && visit->visitingHero == hero->id);
 
 	return true;
 }

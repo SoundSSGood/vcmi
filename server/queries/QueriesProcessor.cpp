@@ -131,8 +131,8 @@ const std::tuple<const ObjectInstanceID, const ObjectInstanceID> QueriesProcesso
 {
 	for(const auto & query : queries[player])
 	{
-		if(const auto visitingQuery = std::dynamic_pointer_cast<MapObjectVisitQuery>(query))
-			return std::make_tuple(visitingQuery->visitingHeroId, visitingQuery->visitingObjectId);
+		if(const auto visitingQuery = std::dynamic_pointer_cast<VisitQuery>(query))
+			return std::make_tuple(visitingQuery->visitingHero, visitingQuery->visitedObject);
 	}
 	return std::make_tuple(ObjectInstanceID::NONE, ObjectInstanceID::NONE);
 }

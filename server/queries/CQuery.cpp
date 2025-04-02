@@ -26,10 +26,9 @@ std::ostream & operator<<(std::ostream & out, QueryPtr query)
 	return out << "[" << query.get() << "] " << query->toString();
 }
 
-CQuery::CQuery(CGameHandler * gameHandler, const std::string & queryName, const bool isAnswerRequired)
+CQuery::CQuery(CGameHandler * gameHandler, const bool isAnswerRequired)
 	: owner(gameHandler->queries.get())
 	, gh(gameHandler)
-	, name(queryName)
 	, isAnswerRequired(isAnswerRequired)
 {
 	static QueryID QID = QueryID(0);
@@ -65,7 +64,7 @@ std::string CQuery::toString() const
 			names += " and ";
 	}
 	std::string ret = boost::str(boost::format("A query of type '%s' and qid = %d affecting player%s %s")
-		% name
+		% typeid(*this).name()
 		% queryID 
 		% plural
 		% names
@@ -123,8 +122,8 @@ bool CQuery::blockAllButReply(const CPackForServer * pack) const
 	return true;
 }
 
-CDialogQuery::CDialogQuery(CGameHandler * owner, const PlayerColor & player, const std::string & queryName):
-	CQuery(owner, queryName, true)
+CDialogQuery::CDialogQuery(CGameHandler * owner, const PlayerColor & player):
+	CQuery(owner, true)
 {
 	addPlayer(player);
 }

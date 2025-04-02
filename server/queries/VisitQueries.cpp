@@ -16,14 +16,12 @@
 #include "../CGameHandler.h"
 #include "QueriesProcessor.h"
 
-VisitQuery::VisitQuery(CGameHandler * owner, const std::string queryName, const CGObjectInstance * Obj, const CGHeroInstance * Hero)
-	: CQuery(owner, queryName, false)
-	, visitedObject(Obj)
-	, visitingHero(Hero)
-	, visitingObjectId(Obj->id)
-	, visitingHeroId(Hero->id)
+VisitQuery::VisitQuery(CGameHandler * owner, const ObjectInstanceID & objId, const ObjectInstanceID & heroId)
+	: CQuery(owner, false)
+	, visitedObject(objId)
+	, visitingHero(heroId)
 {
-	addPlayer(Hero->getOwner());
+	addPlayer(gh->getOwner(heroId));
 }
 
 bool VisitQuery::blocksPack(const CPackForServer * pack) const
@@ -39,22 +37,25 @@ void MapObjectVisitQuery::onExposure(QueryPtr topQuery)
 }
 
 MapObjectVisitQuery::MapObjectVisitQuery(CGameHandler * owner, const CGObjectInstance * Obj, const CGHeroInstance * Hero)
-	: VisitQuery(owner, "MapObjectVisitQuery " + Obj->getObjectName(), Obj, Hero)
+	: VisitQuery(owner, Obj->id, Hero->id)
 	, removeObjectAfterVisit(false)
 {
 }
 
 void MapObjectVisitQuery::onRemoval(PlayerColor color)
 {
-	gh->objectVisitEnded(visitingHero, players.front());
+	auto obj = gh->getObj(visitedObject);
+	auto hero = gh->getHero(visitingHero);
+
+	gh->objectVisitEnded(hero, players.front());
 
 	//Can object visit affect 2 players and what would be desired behavior?
 	if(removeObjectAfterVisit)
-		gh->removeObject(visitedObject, color);
+		gh->removeObject(obj, color);
 }
 
 TownBuildingVisitQuery::TownBuildingVisitQuery(CGameHandler * owner, const CGTownInstance * Obj, std::vector<const CGHeroInstance *> heroes, std::vector<BuildingID> buildingToVisit)
-	: VisitQuery(owner, "TownBuildingVisitQuery", Obj, heroes.front())
+	: VisitQuery(owner, Obj->id, heroes.front()->id)
 	, visitedTown(Obj)
 {
 	// generate in reverse order - first building-hero pair to handle must be in the end of vector
@@ -72,9 +73,9 @@ void TownBuildingVisitQuery::onAdded(PlayerColor color)
 {
 	while (!visitedBuilding.empty() && owner->topQuery(color).get() == this)
 	{
-		visitingHero = visitedBuilding.back().hero;
-		const auto * building = visitedTown->rewardableBuildings.at(visitedBuilding.back().building);
-		building->onHeroVisit(visitingHero);
+		visitingHero = visitedBuilding.back().hero->id;
+		const auto & building = visitedTown->rewardableBuildings.at(visitedBuilding.back().building);
+		building->onHeroVisit(visitedBuilding.back().hero);
 		visitedBuilding.pop_back();
 	}
 

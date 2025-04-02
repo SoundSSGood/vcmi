@@ -18,7 +18,7 @@
 #include "../../lib/networkPacks/PacksForServer.h"
 
 TimerPauseQuery::TimerPauseQuery(CGameHandler * owner, PlayerColor player):
-	CQuery(owner, "TimerPauseQuery", true)
+	CQuery(owner, true)
 {
 	addPlayer(player);
 }
@@ -39,7 +39,7 @@ void TimerPauseQuery::onRemoval(PlayerColor color)
 }
 
 CGarrisonDialogQuery::CGarrisonDialogQuery(CGameHandler * owner, const CArmedInstance * up, const CArmedInstance * down):
-	CDialogQuery(owner, down->tempOwner, "GarrisonDialogQuery")
+	CDialogQuery(owner, down->tempOwner)
 {
 	exchangingArmies[0] = up;
 	exchangingArmies[1] = down;
@@ -107,7 +107,7 @@ bool CGarrisonDialogQuery::blocksPack(const CPackForServer * pack) const
 }
 
 OpenWindowQuery::OpenWindowQuery(CGameHandler * owner, const CGHeroInstance *hero, EOpenWindowMode mode):
-	CDialogQuery(owner, hero->getOwner(), "OpenWindowQuery"),
+	CDialogQuery(owner, hero->getOwner()),
 	mode(mode)
 {
 }
@@ -166,7 +166,7 @@ void CHeroMovementQuery::onExposure(QueryPtr topQuery)
 }
 
 CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero)
-	: CQuery(owner, "HeroMovementQuery", false)
+	: CQuery(owner, false)
 	, tmh(Tmh)
 	, hero(Hero)
 {

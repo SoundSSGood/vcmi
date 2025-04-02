@@ -61,3 +61,29 @@ public:
 
 	bool blocksPack(const CPackForServer *pack) const override;
 };
+
+//yes/no and component selection dialogs
+class CBlockingDialogQuery : public CDialogQuery
+{
+public:	CBlockingDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+};
+
+class CTeleportDialogQuery : public CDialogQuery
+{
+public: CTeleportDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+};
+
+class CHeroLevelUpDialogQuery : public CDialogQuery
+{
+public: CHeroLevelUpDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+};
+
+class CCommanderLevelUpDialogQuery : public CDialogQuery
+{
+public: CCommanderLevelUpDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+};
+
+class CTownGateDialogQuery : public CDialogQuery
+{
+public : CTownGateDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+};

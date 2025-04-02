@@ -11,7 +11,7 @@
 
 #include "CGameHandler.h"
 #include "queries/QueriesProcessor.h"
-#include "queries/CQuery.h"
+#include "queries/MapQueries.h"
 
 #include "../lib/gameState/CGameState.h"
 #include "../lib/networkPacks/PacksForClientBattle.h"
@@ -100,7 +100,7 @@ void ServerSpellCastEnvironment::createBoat(const int3 & visitablePosition, Boat
 
 void ServerSpellCastEnvironment::dialogQuery(Query * request, PlayerColor color, std::function<void(const PlayerColor & player, const std::optional<int32_t> &)> callback)
 {
-	auto query = std::make_shared<CDialogQuery>(gh, color, "townPortalDialogQuery");
+	auto query = std::make_shared<CTownGateDialogQuery>(gh, color);
 	query->setOnRemovalCallback(callback);
 	request->queryID = query->queryID;
 	gh->queries->addQuery(query);
