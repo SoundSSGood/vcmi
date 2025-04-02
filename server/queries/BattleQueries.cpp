@@ -18,16 +18,11 @@
 #include "../../lib/battle/BattleLayout.h"
 
 CBattleQuery::CBattleQuery(CGameHandler * owner, const IBattleInfo * bi):
-	CQuery(owner),
+	CQuery(owner, "BattleQuery", false),
 	battleID(bi->getBattleID())
 {
 	addPlayer(bi->getSidePlayer(BattleSide::ATTACKER));
 	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));
-}
-
-CBattleQuery::CBattleQuery(CGameHandler * owner):
-	CQuery(owner)
-{
 }
 
 void CBattleQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const BattleResult & result)> & onRemovalCallback)
@@ -61,7 +56,7 @@ void CBattleQuery::onExposure(QueryPtr topQuery)
 }
 
 CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi):
-	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER)),
+	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER), "BattleDialogQuery"),
 	bi(bi)
 {
 	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));

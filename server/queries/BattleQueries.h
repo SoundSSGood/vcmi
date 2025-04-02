@@ -26,7 +26,6 @@ public:
 	BattleID battleID;
 	std::optional<BattleResult> result;
 
-	CBattleQuery(CGameHandler * owner);
 	CBattleQuery(CGameHandler * owner, const IBattleInfo * Bi);
 	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const BattleResult & result)> & onRemovalCallback);
 	bool blocksPack(const CPackForServer *pack) const override;

@@ -18,7 +18,7 @@
 #include "../../lib/networkPacks/PacksForServer.h"
 
 TimerPauseQuery::TimerPauseQuery(CGameHandler * owner, PlayerColor player):
-	CQuery(owner)
+	CQuery(owner, "TimerPauseQuery", true)
 {
 	addPlayer(player);
 }
@@ -38,13 +38,8 @@ void TimerPauseQuery::onRemoval(PlayerColor color)
 	gh->turnTimerHandler->setTimerEnabled(color, true);
 }
 
-bool TimerPauseQuery::endsByPlayerAnswer() const
-{
-	return true;
-}
-
 CGarrisonDialogQuery::CGarrisonDialogQuery(CGameHandler * owner, const CArmedInstance * up, const CArmedInstance * down):
-	CDialogQuery(owner, down->tempOwner)
+	CDialogQuery(owner, down->tempOwner, "GarrisonDialogQuery")
 {
 	exchangingArmies[0] = up;
 	exchangingArmies[1] = down;
@@ -112,7 +107,7 @@ bool CGarrisonDialogQuery::blocksPack(const CPackForServer * pack) const
 }
 
 OpenWindowQuery::OpenWindowQuery(CGameHandler * owner, const CGHeroInstance *hero, EOpenWindowMode mode):
-	CDialogQuery(owner, hero->getOwner()),
+	CDialogQuery(owner, hero->getOwner(), "OpenWindowQuery"),
 	mode(mode)
 {
 }
@@ -170,10 +165,12 @@ void CHeroMovementQuery::onExposure(QueryPtr topQuery)
 	owner->popIfTop(*this);
 }
 
-CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero, bool VisitDestAfterVictory):
-	CQuery(owner), tmh(Tmh), visitDestAfterVictory(VisitDestAfterVictory), hero(Hero)
+CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero)
+	: CQuery(owner, "HeroMovementQuery", false)
+	, tmh(Tmh)
+	, hero(Hero)
 {
-	players.push_back(hero->tempOwner);
+	addPlayer(hero->tempOwner);
 }
 
 void CHeroMovementQuery::onRemoval(PlayerColor color)

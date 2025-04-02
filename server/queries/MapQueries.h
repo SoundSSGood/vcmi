@@ -28,7 +28,6 @@ public:
 	bool blocksPack(const CPackForServer *pack) const override;
 	void onAdding(PlayerColor color) override;
 	void onRemoval(PlayerColor color) override;
-	bool endsByPlayerAnswer() const override;
 };
 
 //Created when hero attempts move and something happens
@@ -37,10 +36,9 @@ class CHeroMovementQuery : public CQuery
 {
 public:
 	TryMoveHero tmh;
-	bool visitDestAfterVictory; //if hero moved to guarded tile and it should be visited once guard is defeated
 	const CGHeroInstance *hero;
 
-	CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero, bool VisitDestAfterVictory = false);
+	CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero);
 	void onAdding(PlayerColor color) override;
 	void onRemoval(PlayerColor color) override;
 	void onExposure(QueryPtr topQuery) override;

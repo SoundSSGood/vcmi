@@ -179,7 +179,7 @@ void CGameHandler::levelUpHero(const CGHeroInstance * hero)
 	}
 	else if (hlu.skills.size() > 1)
 	{
-		auto levelUpQuery = std::make_shared<CDialogQuery>(this, hero->getOwner());
+		auto levelUpQuery = std::make_shared<CDialogQuery>(this, hero->getOwner(), "levelUpQuery");
 		hlu.queryID = levelUpQuery->queryID;
 		levelUpQuery->setOnRemovalCallback([this, hero, skills = hlu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
@@ -332,7 +332,7 @@ void CGameHandler::levelUpCommander(const CCommanderInstance * c)
 	}
 	else if (skillAmount > 1) //apply and ask for secondary skill
 	{
-		auto commanderLevelUp = std::make_shared<CDialogQuery>(this, hero->getOwner());
+		auto commanderLevelUp = std::make_shared<CDialogQuery>(this, hero->getOwner(), "commanderLevelUpQuery");
 		clu.queryID = commanderLevelUp->queryID;
 		commanderLevelUp->setOnRemovalCallback([this, hero, skills = clu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
@@ -956,8 +956,6 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 		else if (lookForGuards == CHECK_FOR_GUARDS && isInTheMap(guardPos))
 		{
 			objectVisited(guardian, h);
-
-			moveQuery->visitDestAfterVictory = visitDest==VISIT_DEST;
 		}
 		else if (visitDest == VISIT_DEST)
 		{
@@ -1121,7 +1119,7 @@ void CGameHandler::setOwner(const CGObjectInstance * obj, const PlayerColor owne
 
 void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CDialogQuery>(this, iw->player);
+	auto dialogQuery = std::make_shared<CDialogQuery>(this, iw->player, "blockingDialogQuery");
 	queries->addQuery(dialogQuery);
 	dialogQuery->setOnRemovalCallback([this, caller](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
@@ -1137,7 +1135,7 @@ void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingD
 
 void CGameHandler::showTeleportDialog(TeleportDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CDialogQuery>(this, getOwner(iw->hero));
+	auto dialogQuery = std::make_shared<CDialogQuery>(this, getOwner(iw->hero), "teleportDialogQuery");
 	queries->addQuery(dialogQuery);
 	dialogQuery->setOnRemovalCallback([this, exits = iw->exits](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{

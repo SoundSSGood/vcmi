@@ -16,14 +16,14 @@
 #include "../CGameHandler.h"
 #include "QueriesProcessor.h"
 
-VisitQuery::VisitQuery(CGameHandler * owner, const CGObjectInstance * Obj, const CGHeroInstance * Hero)
-	: CQuery(owner)
+VisitQuery::VisitQuery(CGameHandler * owner, const std::string queryName, const CGObjectInstance * Obj, const CGHeroInstance * Hero)
+	: CQuery(owner, queryName, false)
 	, visitedObject(Obj)
 	, visitingHero(Hero)
 	, visitingObjectId(Obj->id)
 	, visitingHeroId(Hero->id)
 {
-	addPlayer(Hero->tempOwner);
+	addPlayer(Hero->getOwner());
 }
 
 bool VisitQuery::blocksPack(const CPackForServer * pack) const
@@ -35,12 +35,11 @@ bool VisitQuery::blocksPack(const CPackForServer * pack) const
 
 void MapObjectVisitQuery::onExposure(QueryPtr topQuery)
 {
-	CQuery::onExposure(topQuery);
 	owner->popIfTop(*this);
 }
 
 MapObjectVisitQuery::MapObjectVisitQuery(CGameHandler * owner, const CGObjectInstance * Obj, const CGHeroInstance * Hero)
-	: VisitQuery(owner, Obj, Hero)
+	: VisitQuery(owner, "MapObjectVisitQuery " + Obj->getObjectName(), Obj, Hero)
 	, removeObjectAfterVisit(false)
 {
 }
@@ -55,7 +54,7 @@ void MapObjectVisitQuery::onRemoval(PlayerColor color)
 }
 
 TownBuildingVisitQuery::TownBuildingVisitQuery(CGameHandler * owner, const CGTownInstance * Obj, std::vector<const CGHeroInstance *> heroes, std::vector<BuildingID> buildingToVisit)
-	: VisitQuery(owner, Obj, heroes.front())
+	: VisitQuery(owner, "TownBuildingVisitQuery", Obj, heroes.front())
 	, visitedTown(Obj)
 {
 	// generate in reverse order - first building-hero pair to handle must be in the end of vector
@@ -66,7 +65,6 @@ TownBuildingVisitQuery::TownBuildingVisitQuery(CGameHandler * owner, const CGTow
 
 void TownBuildingVisitQuery::onExposure(QueryPtr topQuery)
 {
-	CQuery::onExposure(topQuery);
 	onAdded(players.front());
 }
 

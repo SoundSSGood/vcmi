@@ -100,7 +100,7 @@ void ServerSpellCastEnvironment::createBoat(const int3 & visitablePosition, Boat
 
 void ServerSpellCastEnvironment::dialogQuery(Query * request, PlayerColor color, std::function<void(const PlayerColor & player, const std::optional<int32_t> &)> callback)
 {
-	auto query = std::make_shared<CDialogQuery>(gh, color);
+	auto query = std::make_shared<CDialogQuery>(gh, color, "townPortalDialogQuery");
 	query->setOnRemovalCallback(callback);
 	request->queryID = query->queryID;
 	gh->queries->addQuery(query);
