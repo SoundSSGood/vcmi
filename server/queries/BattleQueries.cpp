@@ -45,14 +45,12 @@ bool CBattleQuery::blocksPack(const CPackForServer * pack) const
 	return true;
 }
 
-void CBattleQuery::onExposure(QueryPtr topQuery)
+bool CBattleQuery::getAnswerRequired() const
 {
 	// this method may be called in two cases:
 	// 1) when requesting battle replay (but before replay starts -> no valid result)
 	// 2) when aswering on levelup queries after accepting battle result -> valid result
-	CQuery::onExposure(topQuery);
-	if(result)
-		owner->popQuery(*this);
+	return !result.has_value();
 }
 
 CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi):

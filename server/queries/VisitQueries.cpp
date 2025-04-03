@@ -31,11 +31,6 @@ bool VisitQuery::blocksPack(const CPackForServer * pack) const
 	return true;
 }
 
-void MapObjectVisitQuery::onExposure(QueryPtr topQuery)
-{
-	owner->popIfTop(*this);
-}
-
 MapObjectVisitQuery::MapObjectVisitQuery(CGameHandler * owner, const CGObjectInstance * Obj, const CGHeroInstance * Hero)
 	: VisitQuery(owner, Obj->id, Hero->id)
 	, removeObjectAfterVisit(false)
@@ -64,21 +59,13 @@ TownBuildingVisitQuery::TownBuildingVisitQuery(CGameHandler * owner, const CGTow
 			visitedBuilding.push_back({ hero, building});
 }
 
-void TownBuildingVisitQuery::onExposure(QueryPtr topQuery)
+void TownBuildingVisitQuery::onAdding(PlayerColor color)
 {
-	onAdded(players.front());
-}
-
-void TownBuildingVisitQuery::onAdded(PlayerColor color)
-{
-	while (!visitedBuilding.empty() && owner->topQuery(color).get() == this)
+	while(!visitedBuilding.empty())
 	{
 		visitingHero = visitedBuilding.back().hero->id;
 		const auto & building = visitedTown->rewardableBuildings.at(visitedBuilding.back().building);
 		building->onHeroVisit(visitedBuilding.back().hero);
 		visitedBuilding.pop_back();
 	}
-
-	if (visitedBuilding.empty() && owner->topQuery(color).get() == this)
-		owner->popIfTop(*this);
 }

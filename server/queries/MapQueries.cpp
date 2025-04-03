@@ -160,11 +160,6 @@ bool OpenWindowQuery::blocksPack(const CPackForServer *pack) const
 	return CDialogQuery::blocksPack(pack);
 }
 
-void CHeroMovementQuery::onExposure(QueryPtr topQuery)
-{
-	owner->popIfTop(*this);
-}
-
 CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero)
 	: CQuery(owner, false)
 	, tmh(Tmh)

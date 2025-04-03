@@ -41,7 +41,6 @@ public:
 	CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero);
 	void onAdding(PlayerColor color) override;
 	void onRemoval(PlayerColor color) override;
-	void onExposure(QueryPtr topQuery) override;
 };
 
 class CGarrisonDialogQuery : public CDialogQuery //used also for hero exchange dialogs

@@ -47,19 +47,13 @@ public:
 	virtual bool blocksPack(const CPackForServer *pack) const;
 
 	/// query is removed after player gives answer (like dialogs)
-	virtual bool endsByPlayerAnswer() const;
+	virtual bool getAnswerRequired() const;
 
 	/// called just before query is pushed on stack
 	virtual void onAdding(PlayerColor color);
 
-	/// called right after query is pushed on stack
-	virtual void onAdded(PlayerColor color);
-
 	/// called after query is removed from stack
 	virtual void onRemoval(PlayerColor color);
-
-	/// called when query immediately above is removed and this is exposed (becomes top)
-	virtual void onExposure(QueryPtr topQuery);
 
 	void setOnRemovalCallback(const std::function<void(const PlayerColor & player)> & onRemovalCallback);
 
@@ -68,7 +62,6 @@ public:
 
 	virtual ~CQuery();
 protected:
-	QueriesProcessor * owner;
 	CGameHandler * gh;
 	void addPlayer(PlayerColor color);
 	bool blockAllButReply(const CPackForServer * pack) const;
@@ -86,6 +79,7 @@ public:
 	bool blocksPack(const CPackForServer *pack) const override;
 	void setReply(std::optional<int32_t> reply) override;
 	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const std::optional<int32_t> & answer)> & onRemovalCallback);
+
 protected:
 	std::optional<int32_t> answer;
 };

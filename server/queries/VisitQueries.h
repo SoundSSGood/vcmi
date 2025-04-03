@@ -19,14 +19,12 @@ VCMI_LIB_NAMESPACE_END
 //Removed when query above is resolved (or immediately after visit if no queries were created)
 class VisitQuery : public CQuery
 {
-protected:
-	VisitQuery(CGameHandler * owner, const ObjectInstanceID & objId, const ObjectInstanceID & heroId);
-
 public:
+	VisitQuery(CGameHandler * owner, const ObjectInstanceID & objId, const ObjectInstanceID & heroId);
+	bool blocksPack(const CPackForServer * pack) const final;
+
 	ObjectInstanceID visitedObject;
 	ObjectInstanceID visitingHero;
-
-	bool blocksPack(const CPackForServer * pack) const final;
 };
 
 class MapObjectVisitQuery final : public VisitQuery
@@ -36,8 +34,7 @@ public:
 
 	MapObjectVisitQuery(CGameHandler * owner, const CGObjectInstance * Obj, const CGHeroInstance * Hero);
 
-	void onRemoval(PlayerColor color) final;
-	void onExposure(QueryPtr topQuery) final;
+	void onRemoval(PlayerColor color) override final;
 };
 
 class TownBuildingVisitQuery final : public VisitQuery
@@ -53,7 +50,5 @@ class TownBuildingVisitQuery final : public VisitQuery
 
 public:
 	TownBuildingVisitQuery(CGameHandler * owner, const CGTownInstance * Obj, std::vector<const CGHeroInstance *> heroes, std::vector<BuildingID> buildingToVisit);
-
-	void onAdded(PlayerColor color) final;
-	void onExposure(QueryPtr topQuery) final;
+	void onAdding(PlayerColor color) override final;
 };

@@ -22,13 +22,12 @@ void QueriesProcessor::popQuery(PlayerColor player, QueryPtr query)
 	}
 
 	queries[player] -= query;
-	auto nextQuery = topQuery(player);
 	std::cout << "deleted " << query->queryID << " " << player << std::endl;
 	query->onRemoval(player);
 
-	//Exposure on query below happens only if removal didn't trigger any new query
-	if(nextQuery && nextQuery == topQuery(player))
-		nextQuery->onExposure(query);
+	// Try to pop the next query
+	if(auto nextQuery = topQuery(player); nextQuery && !nextQuery->getAnswerRequired())
+		popQuery(nextQuery);
 }
 
 void QueriesProcessor::popQuery(const CQuery &query)
@@ -63,9 +62,6 @@ void QueriesProcessor::addQuery(QueryPtr query)
 {
 	for(auto player : query->players)
 		addQuery(player, query);
-
-	for(auto player : query->players)
-		query->onAdded(player);
 }
 
 void QueriesProcessor::addQuery(PlayerColor player, QueryPtr query)
@@ -74,6 +70,8 @@ void QueriesProcessor::addQuery(PlayerColor player, QueryPtr query)
 	std::cout << "add Q " << query << std::endl;
 	query->onAdding(player);
 	queries[player].push_back(query);
+	if(!query->getAnswerRequired())
+		popQuery(query);
 }
 
 QueryPtr QueriesProcessor::topQuery(PlayerColor player)

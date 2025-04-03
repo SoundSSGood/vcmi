@@ -27,8 +27,7 @@ std::ostream & operator<<(std::ostream & out, QueryPtr query)
 }
 
 CQuery::CQuery(CGameHandler * gameHandler, const bool isAnswerRequired)
-	: owner(gameHandler->queries.get())
-	, gh(gameHandler)
+	: gh(gameHandler)
 	, isAnswerRequired(isAnswerRequired)
 {
 	static QueryID QID = QueryID(0);
@@ -72,7 +71,7 @@ std::string CQuery::toString() const
 	return ret;
 }
 
-bool CQuery::endsByPlayerAnswer() const
+bool CQuery::getAnswerRequired() const
 {
 	return isAnswerRequired;
 }
@@ -93,17 +92,7 @@ void CQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & p
 	this->onRemovalCallback = onRemovalCallback;
 }
 
-void CQuery::onExposure(QueryPtr topQuery)
-{
-	logGlobal->trace("Exposed query with id %d", queryID);
-}
-
 void CQuery::onAdding(PlayerColor color)
-{
-
-}
-
-void CQuery::onAdded(PlayerColor color)
 {
 
 }
