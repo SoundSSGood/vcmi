@@ -17,13 +17,13 @@ using QueryPtr = std::shared_ptr<CQuery>;
 class QueriesProcessor
 {
 private:
-	void addQuery(PlayerColor player, QueryPtr query);
 	void popQuery(PlayerColor player, QueryPtr query);
 
 	std::map<PlayerColor, std::vector<QueryPtr>> queries; //player => stack of queries
 
 public:
-	void addQuery(QueryPtr query);
+	void addQuery(QueryPtr query, const PlayerColor & player);
+	void addQuery(QueryPtr query, const std::vector<PlayerColor> & players);
 	void popQuery(const CQuery &query);
 	void popQuery(QueryPtr query);
 	void popIfTop(const CQuery &query); //removes this query if it is at the top (otherwise, do nothing)

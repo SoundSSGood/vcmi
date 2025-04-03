@@ -40,7 +40,7 @@ void ApplyGhNetPackVisitor::visitGamePause(GamePause & pack)
 {
 	auto turnQuery = std::make_shared<TimerPauseQuery>(&gh, pack.player);
 	turnQuery->queryID = QueryID::CLIENT;
-	gh.queries->addQuery(turnQuery);
+	gh.queries->addQuery(turnQuery, {pack.player});
 	result = true;
 }
 

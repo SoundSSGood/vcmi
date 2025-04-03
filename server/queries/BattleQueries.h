@@ -32,6 +32,7 @@ public:
 	bool getAnswerRequired() const override;
 };
 
+// Used for requesting battle replay
 class CBattleDialogQuery : public CDialogQuery
 {
 	bool resultProcessed = false;

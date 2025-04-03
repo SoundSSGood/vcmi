@@ -21,7 +21,6 @@ VisitQuery::VisitQuery(CGameHandler * owner, const ObjectInstanceID & objId, con
 	, visitedObject(objId)
 	, visitingHero(heroId)
 {
-	addPlayer(gh->getOwner(heroId));
 }
 
 bool VisitQuery::blocksPack(const CPackForServer * pack) const

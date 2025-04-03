@@ -58,20 +58,22 @@ void QueriesProcessor::popQuery(QueryPtr query)
 		popQuery(player, query);
 }
 
-void QueriesProcessor::addQuery(QueryPtr query)
+void QueriesProcessor::addQuery(QueryPtr query, const std::vector<PlayerColor> & players)
 {
-	for(auto player : query->players)
-		addQuery(player, query);
+	for(const auto & player : players)
+		addQuery(query, player);
 }
 
-void QueriesProcessor::addQuery(PlayerColor player, QueryPtr query)
+void QueriesProcessor::addQuery(QueryPtr query, const PlayerColor & player)
 {
-	LOG_TRACE_PARAMS(logGlobal, "player='%d', query='%s'", player.getNum() % query);
-	std::cout << "add Q " << query << std::endl;
-	query->onAdding(player);
-	queries[player].push_back(query);
-	if(!query->getAnswerRequired())
-		popQuery(query);
+	if(player.isValidPlayer())
+	{
+		LOG_TRACE_PARAMS(logGlobal, "player='%d', query='%s'", player.getNum() % query);
+		query->addPlayer(player);
+		std::cout << "add Q " << query << std::endl;
+		query->onAdding(player);
+		queries[player].push_back(query);
+	}
 }
 
 QueryPtr QueriesProcessor::topQuery(PlayerColor player)

@@ -111,10 +111,9 @@ bool CQuery::blockAllButReply(const CPackForServer * pack) const
 	return true;
 }
 
-CDialogQuery::CDialogQuery(CGameHandler * owner, const PlayerColor & player):
+CDialogQuery::CDialogQuery(CGameHandler * owner):
 	CQuery(owner, true)
 {
-	addPlayer(player);
 }
 
 bool CDialogQuery::blocksPack(const CPackForServer * pack) const

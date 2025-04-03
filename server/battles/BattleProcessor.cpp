@@ -144,7 +144,7 @@ void BattleProcessor::startBattle(const CArmedInstance *army1, const CArmedInsta
 			if(heroes[i])
 				newBattleQuery->initialHeroMana[i] = heroes[i]->mana;
 
-		gameHandler->queries->addQuery(newBattleQuery);
+		gameHandler->queries->addQuery(newBattleQuery, {army1->getOwner(), army2->getOwner()});
 	}
 
 	flowProcessor->onBattleStarted(*battle);

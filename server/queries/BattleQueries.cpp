@@ -21,8 +21,6 @@ CBattleQuery::CBattleQuery(CGameHandler * owner, const IBattleInfo * bi):
 	CQuery(owner, false),
 	battleID(bi->getBattleID())
 {
-	addPlayer(bi->getSidePlayer(BattleSide::ATTACKER));
-	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));
 }
 
 void CBattleQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const BattleResult & result)> & onRemovalCallback)
@@ -47,17 +45,13 @@ bool CBattleQuery::blocksPack(const CPackForServer * pack) const
 
 bool CBattleQuery::getAnswerRequired() const
 {
-	// this method may be called in two cases:
-	// 1) when requesting battle replay (but before replay starts -> no valid result)
-	// 2) when aswering on levelup queries after accepting battle result -> valid result
 	return !result.has_value();
 }
 
 CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi):
-	CDialogQuery(owner, bi->getSidePlayer(BattleSide::ATTACKER)),
+	CDialogQuery(owner),
 	bi(bi)
 {
-	addPlayer(bi->getSidePlayer(BattleSide::DEFENDER));
 }
 
 void CBattleDialogQuery::onRemoval(PlayerColor color)

@@ -64,25 +64,25 @@ public:
 //yes/no and component selection dialogs
 class CBlockingDialogQuery : public CDialogQuery
 {
-public:	CBlockingDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+public:	CBlockingDialogQuery(CGameHandler * owner): CDialogQuery(owner) {};
 };
 
 class CTeleportDialogQuery : public CDialogQuery
 {
-public: CTeleportDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+public: CTeleportDialogQuery(CGameHandler * owner): CDialogQuery(owner) {};
 };
 
 class CHeroLevelUpDialogQuery : public CDialogQuery
 {
-public: CHeroLevelUpDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+public: CHeroLevelUpDialogQuery(CGameHandler * owner): CDialogQuery(owner) {};
 };
 
 class CCommanderLevelUpDialogQuery : public CDialogQuery
 {
-public: CCommanderLevelUpDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+public: CCommanderLevelUpDialogQuery(CGameHandler * owner): CDialogQuery(owner) {};
 };
 
 class CTownGateDialogQuery : public CDialogQuery
 {
-public : CTownGateDialogQuery(CGameHandler * owner, const PlayerColor & player): CDialogQuery(owner, player) {};
+public : CTownGateDialogQuery(CGameHandler * owner): CDialogQuery(owner) {};
 };

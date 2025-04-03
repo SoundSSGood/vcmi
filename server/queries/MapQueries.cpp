@@ -20,7 +20,6 @@
 TimerPauseQuery::TimerPauseQuery(CGameHandler * owner, PlayerColor player):
 	CQuery(owner, true)
 {
-	addPlayer(player);
 }
 
 bool TimerPauseQuery::blocksPack(const CPackForServer *pack) const
@@ -39,12 +38,10 @@ void TimerPauseQuery::onRemoval(PlayerColor color)
 }
 
 CGarrisonDialogQuery::CGarrisonDialogQuery(CGameHandler * owner, const CArmedInstance * up, const CArmedInstance * down):
-	CDialogQuery(owner, down->tempOwner)
+	CDialogQuery(owner)
 {
 	exchangingArmies[0] = up;
 	exchangingArmies[1] = down;
-
-	addPlayer(up->tempOwner);
 }
 
 bool CGarrisonDialogQuery::blocksPack(const CPackForServer * pack) const
@@ -107,7 +104,7 @@ bool CGarrisonDialogQuery::blocksPack(const CPackForServer * pack) const
 }
 
 OpenWindowQuery::OpenWindowQuery(CGameHandler * owner, const CGHeroInstance *hero, EOpenWindowMode mode):
-	CDialogQuery(owner, hero->getOwner()),
+	CDialogQuery(owner),
 	mode(mode)
 {
 }
@@ -165,7 +162,6 @@ CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero &
 	, tmh(Tmh)
 	, hero(Hero)
 {
-	addPlayer(hero->tempOwner);
 }
 
 void CHeroMovementQuery::onRemoval(PlayerColor color)

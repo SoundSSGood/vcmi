@@ -279,7 +279,7 @@ void BattleResultProcessor::endBattle(const CBattleInfoCallback & battle)
 	{
 		auto battleDialogQuery = std::make_shared<CBattleDialogQuery>(gameHandler, battle.getBattle());
 		battleResult->queryID = battleDialogQuery->queryID;
-		gameHandler->queries->addQuery(battleDialogQuery);
+		gameHandler->queries->addQuery(battleDialogQuery, {battle.getBattle()->getSidePlayer(BattleSide::ATTACKER), battle.getBattle()->getSidePlayer(BattleSide::DEFENDER)});
 	}
 	else
 		battleResult->queryID = QueryID::NONE;

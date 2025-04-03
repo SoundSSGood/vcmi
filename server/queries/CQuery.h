@@ -56,6 +56,7 @@ public:
 	virtual void onRemoval(PlayerColor color);
 
 	void setOnRemovalCallback(const std::function<void(const PlayerColor & player)> & onRemovalCallback);
+	void addPlayer(PlayerColor color);
 
 	virtual void setReply(std::optional<int32_t> reply);
 	virtual std::string toString() const;
@@ -63,7 +64,6 @@ public:
 	virtual ~CQuery();
 protected:
 	CGameHandler * gh;
-	void addPlayer(PlayerColor color);
 	bool blockAllButReply(const CPackForServer * pack) const;
 	std::function<void(const PlayerColor & player)> onRemovalCallback;
 	const bool isAnswerRequired;
@@ -75,7 +75,7 @@ std::ostream &operator<<(std::ostream &out, QueryPtr query);
 class CDialogQuery : public CQuery
 {
 public:
-	CDialogQuery(CGameHandler * owner, const PlayerColor & player);
+	CDialogQuery(CGameHandler * owner);
 	bool blocksPack(const CPackForServer *pack) const override;
 	void setReply(std::optional<int32_t> reply) override;
 	void setOnRemovalCallback(const std::function<void(const PlayerColor & player, const std::optional<int32_t> & answer)> & onRemovalCallback);

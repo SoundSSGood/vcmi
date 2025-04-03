@@ -179,7 +179,7 @@ void CGameHandler::levelUpHero(const CGHeroInstance * hero)
 	}
 	else if (hlu.skills.size() > 1)
 	{
-		auto levelUpQuery = std::make_shared<CHeroLevelUpDialogQuery>(this, hero->getOwner());
+		auto levelUpQuery = std::make_shared<CHeroLevelUpDialogQuery>(this);
 		hlu.queryID = levelUpQuery->queryID;
 		levelUpQuery->setOnRemovalCallback([this, hero, skills = hlu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
@@ -190,7 +190,7 @@ void CGameHandler::levelUpHero(const CGHeroInstance * hero)
 			if(const auto obj = getObjInstance(objId))
 				obj->heroLevelUpDone(hero);
 		});
-		queries->addQuery(levelUpQuery);
+		queries->addQuery(levelUpQuery, getOwner(hero->id));
 		sendAndApply(hlu);
 		//level up will be called on query reply
 	}
@@ -332,7 +332,7 @@ void CGameHandler::levelUpCommander(const CCommanderInstance * c)
 	}
 	else if (skillAmount > 1) //apply and ask for secondary skill
 	{
-		auto commanderLevelUp = std::make_shared<CCommanderLevelUpDialogQuery>(this, hero->getOwner());
+		auto commanderLevelUp = std::make_shared<CCommanderLevelUpDialogQuery>(this);
 		clu.queryID = commanderLevelUp->queryID;
 		commanderLevelUp->setOnRemovalCallback([this, hero, skills = clu.skills](const PlayerColor & player, const std::optional<int32_t> & answer)
 		{
@@ -343,7 +343,7 @@ void CGameHandler::levelUpCommander(const CCommanderInstance * c)
 			if(const auto obj = getObjInstance(objId))
 				obj->heroLevelUpDone(hero);
 		});
-		queries->addQuery(commanderLevelUp);
+		queries->addQuery(commanderLevelUp, getOwner(hero->id));
 		sendAndApply(clu);
 	}
 }
@@ -938,7 +938,7 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 		LOG_TRACE_PARAMS(logGlobal, "Hero %s starts movement from %s to %s", h->getNameTranslated() % tmh.start.toString() % tmh.end.toString());
 
 		auto moveQuery = std::make_shared<CHeroMovementQuery>(this, tmh, h);
-		queries->addQuery(moveQuery);
+		queries->addQuery(moveQuery, getOwner(h->id));
 
 		if (leavingTile == LEAVING_TILE)
 			leaveTile();
@@ -1119,8 +1119,8 @@ void CGameHandler::setOwner(const CGObjectInstance * obj, const PlayerColor owne
 
 void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CBlockingDialogQuery>(this, iw->player);
-	queries->addQuery(dialogQuery);
+	auto dialogQuery = std::make_shared<CBlockingDialogQuery>(this);
+	queries->addQuery(dialogQuery, iw->player);
 	dialogQuery->setOnRemovalCallback([this, caller](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
 		assert(answer.has_value());
@@ -1135,8 +1135,8 @@ void CGameHandler::showBlockingDialog(const IObjectInterface * caller, BlockingD
 
 void CGameHandler::showTeleportDialog(TeleportDialog *iw)
 {
-	auto dialogQuery = std::make_shared<CTeleportDialogQuery>(this, getOwner(iw->hero));
-	queries->addQuery(dialogQuery);
+	auto dialogQuery = std::make_shared<CTeleportDialogQuery>(this);
+	queries->addQuery(dialogQuery, getOwner(iw->hero));
 	dialogQuery->setOnRemovalCallback([this, exits = iw->exits](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
 		assert(answer.has_value());
@@ -1259,7 +1259,7 @@ void CGameHandler::visitCastleObjects(const CGTownInstance * t, std::vector<cons
 	if (!buildingsToVisit.empty())
 	{
 		auto visitQuery = std::make_shared<TownBuildingVisitQuery>(this, t, visitors, buildingsToVisit);
-		queries->addQuery(visitQuery);
+		queries->addQuery(visitQuery, {visitors.front()->getOwner()});
 	}
 }
 
@@ -1474,7 +1474,7 @@ void CGameHandler::heroExchange(ObjectInstanceID hero1, ObjectInstanceID hero2)
 		sendAndApply(hex);
 
 		useScholarSkill(hero1,hero2);
-		queries->addQuery(exchange);
+		queries->addQuery(exchange, {h1->getOwner(), h2->getOwner()});
 	}
 }
 
@@ -2280,7 +2280,7 @@ bool CGameHandler::visitTownBuilding(ObjectInstanceID tid, BuildingID bid)
 		buildingsToVisit.push_back(bid);
 		visitors.push_back(t->visitingHero);
 		auto visitQuery = std::make_shared<TownBuildingVisitQuery>(this, t, visitors, buildingsToVisit);
-		queries->addQuery(visitQuery);
+		queries->addQuery(visitQuery, {visitors.front()->getOwner()});
 		return true;
 	}
 
@@ -3346,7 +3346,7 @@ void CGameHandler::showGarrisonDialog(ObjectInstanceID upobj, ObjectInstanceID h
 	assert(upperArmy);
 
 	auto garrisonQuery = std::make_shared<CGarrisonDialogQuery>(this, upperArmy, lowerArmy);
-	queries->addQuery(garrisonQuery);
+	queries->addQuery(garrisonQuery, {getOwner(upperArmy->id), getOwner(lowerArmy->id)});
 	garrisonQuery->setOnRemovalCallback([upperArmy, lowerArmy](const PlayerColor & player, const std::optional<int32_t> & answer)
 	{
 		upperArmy->garrisonDialogClosed(lowerArmy);
@@ -3371,7 +3371,7 @@ void CGameHandler::showObjectWindow(const CGObjectInstance * object, EOpenWindow
 	{
 		auto windowQuery = std::make_shared<OpenWindowQuery>(this, visitor, window);
 		pack.queryID = windowQuery->queryID;
-		queries->addQuery(windowQuery);
+		queries->addQuery(windowQuery, {getOwner(visitor->id)});
 	}
 	sendAndApply(pack);
 }
@@ -3468,7 +3468,7 @@ void CGameHandler::objectVisited(const CGObjectInstance * obj, const CGHeroInsta
 			}
 		}
 		visitQuery = std::make_shared<MapObjectVisitQuery>(this, visitedObject, h);
-		queries->addQuery(visitQuery); //TODO real visit pos
+		queries->addQuery(visitQuery, h->getOwner()); //TODO real visit pos
 
 		HeroVisit hv;
 		hv.objId = obj->id;
