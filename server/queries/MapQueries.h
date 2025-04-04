@@ -23,11 +23,8 @@ VCMI_LIB_NAMESPACE_END
 class TimerPauseQuery : public CQuery
 {
 public:	
-	TimerPauseQuery(CGameHandler * owner, PlayerColor player);
-	
+	TimerPauseQuery(CGameHandler * owner, PlayerColor player) : CQuery(owner, false) {};
 	bool blocksPack(const CPackForServer *pack) const override;
-	void onAdding(PlayerColor color) override;
-	void onRemoval(PlayerColor color) override;
 };
 
 //Created when hero attempts move and something happens
@@ -35,12 +32,7 @@ public:
 class CHeroMovementQuery : public CQuery
 {
 public:
-	TryMoveHero tmh;
-	const CGHeroInstance *hero;
-
-	CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero);
-	void onAdding(PlayerColor color) override;
-	void onRemoval(PlayerColor color) override;
+	CHeroMovementQuery(CGameHandler * owner) : CQuery(owner, true){};
 };
 
 class CGarrisonDialogQuery : public CDialogQuery //used also for hero exchange dialogs

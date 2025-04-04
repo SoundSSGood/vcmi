@@ -17,24 +17,9 @@
 #include "../../lib/mapObjects/MiscObjects.h"
 #include "../../lib/networkPacks/PacksForServer.h"
 
-TimerPauseQuery::TimerPauseQuery(CGameHandler * owner, PlayerColor player):
-	CQuery(owner, false)
-{
-}
-
 bool TimerPauseQuery::blocksPack(const CPackForServer *pack) const
 {
 	return blockAllButReply(pack);
-}
-
-void TimerPauseQuery::onAdding(PlayerColor color)
-{
-	gh->turnTimerHandler->setTimerEnabled(color, false);
-}
-
-void TimerPauseQuery::onRemoval(PlayerColor color)
-{
-	gh->turnTimerHandler->setTimerEnabled(color, true);
 }
 
 CGarrisonDialogQuery::CGarrisonDialogQuery(CGameHandler * owner, const CArmedInstance * up, const CArmedInstance * down):
@@ -155,29 +140,4 @@ bool OpenWindowQuery::blocksPack(const CPackForServer *pack) const
 	}
 
 	return CDialogQuery::blocksPack(pack);
-}
-
-CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero)
-	: CQuery(owner, true)
-	, tmh(Tmh)
-	, hero(Hero)
-{
-}
-
-void CHeroMovementQuery::onRemoval(PlayerColor color)
-{
-	PlayerBlocked pb;
-	pb.player = color;
-	pb.reason = PlayerBlocked::ONGOING_MOVEMENT;
-	pb.startOrEnd = PlayerBlocked::BLOCKADE_ENDED;
-	gh->sendAndApply(pb);
-}
-
-void CHeroMovementQuery::onAdding(PlayerColor color)
-{
-	PlayerBlocked pb;
-	pb.player = color;
-	pb.reason = PlayerBlocked::ONGOING_MOVEMENT;
-	pb.startOrEnd = PlayerBlocked::BLOCKADE_STARTED;
-	gh->sendAndApply(pb);
 }

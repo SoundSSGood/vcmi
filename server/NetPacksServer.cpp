@@ -11,6 +11,7 @@
 #include "ServerNetPackVisitors.h"
 
 #include "CGameHandler.h"
+#include "TurnTimerHandler.h"
 #include "battles/BattleProcessor.h"
 #include "processors/HeroPoolProcessor.h"
 #include "processors/PlayerMessageProcessor.h"
@@ -39,7 +40,9 @@ void ApplyGhNetPackVisitor::visitSaveGame(SaveGame & pack)
 void ApplyGhNetPackVisitor::visitGamePause(GamePause & pack)
 {
 	auto turnQuery = std::make_shared<TimerPauseQuery>(&gh, pack.player);
+	gh.turnTimerHandler->setTimerEnabled(pack.player, false);
 	turnQuery->queryID = QueryID::CLIENT;
+	turnQuery->setOnRemovalCallback([this](const PlayerColor & player){gh.turnTimerHandler->setTimerEnabled(player, true);});
 	gh.queries->addQuery(turnQuery, {pack.player});
 	result = true;
 }

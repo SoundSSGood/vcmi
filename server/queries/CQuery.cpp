@@ -26,9 +26,9 @@ std::ostream & operator<<(std::ostream & out, QueryPtr query)
 	return out << "[" << query.get() << "] " << query->toString();
 }
 
-CQuery::CQuery(CGameHandler * gameHandler, const bool isAnswerRequired)
+CQuery::CQuery(CGameHandler * gameHandler, const bool isReadyForRemoval)
 	: gh(gameHandler)
-	, isAnswerRequired(isAnswerRequired)
+	, isReadyForRemoval(isReadyForRemoval)
 {
 	static QueryID QID = QueryID(0);
 
@@ -73,7 +73,7 @@ std::string CQuery::toString() const
 
 bool CQuery::getReadyForRemoval() const
 {
-	return isAnswerRequired;
+	return isReadyForRemoval;
 }
 
 void CQuery::onRemoval(PlayerColor color)
@@ -99,7 +99,7 @@ void CQuery::onAdding(PlayerColor color)
 
 void CQuery::setReply(std::optional<int32_t> reply)
 {
-	isAnswerRequired = true;
+	isReadyForRemoval = true;
 }
 
 bool CQuery::blockAllButReply(const CPackForServer * pack) const

@@ -10,6 +10,7 @@
 #include "StdInc.h"
 #include "TurnOrderProcessor.h"
 #include "PlayerMessageProcessor.h"
+#include "TurnTimerHandler.h"
 
 #include "../queries/QueriesProcessor.h"
 #include "../queries/MapQueries.h"
@@ -282,8 +283,10 @@ void TurnOrderProcessor::doStartPlayerTurn(PlayerColor which)
 	actingPlayers.insert(which);
 	awaitingPlayers.erase(which);
 
+	gameHandler->turnTimerHandler->setTimerEnabled(which, false);
 	auto turnQuery = std::make_shared<TimerPauseQuery>(gameHandler, which);
-	gameHandler->queries->addQuery(turnQuery, {which});
+	turnQuery->setOnRemovalCallback([this](const PlayerColor & player){gameHandler->turnTimerHandler->setTimerEnabled(player, true);});
+	gameHandler->queries->addQuery(turnQuery, which);
 
 	PlayerStartsTurn pst;
 	pst.player = which;

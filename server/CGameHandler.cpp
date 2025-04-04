@@ -937,7 +937,20 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 	{
 		LOG_TRACE_PARAMS(logGlobal, "Hero %s starts movement from %s to %s", h->getNameTranslated() % tmh.start.toString() % tmh.end.toString());
 
-		auto moveQuery = std::make_shared<CHeroMovementQuery>(this, tmh, h);
+		PlayerBlocked pb;
+		pb.player = asker;
+		pb.reason = PlayerBlocked::ONGOING_MOVEMENT;
+		pb.startOrEnd = PlayerBlocked::BLOCKADE_STARTED;
+		sendAndApply(pb);
+		auto moveQuery = std::make_shared<CHeroMovementQuery>(this);
+		moveQuery->setOnRemovalCallback([this, pb](const PlayerColor & player)
+		{
+			PlayerBlocked pb;
+			pb.player = player;
+			pb.reason = PlayerBlocked::ONGOING_MOVEMENT;
+			pb.startOrEnd = PlayerBlocked::BLOCKADE_ENDED;
+			sendAndApply(pb);
+		});
 		queries->addQuery(moveQuery, getOwner(h->id));
 
 		if (leavingTile == LEAVING_TILE)
