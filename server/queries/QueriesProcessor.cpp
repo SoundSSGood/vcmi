@@ -26,7 +26,7 @@ void QueriesProcessor::popQuery(PlayerColor player, QueryPtr query)
 	query->onRemoval(player);
 
 	// Try to pop the next query
-	if(auto nextQuery = topQuery(player); nextQuery && !nextQuery->getAnswerRequired())
+	if(auto nextQuery = topQuery(player); nextQuery && nextQuery->getReadyForRemoval())
 		popQuery(nextQuery);
 }
 
@@ -135,4 +135,15 @@ const std::tuple<const ObjectInstanceID, const ObjectInstanceID> QueriesProcesso
 			return std::make_tuple(visitingQuery->visitingHero, visitingQuery->visitedObject);
 	}
 	return std::make_tuple(ObjectInstanceID::NONE, ObjectInstanceID::NONE);
+}
+
+void QueriesProcessor::execWhileOnTop(const QueryID & Id, const PlayerColor & player)
+{
+	auto query = topQuery(player);
+	while(query->queryID == Id && !query->getReadyForRemoval())
+	{
+		//query->onTopExecuteFunctor(player);
+	}
+	if(query->getReadyForRemoval())
+		popIfTop(query);
 }

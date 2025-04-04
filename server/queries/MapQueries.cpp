@@ -18,7 +18,7 @@
 #include "../../lib/networkPacks/PacksForServer.h"
 
 TimerPauseQuery::TimerPauseQuery(CGameHandler * owner, PlayerColor player):
-	CQuery(owner, true)
+	CQuery(owner, false)
 {
 }
 
@@ -158,7 +158,7 @@ bool OpenWindowQuery::blocksPack(const CPackForServer *pack) const
 }
 
 CHeroMovementQuery::CHeroMovementQuery(CGameHandler * owner, const TryMoveHero & Tmh, const CGHeroInstance * Hero)
-	: CQuery(owner, false)
+	: CQuery(owner, true)
 	, tmh(Tmh)
 	, hero(Hero)
 {

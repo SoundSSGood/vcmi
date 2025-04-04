@@ -71,7 +71,7 @@ std::string CQuery::toString() const
 	return ret;
 }
 
-bool CQuery::getAnswerRequired() const
+bool CQuery::getReadyForRemoval() const
 {
 	return isAnswerRequired;
 }
@@ -99,7 +99,7 @@ void CQuery::onAdding(PlayerColor color)
 
 void CQuery::setReply(std::optional<int32_t> reply)
 {
-
+	isAnswerRequired = true;
 }
 
 bool CQuery::blockAllButReply(const CPackForServer * pack) const
@@ -112,7 +112,7 @@ bool CQuery::blockAllButReply(const CPackForServer * pack) const
 }
 
 CDialogQuery::CDialogQuery(CGameHandler * owner):
-	CQuery(owner, true)
+	CQuery(owner, false)
 {
 }
 
@@ -125,6 +125,7 @@ void CDialogQuery::setReply(std::optional<int32_t> reply)
 {
 	if(reply.has_value())
 		answer = *reply;
+	CQuery::setReply(reply);
 }
 
 void CDialogQuery::setOnRemovalCallback(const std::function<void(const PlayerColor & player, const std::optional<int32_t> & answer)> & onRemovalCallback)

@@ -18,7 +18,7 @@
 #include "../../lib/battle/BattleLayout.h"
 
 CBattleQuery::CBattleQuery(CGameHandler * owner, const IBattleInfo * bi):
-	CQuery(owner, false),
+	CQuery(owner, true),
 	battleID(bi->getBattleID())
 {
 }
@@ -43,9 +43,9 @@ bool CBattleQuery::blocksPack(const CPackForServer * pack) const
 	return true;
 }
 
-bool CBattleQuery::getAnswerRequired() const
+bool CBattleQuery::getReadyForRemoval() const
 {
-	return !result.has_value();
+	return result.has_value();
 }
 
 CBattleDialogQuery::CBattleDialogQuery(CGameHandler * owner, const IBattleInfo * bi):

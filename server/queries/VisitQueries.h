@@ -50,5 +50,6 @@ class TownBuildingVisitQuery final : public VisitQuery
 
 public:
 	TownBuildingVisitQuery(CGameHandler * owner, const CGTownInstance * Obj, std::vector<const CGHeroInstance *> heroes, std::vector<BuildingID> buildingToVisit);
-	void onAdding(PlayerColor color) override final;
+	void onTopExecute(const PlayerColor & player);
+	bool getReadyForRemoval() const override;
 };

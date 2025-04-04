@@ -17,7 +17,7 @@
 #include "QueriesProcessor.h"
 
 VisitQuery::VisitQuery(CGameHandler * owner, const ObjectInstanceID & objId, const ObjectInstanceID & heroId)
-	: CQuery(owner, false)
+	: CQuery(owner, true)
 	, visitedObject(objId)
 	, visitingHero(heroId)
 {
@@ -58,13 +58,15 @@ TownBuildingVisitQuery::TownBuildingVisitQuery(CGameHandler * owner, const CGTow
 			visitedBuilding.push_back({ hero, building});
 }
 
-void TownBuildingVisitQuery::onAdding(PlayerColor color)
+void TownBuildingVisitQuery::onTopExecute(const PlayerColor & player)
 {
-	while(!visitedBuilding.empty())
-	{
-		visitingHero = visitedBuilding.back().hero->id;
-		const auto & building = visitedTown->rewardableBuildings.at(visitedBuilding.back().building);
-		building->onHeroVisit(visitedBuilding.back().hero);
-		visitedBuilding.pop_back();
-	}
+	visitingHero = visitedBuilding.back().hero->id;
+	const auto & building = visitedTown->rewardableBuildings.at(visitedBuilding.back().building);
+	building->onHeroVisit(visitedBuilding.back().hero);
+	visitedBuilding.pop_back();
+}
+
+bool TownBuildingVisitQuery::getReadyForRemoval() const
+{
+	return visitedBuilding.empty();
 }

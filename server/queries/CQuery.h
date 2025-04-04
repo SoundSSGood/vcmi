@@ -47,7 +47,7 @@ public:
 	virtual bool blocksPack(const CPackForServer *pack) const;
 
 	/// query is removed after player gives answer (like dialogs)
-	virtual bool getAnswerRequired() const;
+	virtual bool getReadyForRemoval() const;
 
 	/// called just before query is pushed on stack
 	virtual void onAdding(PlayerColor color);
@@ -66,7 +66,7 @@ protected:
 	CGameHandler * gh;
 	bool blockAllButReply(const CPackForServer * pack) const;
 	std::function<void(const PlayerColor & player)> onRemovalCallback;
-	const bool isAnswerRequired;
+	bool isAnswerRequired;
 };
 
 std::ostream &operator<<(std::ostream &out, const CQuery &query);

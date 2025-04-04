@@ -3311,12 +3311,12 @@ bool CGameHandler::queryReply(QueryID qid, std::optional<int32_t> answer, Player
 	{
 		auto currentQuery = queries->getQuery(qid);
 
-		if(currentQuery != nullptr && currentQuery->getAnswerRequired())
+		if(currentQuery != nullptr && !currentQuery->getReadyForRemoval())
 			currentQuery->setReply(answer);
 
 		COMPLAIN_RET("This player top query has different ID!"); //topQuery->queryID != qid
 	}
-	COMPLAIN_RET_FALSE_IF(!topQuery->getAnswerRequired(), "This query cannot be ended by player's answer!");
+	COMPLAIN_RET_FALSE_IF(topQuery->getReadyForRemoval(), "This query cannot be ended by player's answer!");
 
 	topQuery->setReply(answer);
 	std::cout << "rem Q " << topQuery->queryID << std::endl;
