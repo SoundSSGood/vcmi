@@ -427,7 +427,7 @@ void BattleResultProcessor::battleFinalize(const BattleID & battleID, const Batt
 		}
 	}
 
-	// Artifacts handling
+    // Moving artifacts handling
 	if(result.result == EBattleResult::NORMAL && !finishingBattle->isDraw() && winnerHero)
 	{
 		CArtifactFittingSet artFittingSet(*winnerHero);
@@ -446,7 +446,7 @@ void BattleResultProcessor::battleFinalize(const BattleID & battleID, const Batt
 
 		if(loserHero)
 		{
-			auto & packHero = resultsApplied.artifacts.emplace_back(finishingBattle->victor, finishingBattle->loserId, finishingBattle->winnerId, false);
+            auto & packHero = resultsApplied.movingArtifacts.emplace_back(finishingBattle->victor, finishingBattle->loserId, finishingBattle->winnerId, false);
 			packHero.srcArtHolder = finishingBattle->loserId;
 			for(const auto & slot : ArtifactUtils::commonWornSlots())
 			{
@@ -463,7 +463,7 @@ void BattleResultProcessor::battleFinalize(const BattleID & battleID, const Batt
 
 			if(loserHero->getCommander())
 			{
-				auto & packCommander = resultsApplied.artifacts.emplace_back(finishingBattle->victor, finishingBattle->loserId, finishingBattle->winnerId, false);
+                auto & packCommander = resultsApplied.movingArtifacts.emplace_back(finishingBattle->victor, finishingBattle->loserId, finishingBattle->winnerId, false);
 				packCommander.srcCreature = loserHero->findStack(loserHero->getCommander());
 				for(const auto & artSlot : loserHero->getCommander()->artifactsWorn)
 					addArtifactToTransfer(packCommander, artSlot.first, artSlot.second.getArt());
@@ -471,7 +471,7 @@ void BattleResultProcessor::battleFinalize(const BattleID & battleID, const Batt
 			auto armyObj = dynamic_cast<const CArmedInstance*>(gameHandler->getObj(finishingBattle->loserId));
 			for(const auto & armySlot : armyObj->stacks)
 			{
-				auto & packsArmy = resultsApplied.artifacts.emplace_back(finishingBattle->victor, finishingBattle->loserId, finishingBattle->winnerId, false);
+                auto & packsArmy = resultsApplied.movingArtifacts.emplace_back(finishingBattle->victor, finishingBattle->loserId, finishingBattle->winnerId, false);
 				packsArmy.srcArtHolder = armyObj->id;
 				packsArmy.srcCreature = armySlot.first;
 				for(const auto & artSlot : armySlot.second->artifactsWorn)
@@ -479,6 +479,24 @@ void BattleResultProcessor::battleFinalize(const BattleID & battleID, const Batt
 			}
 		}
 	}
+
+    // Growing artifacts handling
+    /*if(winnerSide != BattleSide::NONE)
+    {
+        // Grow up growing artifacts
+        if(const auto winnerHero = gs->getHero(heroResult[winnerSide].heroId))
+        {
+            if(winnerHero->commander && winnerHero->commander->alive)
+            {
+                for(auto & art : winnerHero->commander->artifactsWorn)
+                    art.second.artifact->growingUp();
+            }
+            for(auto & art : winnerHero->artifactsWorn)
+            {
+                art.second.artifact->growingUp();
+            }
+        }
+    }*/
 
 	// Necromancy handling
 	// Give raised units to winner, if any were raised, units will be given after casualties are taken

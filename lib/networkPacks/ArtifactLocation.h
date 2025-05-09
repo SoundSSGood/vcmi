@@ -79,4 +79,11 @@ struct MoveArtifactInfo
 	}
 };
 
+enum class GrowingUpCondition
+{
+    HERO_VICTORY,
+    MONSTER_VICTORY,
+    SIEGE_VICTORY
+};
+
 VCMI_LIB_NAMESPACE_END

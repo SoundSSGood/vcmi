@@ -17,6 +17,7 @@ VCMI_LIB_NAMESPACE_BEGIN
 struct ArtifactLocation;
 class CGameState;
 class CArtifactSet;
+enum class GrowingUpCondition;
 
 class DLL_LINKAGE CCombinedArtifactInstance : public GameCallbackHolder
 {
@@ -72,7 +73,7 @@ class DLL_LINKAGE CGrowingArtifactInstance
 protected:
 	CGrowingArtifactInstance() = default;
 public:
-	void growingUp();
+    void growingUp(const GrowingUpCondition upCondition);
 };
 
 class DLL_LINKAGE CArtifactInstance final

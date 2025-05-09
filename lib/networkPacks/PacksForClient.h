@@ -986,6 +986,26 @@ struct DLL_LINKAGE CArtifactOperationPack : CPackForClient
 {
 };
 
+struct DLL_LINKAGE GrowUpArtifact : CArtifactOperationPack
+{
+    ArtifactInstanceID id;
+    GrowingUpCondition upCondition;
+
+    GrowUpArtifact() = default;
+    GrowUpArtifact(const ArtifactInstanceID & id, const GrowingUpCondition upCondition)
+        : id(id)
+        , upCondition(upCondition)
+    {
+    }
+    void applyGs(CGameState * gs) override;
+
+    template <typename Handler> void serialize(Handler & h)
+    {
+        h & id;
+        h & upCondition;
+    }
+};
+
 struct DLL_LINKAGE PutArtifact : CArtifactOperationPack
 {
 	PutArtifact() = default;

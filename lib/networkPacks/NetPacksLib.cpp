@@ -1635,6 +1635,11 @@ void BulkRebalanceStacks::applyGs(CGameState *gs)
 		move.applyGs(gs);
 }
 
+void GrowUpArtifact::applyGs(CGameState *gs)
+{
+
+}
+
 void PutArtifact::applyGs(CGameState *gs)
 {
 	auto art = gs->getArtInstance(id);
@@ -2034,22 +2039,6 @@ void BattleResultAccepted::applyGs(CGameState *gs)
 	if(const auto defenderHero = gs->getHero(heroResult[BattleSide::DEFENDER].heroID))
 		defenderHero->removeBonusesRecursive(Bonus::OneBattle);
 
-	if(winnerSide != BattleSide::NONE)
-	{
-		// Grow up growing artifacts
-		if(const auto winnerHero = gs->getHero(heroResult[winnerSide].heroID))
-		{
-			if(winnerHero->getCommander() && winnerHero->getCommander()->alive)
-
-			{
-				for(auto & art : winnerHero->getCommander()->artifactsWorn)
-					gs->getArtInstance(art.second.getID())->growingUp();
-			}
-			for(auto & art : winnerHero->artifactsWorn)
-				gs->getArtInstance(art.second.getID())->growingUp();
-		}
-	}
-
 	if(gs->getSettings().getBoolean(EGameSettings::MODULE_STACK_EXPERIENCE))
 	{
 		if(const auto attackerArmy = gs->getArmyInstance(heroResult[BattleSide::ATTACKER].armyID))
@@ -2225,10 +2214,13 @@ void BattleResultsApplied::applyGs(CGameState * gs)
 {
 	learnedSpells.applyGs(gs);
 
-	for(auto & artPack : artifacts)
-		artPack.applyGs(gs);
+    for(auto & movingPack : movingArtifacts)
+        movingPack.applyGs(gs);
 
-	const auto currentBattle = std::find_if(gs->currentBattles.begin(), gs->currentBattles.end(),
+    for(auto & growingPack : growingArtifacts)
+        growingPack.applyGs(gs);
+
+    const auto currentBattle = std::find_if(gs->currentBattles.begin(), gs->currentBattles.end(),
 		[this](const auto & battle)
 		{
 			return battle->battleID == battleID;
