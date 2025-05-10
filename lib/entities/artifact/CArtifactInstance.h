@@ -70,6 +70,8 @@ public:
 
 class DLL_LINKAGE CGrowingArtifactInstance
 {
+    std::map<GrowingUpCondition, ui16> levels;
+
 protected:
 	CGrowingArtifactInstance() = default;
 public:

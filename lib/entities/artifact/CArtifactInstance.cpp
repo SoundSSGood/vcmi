@@ -99,28 +99,24 @@ void CGrowingArtifactInstance::growingUp(const GrowingUpCondition upCondition)
 	
 	if(artInst->getType()->isGrowing())
 	{
-        auto growingBonus = std::make_shared<Bonus>();
-        growingBonus->type = BonusType::ARTIFACT_GROWING;
-        growingBonus->val = 1;
-        growingBonus->duration = BonusDuration::PERMANENT;
-        artInst->accumulateBonus(growingBonus);
+        levels[upCondition] += 1;
 
-		for(const auto & bonus : artInst->getType()->getBonusesPerLevel())
+        for(const auto & [requiredLevel, bonus, conditions] : artInst->getType()->getBonusesPerLevel())
 		{
 			// Every n levels
-            if(artInst->valOfBonuses(BonusType::ARTIFACT_GROWING) % bonus.first == 0)
-			{
-				artInst->accumulateBonus(std::make_shared<Bonus>(bonus.second));
-			}
+            ui16 level = 0;
+            for(const auto & cond : conditions)
+                level += levels[cond];
+
+            if(vstd::contains(conditions, upCondition) && level % requiredLevel == 0)
+                artInst->accumulateBonus(std::make_shared<Bonus>(bonus));
 		}
-		for(const auto & bonus : artInst->getType()->getThresholdBonuses())
+        for(const auto & [requiredLevel, bonus, conditions] : artInst->getType()->getThresholdBonuses())
 		{
 			// At n level
-            if(artInst->valOfBonuses(BonusType::ARTIFACT_GROWING) == bonus.first)
-			{
-				artInst->addNewBonus(std::make_shared<Bonus>(bonus.second));
-			}
-		}
+            if(vstd::contains(conditions, upCondition) && levels.at(upCondition) == requiredLevel)
+                artInst->addNewBonus(std::make_shared<Bonus>(bonus));
+        }
 	}
 }
 

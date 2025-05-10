@@ -23,6 +23,7 @@
 #include "../../lib/battle/SideInBattle.h"
 #include "../../lib/entities/artifact/ArtifactUtils.h"
 #include "../../lib/entities/artifact/CArtifactFittingSet.h"
+#include "../../lib/entities/artifact/CArtifact.h"
 #include "../../lib/gameState/CGameState.h"
 #include "../../lib/mapObjects/CGTownInstance.h"
 #include "../../lib/networkPacks/PacksForClientBattle.h"
@@ -481,22 +482,47 @@ void BattleResultProcessor::battleFinalize(const BattleID & battleID, const Batt
 	}
 
     // Growing artifacts handling
-    /*if(winnerSide != BattleSide::NONE)
+    if(!finishingBattle->isDraw() && winnerHero)
     {
-        // Grow up growing artifacts
-        if(const auto winnerHero = gs->getHero(heroResult[winnerSide].heroId))
+        std::set<GrowingUpCondition> curBattleGrowingConditions;
+        if((*battle)->getDefendedTown())
+            curBattleGrowingConditions.emplace(GrowingUpCondition::SIEGE_VICTORY);
+        if(loserHero)
+            curBattleGrowingConditions.emplace(GrowingUpCondition::HERO_VICTORY);
+        if(curBattleGrowingConditions.empty())
+            curBattleGrowingConditions.emplace(GrowingUpCondition::MONSTER_VICTORY);
+
+        const auto findMatchCondition = [&curBattleGrowingConditions](const std::vector<CGrowingArtifact::growingBonus> & growingBonuses) -> std::optional<GrowingUpCondition>
         {
-            if(winnerHero->commander && winnerHero->commander->alive)
+            for(const auto & growingBonus : growingBonuses)
             {
-                for(auto & art : winnerHero->commander->artifactsWorn)
-                    art.second.artifact->growingUp();
+                for(const auto & curCondition : curBattleGrowingConditions)
+                {
+                    if(std::find(growingBonus.conditions.begin(), growingBonus.conditions.end(), curCondition) != growingBonus.conditions.end())
+                        return curCondition;
+                }
             }
-            for(auto & art : winnerHero->artifactsWorn)
-            {
-                art.second.artifact->growingUp();
-            }
+            return std::nullopt;
+        };
+
+        const auto addArtifactToGrowing = [&findMatchCondition, &resultsApplied](const CArtifactInstance * artInst)
+        {
+            assert(artInst);
+            auto upCondition = findMatchCondition(artInst->getType()->getBonusesPerLevel());
+            if(!upCondition.has_value())
+                upCondition = findMatchCondition(artInst->getType()->getThresholdBonuses());
+            if(upCondition.has_value())
+                resultsApplied.growingArtifacts.emplace_back(artInst->getId(), upCondition.value());
+        };
+
+        for(const auto & [slot, slotInfo] : winnerHero->artifactsWorn)
+            addArtifactToGrowing(slotInfo.getArt());
+        if(const auto commander = winnerHero->getCommander(); commander && commander->alive)
+        {
+            for(const auto & [slot, slotInfo] : commander->artifactsWorn)
+                addArtifactToGrowing(slotInfo.getArt());
         }
-    }*/
+    }
 
 	// Necromancy handling
 	// Give raised units to winner, if any were raised, units will be given after casualties are taken

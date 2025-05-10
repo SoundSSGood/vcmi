@@ -141,16 +141,49 @@ std::shared_ptr<CArtifact> CArtHandler::loadFromJson(const std::string & scope, 
 	auto art = std::make_shared<CArtifact>();
 	if(!node["growing"].isNull())
 	{
-		for(auto bonus : node["growing"]["bonusesPerLevel"].Vector())
+        const std::unordered_map<std::string, GrowingUpCondition> growingConditionsMap =
+        {
+            {"HEROVICTORY", GrowingUpCondition::HERO_VICTORY},
+            {"MONSTERVICTORY", GrowingUpCondition::MONSTER_VICTORY},
+            {"SIEGEVICTORY", GrowingUpCondition::SIEGE_VICTORY},
+        };
+        const auto loadGrowingBonus = [growingConditionsMap](std::vector<CGrowingArtifact::growingBonus> & bonusStorage, const JsonNode & inputNode)
+        {
+            for(const auto & bonus : inputNode.Vector())
+            {
+                Bonus loadedBonus;
+                JsonUtils::parseBonus(bonus["bonus"], &loadedBonus);
+                auto & growingBonus = bonusStorage.emplace_back(static_cast<ui16>(bonus["level"].Float()), loadedBonus);
+                for(const auto & upCondition : bonus["upCondition"].Vector())
+                    growingBonus.conditions.emplace(growingConditionsMap.at(upCondition.String()));
+                // If no conditions were defined, add them all.
+                if(growingBonus.conditions.empty())
+                    growingBonus.conditions.insert({GrowingUpCondition::SIEGE_VICTORY, GrowingUpCondition::HERO_VICTORY, GrowingUpCondition::MONSTER_VICTORY});
+            }
+        };
+        loadGrowingBonus(art->bonusesPerLevel, node["growing"]["bonusesPerLevel"]);
+        loadGrowingBonus(art->thresholdBonuses, node["growing"]["thresholdBonuses"]);
+
+        /*for(const auto & bonus : node["growing"]["bonusesPerLevel"].Vector())
 		{
-			art->bonusesPerLevel.emplace_back(static_cast<ui16>(bonus["level"].Float()), Bonus());
-			JsonUtils::parseBonus(bonus["bonus"], &art->bonusesPerLevel.back().second);
+            Bonus perLevelBonus;
+            JsonUtils::parseBonus(bonus["bonus"], &perLevelBonus);
+            auto & growingBonus = art->bonusesPerLevel.emplace_back(static_cast<ui16>(bonus["level"].Float()), perLevelBonus);
+            for(const auto & upCondition : bonus["upCondition"].Vector())
+                growingBonus.conditions.emplace(growingConditionsMap.at(upCondition.String()));
+            if(growingBonus.conditions.empty())
+                growingBonus.conditions.insert({GrowingUpCondition::SIEGE_VICTORY, GrowingUpCondition::HERO_VICTORY, GrowingUpCondition::MONSTER_VICTORY});
 		}
-		for(auto bonus : node["growing"]["thresholdBonuses"].Vector())
+        for(const auto & bonus : node["growing"]["thresholdBonuses"].Vector())
 		{
-			art->thresholdBonuses.emplace_back(static_cast<ui16>(bonus["level"].Float()), Bonus());
-			JsonUtils::parseBonus(bonus["bonus"], &art->thresholdBonuses.back().second);
-		}
+            Bonus thresholdBonus;
+            JsonUtils::parseBonus(bonus["bonus"], &thresholdBonus);
+            auto & growingBonus = art->thresholdBonuses.emplace_back(static_cast<ui16>(bonus["level"].Float()), thresholdBonus);
+            for(const auto & upCondition : bonus["upCondition"].Vector())
+                growingBonus.conditions.emplace(growingConditionsMap.at(upCondition.String()));
+            if(growingBonus.conditions.empty())
+                growingBonus.conditions.insert({GrowingUpCondition::SIEGE_VICTORY, GrowingUpCondition::HERO_VICTORY, GrowingUpCondition::MONSTER_VICTORY});
+        }*/
 	}
 	art->id = ArtifactID(index);
 	art->identifier = identifier;

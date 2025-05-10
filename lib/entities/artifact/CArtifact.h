@@ -13,6 +13,7 @@
 #include "EArtifactClass.h"
 
 #include "../../bonuses/CBonusSystemNode.h"
+#include "../../networkPacks/ArtifactLocation.h"
 
 #include <vcmi/Artifact.h>
 
@@ -50,18 +51,31 @@ public:
 
 class DLL_LINKAGE CGrowingArtifact
 {
-protected:
-	CGrowingArtifact() = default;
-
-	std::vector<std::pair<ui16, Bonus>> bonusesPerLevel; // Bonus given each n levels
-	std::vector<std::pair<ui16, Bonus>> thresholdBonuses; // After certain level they will be added once
 public:
+    CGrowingArtifact() = default;
+
+    struct growingBonus
+    {
+        ui16 level;
+        Bonus bonus;
+        std::set<GrowingUpCondition> conditions;
+
+        growingBonus(const ui16 level, const Bonus & bonus)
+            : level(level), bonus(bonus)
+        {}
+    };
+
 	bool isGrowing() const;
 
-	std::vector<std::pair<ui16, Bonus>> & getBonusesPerLevel();
-	const std::vector<std::pair<ui16, Bonus>> & getBonusesPerLevel() const;
-	std::vector<std::pair<ui16, Bonus>> & getThresholdBonuses();
-	const std::vector<std::pair<ui16, Bonus>> & getThresholdBonuses() const;
+    std::vector<CGrowingArtifact::growingBonus> & getBonusesPerLevel();
+    const std::vector<CGrowingArtifact::growingBonus> & getBonusesPerLevel() const;
+    std::vector<CGrowingArtifact::growingBonus> & getThresholdBonuses();
+    const std::vector<CGrowingArtifact::growingBonus> & getThresholdBonuses() const;
+
+protected:
+
+    std::vector<growingBonus> bonusesPerLevel; // Bonus given each n levels
+    std::vector<growingBonus> thresholdBonuses; // After certain level they will be added once
 };
 
 // Container for artifacts. Not for instances.

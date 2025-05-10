@@ -1637,7 +1637,9 @@ void BulkRebalanceStacks::applyGs(CGameState *gs)
 
 void GrowUpArtifact::applyGs(CGameState *gs)
 {
-
+    auto artInst = gs->getArtInstance(id);
+    assert(artInst);
+    artInst->growingUp(upCondition);
 }
 
 void PutArtifact::applyGs(CGameState *gs)

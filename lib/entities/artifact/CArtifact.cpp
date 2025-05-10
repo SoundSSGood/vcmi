@@ -59,22 +59,22 @@ bool CGrowingArtifact::isGrowing() const
 	return !bonusesPerLevel.empty() || !thresholdBonuses.empty();
 }
 
-std::vector <std::pair<ui16, Bonus>> & CGrowingArtifact::getBonusesPerLevel()
+std::vector<CGrowingArtifact::growingBonus> & CGrowingArtifact::getBonusesPerLevel()
 {
 	return bonusesPerLevel;
 }
 
-const std::vector <std::pair<ui16, Bonus>> & CGrowingArtifact::getBonusesPerLevel() const
+const std::vector<CGrowingArtifact::growingBonus> & CGrowingArtifact::getBonusesPerLevel() const
 {
 	return bonusesPerLevel;
 }
 
-std::vector <std::pair<ui16, Bonus>> & CGrowingArtifact::getThresholdBonuses()
+std::vector<CGrowingArtifact::growingBonus> & CGrowingArtifact::getThresholdBonuses()
 {
 	return thresholdBonuses;
 }
 
-const std::vector <std::pair<ui16, Bonus>> & CGrowingArtifact::getThresholdBonuses() const
+const std::vector<CGrowingArtifact::growingBonus> & CGrowingArtifact::getThresholdBonuses() const
 {
 	return thresholdBonuses;
 }

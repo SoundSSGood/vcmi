@@ -14,6 +14,14 @@
 					"level" : {
 						"type" : "number"
 					},
+					"upCondition" : {
+						"type" : "array",
+						"description" : "Condition for increasing the artifact level",
+						"items" : {
+							"type" : "string",
+							"enum" : [ "SIEGEVICTORY", "HEROVICTORY", "MONSTERVICTORY" ]
+						}
+					},
 					"bonus" : { "$ref" : "bonusInstance.json" }
 				}
 			}
