@@ -483,6 +483,11 @@ void BattleResultsApplied::visitTyped(ICPackVisitor & visitor)
 	visitor.visitBattleResultsApplied(*this);
 }
 
+void BattleEnded::visitTyped(ICPackVisitor & visitor)
+{
+	visitor.visitBattleEnded(*this);
+}
+
 void BattleObstaclesChanged::visitTyped(ICPackVisitor & visitor)
 {
 	visitor.visitBattleObstaclesChanged(*this);
@@ -683,6 +688,11 @@ void CastAdvSpell::visitTyped(ICPackVisitor & visitor)
 	visitor.visitCastAdvSpell(*this);
 }
 
+void RequestStatistic::visitTyped(ICPackVisitor & visitor)
+{
+	visitor.visitRequestStatistic(*this);
+}
+
 void SaveGame::visitTyped(ICPackVisitor & visitor)
 {
 	visitor.visitSaveGame(*this);
@@ -856,6 +866,11 @@ void BattleCancelled::visitTyped(ICPackVisitor & visitor)
 void TurnTimeUpdate::visitTyped(ICPackVisitor & visitor)
 {
 	visitor.visitTurnTimeUpdate(*this);
+}
+
+void ResponseStatistic::visitTyped(ICPackVisitor & visitor)
+{
+	visitor.visitResponseStatistic(*this);
 }
 
 VCMI_LIB_NAMESPACE_END

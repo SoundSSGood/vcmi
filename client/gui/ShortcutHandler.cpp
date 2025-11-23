@@ -162,6 +162,7 @@ EShortcut ShortcutHandler::findShortcut(const std::string & identifier ) const
 		{"lobbyToggleChat",          EShortcut::LOBBY_TOGGLE_CHAT         },
 		{"lobbyAdditionalOptions",   EShortcut::LOBBY_ADDITIONAL_OPTIONS  },
 		{"lobbySelectScenario",      EShortcut::LOBBY_SELECT_SCENARIO     },
+		{"lobbyBattleMode",          EShortcut::LOBBY_BATTLE_MODE         },
 		{"gameEndTurn",              EShortcut::ADVENTURE_END_TURN        }, // compatibility ID - extra's use this string
 		{"adventureEndTurn",         EShortcut::ADVENTURE_END_TURN        },
 		{"adventureLoadGame",        EShortcut::ADVENTURE_LOAD_GAME       },
@@ -202,6 +203,7 @@ EShortcut ShortcutHandler::findShortcut(const std::string & identifier ) const
 		{"adventureViewWorld1",      EShortcut::ADVENTURE_VIEW_WORLD_X1   },
 		{"adventureViewWorld2",      EShortcut::ADVENTURE_VIEW_WORLD_X2   },
 		{"adventureViewWorld4",      EShortcut::ADVENTURE_VIEW_WORLD_X4   },
+		{"adventureViewStatistic",   EShortcut::ADVENTURE_VIEW_STATISTIC  },
 		{"adventureTrackHero",       EShortcut::ADVENTURE_TRACK_HERO,     },
 		{"adventureToggleMapLevel",  EShortcut::ADVENTURE_TOGGLE_MAP_LEVEL},
 		{"adventureKingdomOverview", EShortcut::ADVENTURE_KINGDOM_OVERVIEW},

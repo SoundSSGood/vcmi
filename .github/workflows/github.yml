@@ -13,7 +13,6 @@ jobs:
   build:
     name: Build (${{ matrix.platform }})
     strategy:
-      fail-fast: false      # Do not cancel whole matrix when one build fails
       matrix:
         include:
           - platform: mac-intel
@@ -126,17 +125,14 @@ jobs:
             artifact_platform: x64
 
     runs-on: ${{ matrix.os }}
-    # Allow non-MSVC builds to fail without failing whole job
-    # This keeps pipeline moving so Windows Installer job can still run
-    # MSVC builds must success to continue to Windows Installer job
-    continue-on-error: ${{ !startsWith(matrix.platform, 'msvc') }}
+
     defaults:
       run:
         shell: bash
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -394,7 +390,7 @@ jobs:
       run:
         shell: bash
     steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
           with:
             submodules: recursive
 
@@ -477,7 +473,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -581,7 +577,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -687,7 +683,7 @@ jobs:
         shell: bash
 
     steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
         - name: Ensure LF line endings
           run: |
             find . -path ./.git -prune -o -path ./AI/FuzzyLite -prune -o -path ./test/googletest \
@@ -716,7 +712,7 @@ jobs:
       actions: write                   # Partial JSON artifacts can't be deleted in PRs
     steps:
       - name: Checkout (for script path)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download all partial JSON artifacts
         continue-on-error: true
