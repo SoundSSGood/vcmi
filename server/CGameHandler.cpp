@@ -1001,6 +1001,11 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 		return false;
 	};
 
+	if (settings["general"]["saveBeforeVisit"].Bool() &&
+		gameInfo().getPlayerState(h->getOwner())->human &&
+	   (guardian || objectToVisit) &&
+	   movementMode == EMovementMode::STANDARD)
+		save("Saves/BeforeVisitSave");
 
 	if (!transit && embarking)
 	{
@@ -1151,6 +1156,9 @@ void CGameHandler::giveResource(PlayerColor player, GameResID which, int val)
 
 void CGameHandler::giveResources(PlayerColor player, const ResourceSet & resources)
 {
+	if (resources.empty())
+		return;
+
 	SetResources sr;
 	sr.mode = ChangeValueMode::RELATIVE;
 	sr.player = player;
@@ -1616,16 +1624,17 @@ void CGameHandler::save(const std::string & filename)
 
 	try
 	{
-		CSaveFile save(*CResourceHandler::get("local")->getResourceName(savePath));
+		CSaveFile save;
 		gameState().saveGame(save);
 		logGlobal->info("Saving server state");
 		save.save(*this);
-		logGlobal->info("Game has been successfully saved!");
+		save.write(*CResourceHandler::get("local")->getResourceName(savePath));
 	}
 	catch(std::exception &e)
 	{
 		logGlobal->error("Failed to save game: %s", e.what());
 	}
+	logGlobal->info("Game has been successfully saved!");
 }
 
 void CGameHandler::load(const StartInfo &info)
@@ -3153,10 +3162,12 @@ bool CGameHandler::buySecSkill(const IMarket *m, const CGHeroInstance *h, Second
 	if (!vstd::contains(m->availableItemsIds(EMarketMode::RESOURCE_SKILL), skill))
 		COMPLAIN_RET("That skill is unavailable!");
 
-	if (gameInfo().getResource(h->tempOwner, EGameResID::GOLD) < GameConstants::SKILL_GOLD_COST)//TODO: remove hardcoded resource\summ?
+	int goldCost = gameInfo().getSettings().getInteger(EGameSettings::MARKETS_UNIVERSITY_GOLD_COST);
+
+	if (gameInfo().getResource(h->tempOwner, EGameResID::GOLD) < goldCost)
 		COMPLAIN_RET("You can't afford to buy this skill");
 
-	giveResource(h->tempOwner, EGameResID::GOLD, -GameConstants::SKILL_GOLD_COST);
+	giveResource(h->tempOwner, EGameResID::GOLD, -goldCost);
 
 	changeSecSkill(h, skill, 1, ChangeValueMode::ABSOLUTE);
 	return true;

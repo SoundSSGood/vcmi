@@ -347,10 +347,10 @@ void CGHeroInstance::initObj(IGameRandomizer & gameRandomizer)
 		updateAppearance();
 }
 
-void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer, const HeroTypeID & SUBID)
+void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer, const HeroTypeID & SUBID, bool isFake)
 {
 	subID = SUBID.getNum();
-	initHero(gameRandomizer);
+	initHero(gameRandomizer, isFake);
 }
 
 TObjectTypeHandler CGHeroInstance::getObjectHandler() const
@@ -370,7 +370,7 @@ void CGHeroInstance::updateAppearance()
 		appearance = app;
 }
 
-void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer)
+void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer, bool isFake)
 {
 	assert(validTypes(true));
 	
@@ -395,7 +395,7 @@ void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer)
 	if(!vstd::contains(spells, SpellID::SPELLBOOK_PRESET))
 	{
 		// hero starts with default spellbook presence status
-		if(!getArt(ArtifactPosition::SPELLBOOK) && getHeroType()->haveSpellBook)
+		if(!getArt(ArtifactPosition::SPELLBOOK) && getHeroType()->haveSpellBook	&& !isFake)
 		{
 			auto artifact = cb->gameState().createArtifact(ArtifactID::SPELLBOOK);
 			putArtifact(ArtifactPosition::SPELLBOOK, artifact);
@@ -404,7 +404,7 @@ void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer)
 	else
 		spells -= SpellID::SPELLBOOK_PRESET;
 
-	if(!getArt(ArtifactPosition::MACH4))
+	if(!getArt(ArtifactPosition::MACH4) && !isFake)
 	{
 		auto artifact = cb->gameState().createArtifact(ArtifactID::CATAPULT);
 		putArtifact(ArtifactPosition::MACH4, artifact); //everyone has a catapult
@@ -1404,13 +1404,16 @@ std::vector<SecondarySkill> CGHeroInstance::getLevelupSkillCandidates(IGameRando
 	}
 	
 	int maxUpgradedSkills = cb->getSettings().getInteger(EGameSettings::LEVEL_UP_UPGRADED_SKILLS_AMOUNT);
-	while (skills.size() < maxUpgradedSkills && !basicAndAdv.empty())
+	int maxTotalSkills = cb->getSettings().getInteger(EGameSettings::LEVEL_UP_TOTAL_SKILLS_AMOUNT);
+	int newSkillsAvailable = none.size();
+	int upgradedSkillsToSelect = std::max(maxUpgradedSkills, maxTotalSkills - newSkillsAvailable);
+
+	while (skills.size() < upgradedSkillsToSelect && !basicAndAdv.empty())
 	{
 		skills.push_back(gameRandomizer.rollSecondarySkillForLevelup(this, basicAndAdv));
 		basicAndAdv.erase(skills.back());
 	}
 
-	int maxTotalSkills = cb->getSettings().getInteger(EGameSettings::LEVEL_UP_TOTAL_SKILLS_AMOUNT);
 	while (skills.size() < maxTotalSkills && !none.empty())
 	{
 		skills.push_back(gameRandomizer.rollSecondarySkillForLevelup(this, none));

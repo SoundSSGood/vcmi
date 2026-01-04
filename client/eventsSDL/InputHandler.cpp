@@ -217,6 +217,12 @@ void InputHandler::preprocessEvent(const SDL_Event & ev)
 #endif
 		return;
 	}
+	else if(ev.type == SDL_APP_WILLENTERBACKGROUND)
+	{
+		std::scoped_lock interfaceLock(ENGINE->interfaceMutex);
+		ENGINE->user().onAppPaused();
+		return;
+	}
 	else if(ev.type == SDL_KEYDOWN)
 	{
 		if(ev.key.keysym.sym == SDLK_F4 && (ev.key.keysym.mod & KMOD_ALT))
@@ -444,7 +450,10 @@ void InputHandler::handleUserEvent(const SDL_UserEvent & current)
 	std::unique_ptr<std::function<void()>> task;
 
 	if (!dispatchedTasks.try_pop(task))
-		throw std::runtime_error("InputHandler::handleUserEvent received without active task!");
+	{
+		logGlobal->error("InputHandler::handleUserEvent received without active task!");
+		return;
+	}
 
 	(*task)();
 }

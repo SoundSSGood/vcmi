@@ -76,6 +76,8 @@ class DLL_LINKAGE CMap : public CMapHeader, public GameCallbackHolder
 	/// Precomputed indices of all heroes on map. Does not includes heroes in prisons
 	std::vector<ObjectInstanceID> heroesOnMap;
 
+	void deserializeHeroPool(const std::vector<std::shared_ptr<CGHeroInstance> > &);
+
 public:
 	/// Central lists of items in game. Position of item in the vectors below is their (instance) id.
 	/// TODO: make private
@@ -279,6 +281,7 @@ public:
 
 	void saveCompatibilityStoreAllocatedArtifactID();
 	void parseUidCounter();
+	static bool compareObjectBlitOrder(const CGObjectInstance * a, const CGObjectInstance * b);
 
 private:
 
@@ -307,7 +310,15 @@ public:
 			std::vector< std::shared_ptr<CQuest> > quests;
 			h & quests;
 		}
-		h & heroesPool;
+
+		if (h.saving)
+			h & heroesPool;
+		else
+		{
+			std::vector<std::shared_ptr<CGHeroInstance> > poolFromSave;
+			h & poolFromSave;
+			deserializeHeroPool(poolFromSave);
+		}
 
 		//TODO: viccondetails
 		h & terrain;
