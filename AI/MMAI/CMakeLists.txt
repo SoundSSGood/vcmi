@@ -9,6 +9,8 @@ set(MMAI_FILES
   BAI/model/ScriptedModel.cpp
   BAI/model/NNModel.h
   BAI/model/NNModel.cpp
+  BAI/model/NNModelStochastic.h
+  BAI/model/NNModelStochastic.cpp
   BAI/model/util/bucketing.cpp
   BAI/model/util/bucketing.h
   BAI/model/util/common.h
@@ -70,7 +72,7 @@ else()
   if(APPLE)
     set_target_properties(MMAI PROPERTIES INSTALL_RPATH "@loader_path")
   elseif(UNIX)
-    set_target_properties(MMAI PROPERTIES INSTALL_RPATH "$ORIGIN")
+    set_target_properties(MMAI PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${CMAKE_INSTALL_RPATH}/AI")
   endif()
 endif()
 
