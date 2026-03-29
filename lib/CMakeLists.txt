@@ -16,6 +16,7 @@ set(lib_SRCS
 	filesystem/MinizipExtensions.cpp
 	filesystem/ResourcePath.cpp
 
+	json/JsonFormatException.cpp
 	json/JsonNode.cpp
 	json/JsonParser.cpp
 	json/JsonUtils.cpp
@@ -97,6 +98,7 @@ set(lib_MAIN_SRCS
 	campaign/CampaignRegionsHandler.cpp
 
 	constants/EntityIdentifiers.cpp
+	constants/IdentifierBase.cpp
 
 	entities/artifact/ArtifactUtils.cpp
 	entities/artifact/ArtSlotInfo.cpp
@@ -192,6 +194,7 @@ set(lib_MAIN_SRCS
 	modding/ContentTypeHandler.cpp
 	modding/IdentifierStorage.cpp
 	modding/ModDescription.cpp
+	modding/ModIncompatibility.cpp
 	modding/ModManager.cpp
 	modding/ModUtility.cpp
 	modding/ModVerificationInfo.cpp
@@ -310,11 +313,13 @@ set(lib_MAIN_SRCS
 	CAndroidVMHelper.cpp
 	CBonusTypeHandler.cpp
 	CCreatureHandler.cpp
+	ConditionalWait.cpp
 	CPlayerState.cpp
 	CRandomGenerator.cpp
 	CScriptingModule.cpp
 	CSkillHandler.cpp
 	CStack.cpp
+	ExceptionsCommon.cpp
 	GameSettings.cpp
 	IHandlerBase.cpp
 	LoadProgress.cpp
@@ -846,9 +851,6 @@ target_link_libraries(vcmi PUBLIC
 if(ENABLE_STATIC_LIBS AND ENABLE_CLIENT)
 	target_compile_definitions(vcmi PRIVATE STATIC_AI)
 	target_link_libraries(vcmi PRIVATE EmptyAI)
-	if(ENABLE_NULLKILLER_AI)
-		target_link_libraries(vcmi PRIVATE Nullkiller)
-	endif()
 
 	if(ENABLE_NULLKILLER2_AI)
 		target_link_libraries(vcmi PRIVATE Nullkiller2)

@@ -31,11 +31,11 @@
 #include "../mapObjectConstructors/AObjectTypeHandler.h"
 #include "../mapObjectConstructors/CObjectClassesHandler.h"
 #include "../mapObjectConstructors/CommonConstructors.h"
-#include "../mapObjects/CGHeroInstance.h"
+#include "CGHeroInstance.h"
 #include "../networkPacks/PacksForClient.h"
 #include "../networkPacks/PacksForClientBattle.h"
 #include "../networkPacks/StackLocation.h"
-#include "../lib/gameState/UpgradeInfo.h"
+#include "../gameState/UpgradeInfo.h"
 
 #include <vstd/RNG.h>
 
@@ -628,6 +628,9 @@ bool CGWhirlpool::isProtected(const CGHeroInstance * h)
 
 const CArtifactInstance * CGArtifact::getArtifactInstance() const
 {
+	if(!storedArtifact.hasValue())
+		return nullptr;
+
 	return cb->getArtInstance(storedArtifact);
 }
 
