@@ -648,7 +648,7 @@
     </message>
 </context>
 <context>
-    <name>MainWindow</name>
+    <name>EditorMainWindow</name>
     <message>
         <location filename="../mainwindow.ui" line="14"/>
         <location filename="../mainwindow.cpp" line="415"/>
@@ -2001,6 +2001,7 @@ Do you want to do that now ?</source>
         <translation type="unfinished">
             <numerusform>%n tile</numerusform>
             <numerusform>%n tile</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
