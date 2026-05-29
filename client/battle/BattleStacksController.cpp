@@ -39,6 +39,7 @@
 #include "../../lib/battle/BattleHex.h"
 #include "../../lib/battle/CPlayerBattleCallback.h"
 #include "../../lib/spells/ISpellMechanics.h"
+#include "../../lib/spells/CSpell.h"
 #include "../../lib/texts/TextOperations.h"
 
 static void onAnimationFinished(const CStack *stack, std::weak_ptr<CreatureAnimation> anim)
@@ -614,10 +615,13 @@ void BattleStacksController::stackAttacking( const StackAttackInfo & info )
 
 	if(info.deathBlow)
 	{
-		owner.addToAnimationStage(EAnimationEvents::BEFORE_HIT, [this, defender, info]() {
-			owner.appendBattleLog(info.attacker->formatGeneralMessage(365));
-			owner.effectsController->displayEffect(EBattleEffect::DEATH_BLOW, AudioPath::builtin("DEATHBLO"), defender->getPosition());
-		});
+		if (defender)
+		{
+			owner.addToAnimationStage(EAnimationEvents::BEFORE_HIT, [this, defender, info]() {
+				owner.appendBattleLog(info.attacker->formatGeneralMessage(365));
+				owner.effectsController->displayEffect(EBattleEffect::DEATH_BLOW, AudioPath::builtin("DEATHBLO"), defender->getPosition());
+			});
+		}
 
 		for(auto elem : info.secondaryDefender)
 		{

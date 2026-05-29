@@ -18,8 +18,8 @@
 #include "texts/CGeneralTextHandler.h"
 #include "battle/BattleInfo.h"
 #include "GameLibrary.h"
-#include "spells/CSpellHandler.h"
 #include "networkPacks/PacksForClientBattle.h"
+#include "spells/CSpell.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -281,8 +281,7 @@ bool CStack::canBeHealed() const
 
 bool CStack::isOnNativeTerrain() const
 {
-	auto nativeTerrain = getNativeTerrain();
-	return nativeTerrain == ETerrainId::ANY_TERRAIN || getCurrentTerrain() == nativeTerrain;
+	return isNativeTerrain(getCurrentTerrain());
 }
 
 TerrainId CStack::getCurrentTerrain() const

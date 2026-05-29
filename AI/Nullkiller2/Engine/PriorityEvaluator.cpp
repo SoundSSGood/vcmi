@@ -32,6 +32,9 @@
 #include "../Markers/ArmyUpgrade.h"
 #include "../Markers/DefendTown.h"
 
+#include <vcmi/spells/Service.h>
+#include <vcmi/spells/Spell.h>
+
 namespace NK2AI
 {
 
@@ -935,7 +938,7 @@ public:
 		evaluationContext.movementCost += path.movementCost();
 		evaluationContext.closestWayRatio = chain.closestWayRatio;
 
-		std::map<const CGHeroInstance *, float> costsPerHero;
+		HeroMap<float> costsPerHero;
 
 		for(auto & node : path.nodes)
 		{

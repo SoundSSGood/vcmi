@@ -24,7 +24,6 @@
 #include "../RoadHandler.h"
 #include "../IGameSettings.h"
 #include "../CSoundBase.h"
-#include "../spells/CSpellHandler.h"
 #include "../CSkillHandler.h"
 #include "../gameState/CGameState.h"
 #include "../gameState/UpgradeInfo.h"
@@ -45,6 +44,7 @@
 #include "../json/JsonBonus.h"
 #include "../pathfinder/TurnInfo.h"
 #include "../serializer/JsonSerializeFormat.h"
+#include "../spells/CSpell.h"
 #include "../mapObjectConstructors/AObjectTypeHandler.h"
 #include "../mapObjectConstructors/CObjectClassesHandler.h"
 #include "MiscObjects.h"
@@ -90,20 +90,12 @@ const IBonusBearer* CGHeroInstance::getBonusBearer() const
 	return this;
 }
 
-TerrainId CGHeroInstance::getNativeTerrain() const
+bool CGHeroInstance::isNativeTerrain(TerrainId terrain) const
 {
-	TerrainId nativeTerrain = ETerrainId::ANY_TERRAIN;
-
 	for(const auto & stack : stacks)
-	{
-		TerrainId stackNativeTerrain = stack.second->getNativeTerrain(); //consider terrain bonuses e.g. Lodestar.
-
-		if(nativeTerrain == ETerrainId::ANY_TERRAIN)
-			nativeTerrain = stackNativeTerrain;
-		else if(nativeTerrain != stackNativeTerrain)
-			return ETerrainId::NONE;
-	}
-	return nativeTerrain;
+		if(!stack.second->isNativeTerrain(terrain))
+			return false;
+	return true;
 }
 
 bool CGHeroInstance::isCoastVisitable() const

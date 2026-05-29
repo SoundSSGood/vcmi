@@ -25,7 +25,7 @@
 #include "../spells/ObstacleCasterProxy.h"
 #include "../spells/ISpellMechanics.h"
 #include "../spells/Problem.h"
-#include "../spells/CSpellHandler.h"
+#include "../spells/CSpell.h"
 #include "../mapObjects/CGTownInstance.h"
 #include "../networkPacks/PacksForClientBattle.h"
 #include "../BattleFieldHandler.h"
@@ -852,12 +852,15 @@ bool CBattleInfoCallback::battleCanAttackHex(const BattleHexArray & availableHex
 		//if the movement ends in an obstacle, check if the obstacle allows attacking from that position
 		if (attacker->getPosition() != fromHex)
 		{
-			for (const auto & obstacle : battleGetAllObstacles())
+			if (!attacker->hasBonusOfType(BonusType::FLYING))
 			{
-				if (obstacle->getStoppingTile().contains(fromHex))
-					return false;
-				if (attacker->doubleWide() && obstacle->getStoppingTile().contains(attacker->occupiedHex(fromHex)))
-					return false;
+				for (const auto & obstacle : battleGetAllObstacles())
+				{
+					if (obstacle->getStoppingTile().contains(fromHex))
+						return false;
+					if (attacker->doubleWide() && obstacle->getStoppingTile().contains(attacker->occupiedHex(fromHex)))
+						return false;
+				}
 			}
 			const battle::Unit * defender = battleGetUnitByPos(position, false); //Do not allow to target corpses when standing on them (a WALK_AND_SPELLCAST action)
 			if (defender && defender->isDead() && defender->coversPos(fromHex))
@@ -1087,21 +1090,18 @@ SpellEffectValUptr CBattleInfoCallback::getSpellEffectValue(
 	const spells::Target spellTarget = mech->canonicalizeTarget(aim);
 
 	mech->forEachEffect([&](const spells::effects::Effect &e){
-		if(const auto *ue = dynamic_cast<const spells::effects::UnitEffect*>(&e))
+		auto effTarget = e.transformTarget(mech.get(), aim, spellTarget);
+		// Cure-specific safety net: if empty, but hovering a healable friendly unit, evaluate just that unit
+		if(effTarget.empty() && hoveredUnit)
 		{
-			auto effTarget = ue->transformTarget(mech.get(), aim, spellTarget);
-			// Cure-specific safety net: if empty, but hovering a healable friendly unit, evaluate just that unit
-			if(effTarget.empty() && hoveredUnit)
-			{
-				spells::EffectTarget single;
-				single.emplace_back(spells::Destination(hoveredUnit));
-				*result += ue->getHealthChange(mech.get(), single);
-				return false;
-			}
-
-			if(!effTarget.empty())
-				*result += ue->getHealthChange(mech.get(), effTarget);
+			spells::Target single;
+			single.emplace_back(spells::Destination(hoveredUnit));
+			*result += e.getHealthChange(mech.get(), single);
+			return false;
 		}
+
+		if(!effTarget.empty())
+			*result += e.getHealthChange(mech.get(), effTarget);
 		return false; // continue iterating effects
 	});
 
@@ -1286,7 +1286,7 @@ bool CBattleInfoCallback::handleObstacleTriggersForUnit(SpellCastEnvironment & s
 		if(!unit.alive())
 			return false;
 
-		if(obstacle->stopsMovement())
+		if(obstacle->stopsMovement() && !unit.hasBonusOfType(BonusType::FLYING))
 			movementStopped = true;
 	}
 

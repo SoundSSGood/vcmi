@@ -14,7 +14,6 @@
 #include "TownBuildingInstance.h"
 
 #include "../IGameSettings.h"
-#include "../spells/CSpellHandler.h"
 #include "../bonuses/Bonus.h"
 #include "../battle/IBattleInfoCallback.h"
 #include "../battle/BattleLayout.h"
@@ -1141,6 +1140,13 @@ void CGTownInstance::serializeJsonOptions(JsonSerializeFormat & handler)
 	{
 		handler.serializeIdArray( "possibleSpells", possibleSpells);
 		handler.serializeIdArray( "obligatorySpells", obligatorySpells);
+
+		if (!handler.saving)
+		{
+			// Workaround for invalid spells in	loaded map
+			vstd::erase(possibleSpells, SpellID());
+			vstd::erase(obligatorySpells, SpellID());
+		}
 	}
 
 	{
@@ -1169,14 +1175,18 @@ FactionID CGTownInstance::getFactionID() const
 	return FactionID(subID.getNum());
 }
 
-TerrainId CGTownInstance::getNativeTerrain() const
+bool CGTownInstance::isNativeTerrain(TerrainId terrain) const
 {
-	auto const & terrain = getTown()->faction->getNativeTerrain();
+	return getTown()->faction->isNativeTerrain(terrain);
+}
 
-	if (!terrain.toEntity(LIBRARY)->isSurface() && !terrain.toEntity(LIBRARY)->isUnderground())
-		logMod->warn("Faction %s has terrain %s as native, but terrain is not suitable for either surface or subterranean layers!", getTown()->faction->getJsonKey(), terrain.toEntity(LIBRARY)->getJsonKey());
+TerrainId CGTownInstance::getTownSiegeTerrain(TerrainId defaultTerrain) const
+{
+	const auto & nativeTerrains = getTown()->faction->nativeTerrains;
+	if(nativeTerrains.empty())
+		return defaultTerrain;
 
-	return terrain;
+	return nativeTerrains.front();
 }
 
 ArtifactID CGTownInstance::getWarMachineInBuilding(BuildingID building) const

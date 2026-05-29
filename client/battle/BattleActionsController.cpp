@@ -34,10 +34,10 @@
 #include "../../lib/battle/BattleAction.h"
 #include "../../lib/battle/CPlayerBattleCallback.h"
 #include "../../lib/callback/CCallback.h"
-#include "../../lib/spells/CSpellHandler.h"
 #include "../../lib/spells/ISpellMechanics.h"
 #include "../../lib/spells/effects/UnitEffect.h"
 #include "../../lib/spells/Problem.h"
+#include "../../lib/spells/CSpell.h"
 #include "../../lib/texts/CGeneralTextHandler.h"
 
 struct TextReplacement
@@ -135,16 +135,15 @@ static std::string formatRetaliation(const DamageEstimation & estimation, bool m
 }
 
 static std::string prepareSpellEffectText(int gnrlTextID, const spells::effects::SpellEffectValue & value,
-										  std::string_view spellName, std::string_view targetName)
+										  const std::string & spellName, const std::string & targetName)
 {
-	auto const & templateText = LIBRARY->generaltexth->allTexts[gnrlTextID];
-	std::string baseText;
-	if(!targetName.empty() && !spellName.empty())
-		baseText = boost::str(boost::format(templateText) % spellName % targetName);
-	else if(targetName.empty())
-		baseText = boost::str(boost::format(templateText) % spellName);
-	else
-		baseText = boost::str(boost::format(templateText) % targetName);
+	auto templateText = MetaString::createFromTextID( "core.genrltxt." + std::to_string(gnrlTextID));
+	if (!spellName.empty())
+		templateText.replaceRawString(spellName);
+	if (!targetName.empty())
+		templateText.replaceRawString(targetName);
+
+	std::string baseText = templateText.toString();
 
 	if(value.unitsDelta > 0)
 	{

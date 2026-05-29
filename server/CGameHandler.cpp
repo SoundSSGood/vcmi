@@ -29,7 +29,6 @@
 #include "../lib/CSoundBase.h"
 #include "../lib/GameConstants.h"
 #include "../lib/IGameSettings.h"
-#include "../lib/scripting/ScriptHandler.h"
 #include "../lib/StartInfo.h"
 #include "../lib/TerrainHandler.h"
 #include "../lib/GameLibrary.h"
@@ -77,7 +76,7 @@
 #include "../lib/serializer/CSaveFile.h"
 #include "../lib/serializer/CLoadFile.h"
 
-#include "../lib/spells/CSpellHandler.h"
+#include "../lib/spells/CSpell.h"
 
 #include <vstd/RNG.h>
 #include <vstd/CLoggerBase.h>
@@ -423,7 +422,7 @@ void CGameHandler::changeSecSkill(const CGHeroInstance * hero, SecondarySkill wh
 
 }
 
-void CGameHandler::handleClientDisconnection(GameConnectionID connectionID)
+void CGameHandler::handleClientDisconnection(GameConnectionID connectionID, const std::vector<PlayerConnectionID> & disconnectedPlayerIds)
 {
 	if(gameServer().getState() == EServerState::SHUTDOWN || !gameState().getStartInfo())
 	{
@@ -444,6 +443,28 @@ void CGameHandler::handleClientDisconnection(GameConnectionID connectionID)
 			disconnectedPlayers.push_back(player.first);
 		else
 			remainingPlayers.push_back(player.first);
+	}
+
+	if(disconnectedPlayers.empty() && !disconnectedPlayerIds.empty())
+	{
+		for(const auto & player : gameState().players)
+		{
+			if (gameInfo().getPlayerState(player.first)->status != EPlayerStatus::INGAME)
+				continue;
+
+			const auto playerSettings = gameInfo().getPlayerSettings(player.first);
+			if(!playerSettings)
+				continue;
+
+			for(const auto disconnectedPlayerId : disconnectedPlayerIds)
+			{
+				if(vstd::contains(playerSettings->connectedPlayerIDs, disconnectedPlayerId))
+				{
+					disconnectedPlayers.push_back(player.first);
+					break;
+				}
+			}
+		}
 	}
 
 	for (const auto & inGamePlayer : remainingPlayers)

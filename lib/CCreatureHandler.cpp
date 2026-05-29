@@ -391,46 +391,6 @@ int CCreature::getRandomAmount(vstd::RNG & ranGen) const
 		return ammMax;
 }
 
-void CCreature::updateFrom(const JsonNode & data)
-{
-	JsonUpdater handler(nullptr, data);
-
-	{
-		auto configScope = handler.enterStruct("config");
-
-		const JsonNode & configNode = handler.getCurrent();
-
-		serializeJson(handler);
-
-		if(!configNode["hitPoints"].isNull())
-			addBonus(configNode["hitPoints"].Integer(), BonusType::STACK_HEALTH);
-
-		if(!configNode["speed"].isNull())
-			addBonus(configNode["speed"].Integer(), BonusType::STACKS_SPEED);
-
-		if(!configNode["attack"].isNull())
-			addBonus(configNode["attack"].Integer(), BonusType::PRIMARY_SKILL, BonusSubtypeID(PrimarySkill::ATTACK));
-
-		if(!configNode["defense"].isNull())
-			addBonus(configNode["defense"].Integer(), BonusType::PRIMARY_SKILL, BonusSubtypeID(PrimarySkill::DEFENSE));
-
-		if(!configNode["damage"]["min"].isNull())
-			addBonus(configNode["damage"]["min"].Integer(), BonusType::CREATURE_DAMAGE, BonusCustomSubtype::creatureDamageMin);
-
-		if(!configNode["damage"]["max"].isNull())
-			addBonus(configNode["damage"]["max"].Integer(), BonusType::CREATURE_DAMAGE, BonusCustomSubtype::creatureDamageMax);
-
-		if(!configNode["shots"].isNull())
-			addBonus(configNode["shots"].Integer(), BonusType::SHOTS);
-
-		if(!configNode["spellPoints"].isNull())
-			addBonus(configNode["spellPoints"].Integer(), BonusType::CASTS);
-	}
-
-
-	handler.serializeBonuses("bonuses", this);
-}
-
 void CCreature::serializeJson(JsonSerializeFormat & handler)
 {
 	handler.serializeInt("fightValue", fightValue);
@@ -981,7 +941,9 @@ void CCreatureHandler::loadStackExperience(CCreature * creature, const JsonNode 
 	for (const JsonNode &exp : input.Vector())
 	{
 		const JsonVector &values = exp["values"].Vector();
-		int lowerLimit = 1;//, upperLimit = 255;
+		// RankRangeLimiter uses strict bounds (rank > minRank), so level 1 bonus
+		// must start from 0 to map values[0] -> rank 1 and values[9] -> rank 10.
+		int lowerLimit = 0;//, upperLimit = 255;
 		if (values[0].getType() == JsonNode::JsonType::DATA_BOOL)
 		{
 			for (const JsonNode &val : values)

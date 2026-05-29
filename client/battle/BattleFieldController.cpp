@@ -38,6 +38,7 @@
 #include "../../lib/battle/CPlayerBattleCallback.h"
 #include "../../lib/spells/ISpellMechanics.h"
 #include "../../lib/spells/Problem.h"
+#include "../../lib/spells/CSpell.h"
 
 namespace HexMasks
 {
@@ -668,7 +669,7 @@ BattleHex BattleFieldController::getHexAtPosition(Point hoverPos)
 
 	if (owner.defendingHero)
 	{
-		if (owner.attackingHero->pos.isInside(hoverPos))
+		if (owner.defendingHero->pos.isInside(hoverPos))
 			return BattleHex::HERO_DEFENDER;
 	}
 
