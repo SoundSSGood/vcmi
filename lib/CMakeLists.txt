@@ -82,6 +82,7 @@ set(lib_MAIN_SRCS
 	bonuses/Updaters.cpp
 
 	callback/CAdventureAI.cpp
+	callback/Calendar.cpp
 	callback/CBattleCallback.cpp
 	callback/CCallback.cpp
 	callback/CDynLibHandler.cpp
@@ -290,22 +291,10 @@ set(lib_MAIN_SRCS
 	spells/adventure/TownPortalEffect.cpp
 	spells/adventure/ViewWorldEffect.cpp
 
-	spells/effects/Catapult.cpp
-	spells/effects/Clone.cpp
-	spells/effects/Damage.cpp
-	spells/effects/Dispel.cpp
 	spells/effects/Effect.cpp
 	spells/effects/Effects.cpp
-	spells/effects/Heal.cpp
 	spells/effects/LocationEffect.cpp
-	spells/effects/Moat.cpp
-	spells/effects/Obstacle.cpp
 	spells/effects/SpellEffectHandler.cpp
-	spells/effects/UnitEffect.cpp
-	spells/effects/Teleport.cpp
-	spells/effects/Timed.cpp
-	spells/effects/RemoveObstacle.cpp
-	spells/effects/Sacrifice.cpp
 
 	texts/CGeneralTextHandler.cpp
 	texts/CLegacyConfigParser.cpp
@@ -493,6 +482,7 @@ set(lib_MAIN_HEADERS
 	bonuses/Updaters.h
 
 	callback/CAdventureAI.h
+	callback/Calendar.h
 	callback/CBattleCallback.h
 	callback/CBattleGameInterface.h
 	callback/CCallback.h
@@ -769,23 +759,12 @@ set(lib_MAIN_HEADERS
 	spells/adventure/TownPortalEffect.h
 	spells/adventure/ViewWorldEffect.h
 
-	spells/effects/Catapult.h
-	spells/effects/Clone.h
-	spells/effects/Damage.h
-	spells/effects/Dispel.h
 	spells/effects/Effect.h
 	spells/effects/Effects.h
 	spells/effects/EffectsFwd.h
-	spells/effects/Heal.h
 	spells/effects/LocationEffect.h
-	spells/effects/Obstacle.h
 	spells/effects/SpellEffectHandler.h
 	spells/effects/SpellEffectService.h
-	spells/effects/UnitEffect.h
-	spells/effects/Teleport.h
-	spells/effects/Timed.h
-	spells/effects/RemoveObstacle.h
-	spells/effects/Sacrifice.h
 
 	texts/CGeneralTextHandler.h
 	texts/Languages.h
@@ -877,12 +856,6 @@ if(ENABLE_STATIC_LIBS AND ENABLE_CLIENT)
 	if(ENABLE_MMAI)
 		target_link_libraries(vcmi PRIVATE MMAI)
 	endif()
-endif()
-
-# no longer necessary, but might be useful to keep in future
-# unfortunately at the moment tests do not support namespaced build, so enable only on some systems
-if(IOS OR ANDROID)
-	target_compile_definitions(vcmi PUBLIC VCMI_LIB_NAMESPACE=VCMI)
 endif()
 
 if(IOS)

@@ -58,6 +58,9 @@ set(test_SRCS
  		spells/effects/DispelTest.cpp
  		spells/effects/HealTest.cpp
  		spells/effects/DemonSummonTest.cpp
+		spells/effects/MoatTest.cpp
+		spells/effects/ObstacleTest.cpp
+		spells/effects/RemoveObstacleTest.cpp
 		spells/effects/SacrificeTest.cpp
  		spells/effects/SummonTest.cpp
  		spells/effects/TeleportTest.cpp
@@ -76,6 +79,8 @@ set(test_SRCS
 		spells/targetConditions/ResistanceConditionTest.cpp
  		spells/targetConditions/SpellEffectConditionTest.cpp
  		spells/targetConditions/TargetConditionItemFixture.cpp
+
+		server/queries/QueriesProcessorTest.cpp
 
 		mock/BattleFake.cpp
 		mock/mock_IGameEventCallback.cpp
@@ -100,9 +105,11 @@ set(test_HEADERS
 
 		mock/BattleFake.h
 		mock/mock_BonusBearer.h
+		mock/mock_CStack.h
 		mock/mock_IGameEventCallback.h
  		mock/mock_MapService.h
 		mock/mock_BonusBearer.h
+		mock/TownFake.h
 )
 
 if(ENABLE_BATTLE_AI)
@@ -152,7 +159,7 @@ endif()
 add_subdirectory_with_folder("3rdparty" googletest EXCLUDE_FROM_ALL)
 
 add_executable(vcmitest ${test_SRCS} ${test_HEADERS} ${mock_HEADERS})
-target_link_libraries(vcmitest PRIVATE gtest gmock vcmi ${SYSTEM_LIBS})
+target_link_libraries(vcmitest PRIVATE gtest gmock vcmi vcmiservercommon ${SYSTEM_LIBS})
 target_link_libraries(vcmitest PRIVATE vcmiLua)
 if(ENABLE_NULLKILLER2_AI)
 	target_link_libraries(vcmitest PUBLIC Nullkiller2)

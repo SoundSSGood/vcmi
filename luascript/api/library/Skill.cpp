@@ -18,15 +18,13 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-namespace scripting::api::library
+namespace scripting::api
 {
 
 const std::vector<SkillProxy::CustomRegType> SkillProxy::REGISTER_CUSTOM =
 {
-	{"getIconIndex", LuaMethodWrapper<Skill, decltype(&Entity::getIconIndex), &Entity::getIconIndex>::invoke, false},
-	{"getIndex", LuaMethodWrapper<Skill, decltype(&Entity::getIndex), &Entity::getIndex>::invoke, false},
-	{"getJsonKey", LuaMethodWrapper<Skill, decltype(&Entity::getJsonKey), &Entity::getJsonKey>::invoke, false},
-	{"getName", LuaMethodWrapper<Skill, decltype(&Entity::getNameTranslated), &Entity::getNameTranslated>::invoke, false},
+	{"getJsonKey",   LuaMethodWrapper<&Entity::getJsonKey, Skill>::invoke,        false},
+	{"getName",      LuaMethodWrapper<&Entity::getNameTranslated, Skill>::invoke, false},
 };
 
 }

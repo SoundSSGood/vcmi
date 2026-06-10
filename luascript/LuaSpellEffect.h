@@ -29,22 +29,27 @@ class LuaScriptPool;
 namespace spells::effects
 {
 
+/// Registered under the "lua" effect type; loads Lua scripts on demand and creates LuaSpellEffect instances from them.
 class LuaSpellEffectFactory final : public ISpellEffectFactory
 {
 public:
 	LuaSpellEffectFactory(scripting::LuaModule & host);
 	virtual ~LuaSpellEffectFactory();
 
-	void initialize(const std::string & scope, const std::string & name) override;
-	std::shared_ptr<Effect> create(const std::string & scope, const std::string & name) const override;
+	void initialize(const std::string & effectId,
+		const std::string & scope, const std::string & name,
+		const std::vector<PatchEntry> & patches) override;
+	std::shared_ptr<Effect> create(const std::string & effectId) const override;
 
 	void registerScripts(scripting::LuaScriptPool * pool);
 
 private:
+	/// effect id -> script mapping
 	std::map<std::string, std::unique_ptr<scripting::LuaScriptInstance> > loadedScripts;
 	scripting::LuaModule & host;
 };
 
+/// Implements a full spell effect (targeting, applicability, apply) by delegating each step to a Lua script function.
 class LuaSpellEffect final : public Effect
 {
 	using LuaScriptInstance = scripting::LuaScriptInstance;
@@ -70,7 +75,7 @@ public:
 	SpellEffectValue getHealthChange(const Mechanics * m, const Target & spellTarget) const override;
 
 protected:
-	void serializeJsonEffect(JsonSerializeFormat & handler) override;
+	void initImpl(JsonNode data) override;
 
 private:
 	const LuaScriptInstance * script;

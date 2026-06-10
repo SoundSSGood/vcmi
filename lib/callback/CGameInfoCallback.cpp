@@ -97,13 +97,13 @@ TurnTimerInfo CGameInfoCallback::getPlayerTurnTime(PlayerColor color) const
 	{
 		return TurnTimerInfo{};
 	}
-	
+
 	auto player = gameState().players.find(color);
 	if(player != gameState().players.end())
 	{
 		return player->second.turnTimer;
 	}
-	
+
 	return TurnTimerInfo{};
 }
 
@@ -385,9 +385,9 @@ bool CGameInfoCallback::getHeroInfo(const CGObjectInstance * hero, InfoAboutHero
 	return true;
 }
 
-int CGameInfoCallback::getDate(Date mode) const
+Calendar CGameInfoCallback::getCalendar() const
 {
-	return gameState().getDate(mode);
+	return gameState().getCalendar();
 }
 
 bool CGameInfoCallback::isVisibleFor(int3 pos, PlayerColor player) const
@@ -622,7 +622,7 @@ std::string CGameInfoCallback::getTavernRumor(const CGObjectInstance * townOrTav
 {
 	MetaString text;
 	text.appendLocalString(EMetaText::GENERAL_TXT, 216);
-	
+
 	std::string extraText;
 	if(gameState().currentRumor.type == RumorState::TYPE_NONE)
 		return text.toString();

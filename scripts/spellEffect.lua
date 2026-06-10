@@ -2,13 +2,6 @@ local Script = {}
 Script.__index = Script
 Script.type = "spellEffect"
 
--- TODO
--- initializes parameters of the script using spell effect json
--- returns converted parameters that contain resolved identifiers
-function Script:initialize()
-	return self
-end
-
 --- Returns true if specified target can be affected by the spell
 --- if target can not be affected, script needs to call `problem:add`
 --- to explain the reason to the player
@@ -36,19 +29,24 @@ function Script:transformTarget(mechanics, aimPoint, spellTarget)
 	return spellTarget
 end
 
+--- Filters the transformed target, removing destinations that should not receive the effect.
+--- Return the filtered target list.
+function Script:filterTarget(mechanics, target)
+	return target
+end
+
 --- TODO
 function Script:getHealthChange(mechanics, problem, target)
     return true
 end
 
 --- TODO
-function Script:adjustAffectedHexes(mechanics, problem, target)
-    return true
+function Script:adjustAffectedHexes(mechanics, hexes, spellTarget)
 end
 
 --- TODO
-function Script:adjustTargetTypes(mechanics, problem, target)
-    return true
+function Script:adjustTargetTypes(mechanics, types)
+    return types
 end
 
 return Script

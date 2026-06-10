@@ -14,27 +14,19 @@
 
 #include "../../LuaWrapper.h"
 
-#include "EventBusProxy.h"
+#include "EventBus.h"
 
-namespace scripting
-{
-namespace api
-{
-namespace events
+namespace scripting::api
 {
 
-using ::events::ObjectVisitStarted;
-
-class ObjectVisitStartedProxy : public OpaqueWrapper<ObjectVisitStarted, ObjectVisitStartedProxy>
+class ObjectVisitStartedProxy : public OpaqueWrapper<::events::ObjectVisitStarted, ObjectVisitStartedProxy>
 {
 public:
-	using Wrapper = OpaqueWrapper<ObjectVisitStarted, ObjectVisitStartedProxy>;
+	using Wrapper = OpaqueWrapper<::events::ObjectVisitStarted, ObjectVisitStartedProxy>;
 	static const std::vector<typename Wrapper::CustomRegType> REGISTER_CUSTOM;
 };
 
 
-}
-}
 }
 
 

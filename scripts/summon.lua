@@ -30,14 +30,6 @@ function Script:summonedCreatureAmount(mechanics)
 	end
 end
 
--- TODO
--- initializes parameters of the script using spell effect json
--- returns converted parameters that contain resolved identifiers
-function Script:initialize()
-	self.creature = LIBRARY:getCreatureByName(self.id)
-	return self
-end
-
 --- Returns true if spell can be casted in general
 --- if no valid targets exist, script needs to call `problem:add`
 --- to explain the reason to the player
@@ -45,21 +37,20 @@ function Script:applicableGeneral(mechanics, problem)
 	local creature = LIBRARY:getCreatureByName(self.id)
 
 	if self:summonedCreatureAmount(mechanics) == 0 then
-		print("SpellEffectSummon: zero summoned creatures!")
 		problem:addGeneric(mechanics)
 		return false
 	end
 
 	-- check if there are summoned creatures of other type
 	if self.exclusive then
-		local elemental = mechanics:getBattle():getAnyUnitIf(function(unit)
+		local elementals = mechanics:getBattle():getUnitsIf(function(unit)
 			return (unit:getOwner() == mechanics:getCasterColor())
 				and (unit:isSummoned())
 				and (not unit:isClone())
 				and (unit:getCreature():getJsonKey() ~= creature:getJsonKey())
 		end)
+		local elemental = elementals[1]
 
-		print("SpellEffectSummon - summoning:", creature:getJsonKey(), " elemental is ", elemental)
 		if elemental ~= nil then
 			local hero = mechanics:getHeroCaster()
 			local himHer = "core.genrltxt.539"
@@ -69,8 +60,8 @@ function Script:applicableGeneral(mechanics, problem)
 
 			if hero ~= nil then
 				problem:addCustom({
-					append = { "core.genrltxt.538" },
-					replace = {
+					append         = { "core.genrltxt.538" },
+					replaceStrings = {
 						hero:getNameTextID(),
 						elemental:getCreature():getNamePluralTextID(),
 						himHer
@@ -81,7 +72,6 @@ function Script:applicableGeneral(mechanics, problem)
 					append = { "core.genrltxt.538" }
 				})
 			end
-			print("SpellEffectSummon - summoning:", creature:getJsonKey(), " already summoned: ", elemental:getCreature():getJsonKey())
 			return false
 		end
 	end
@@ -92,11 +82,12 @@ end
 --- use `server` parameter to apply changes on specified target(s)
 function Script:apply(mechanics, server, target)
 	local creature = LIBRARY:getCreatureByName(self.id)
+	local battle   = mechanics:getBattle()
 
 	for _, dest in ipairs(target) do
 		if dest.unit ~= nil then
 			server:healUnit(
-				mechanics:getBattleID(),
+				battle,
 				dest.unit,
 				self:summonedCreatureHealth(mechanics),
 				ENUM.HealLevel.overheal,
@@ -105,14 +96,13 @@ function Script:apply(mechanics, server, target)
 		else
 			print("SpellEffectSummon. Hex: ", dest.hex)
 			assert(dest.hex ~= nil)
-			server:createUnit(
-				mechanics:getBattleID(),
-				mechanics:getBattle():getNextUnitId(),
+			server:addUnit(
+				battle,
 				{
 					count = self:summonedCreatureAmount(mechanics),
 					type = creature:getJsonKey(),
 					side = mechanics:getCasterSide(),
-					position = dest.hex:toInteger(),
+					position = dest.hex,
 					summoned = not self.permanent
 				}
 			)
@@ -125,13 +115,13 @@ end
 --- and return list of affected units
 function Script:transformTarget(mechanics, aimPoint, spellTarget)
 	local creature = LIBRARY:getCreatureByName(self.id)
-	local sameSummoned = mechanics:getBattle():getAnyUnitIf(function(unit)
+	local sameSummoned = mechanics:getBattle():getUnitsIf(function(unit)
 		return (unit:getOwner() == mechanics:getCasterColor())
 			and (unit:isSummoned())
 			and (not unit:isClone())
 			and (unit:getCreature():getJsonKey() == creature:getJsonKey())
 			and (unit:isAlive())
-	end)
+	end)[1]
 
 	if sameSummoned == nil or not self.summonSameUnit then
 		local hex = mechanics:getBattle():getAvailableHex(creature, mechanics:getCasterSide())

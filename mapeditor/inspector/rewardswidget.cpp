@@ -8,6 +8,7 @@
  *
  */
 #include "StdInc.h"
+#include "../helper.h"
 #include "rewardswidget.h"
 #include "ui_rewardswidget.h"
 #include "../../lib/GameLibrary.h"
@@ -41,7 +42,7 @@ RewardsWidget::RewardsWidget(CMap & m, CRewardableObject & p, QWidget *parent) :
 	ui(new Ui::RewardsWidget)
 {
 	ui->setupUi(this);
-
+	Helper::decorateDialog(this);
 	//fill core elements
 	for(const auto & s : Rewardable::VisitModeString)
 		ui->visitMode->addItem(QString::fromUtf8(s.data(), s.size()));
@@ -238,7 +239,9 @@ void RewardsWidget::obtainData()
 	ui->canRefuse->setChecked(object.configuration.canRefuse);
 	
 	//reset parameters
-	ui->resetPeriod->setValue(object.configuration.resetParameters.period);
+	ui->resetPeriod->setValue(object.configuration.resetParameters.days);
+	ui->resetWeeks->setValue(object.configuration.resetParameters.weeks);
+	ui->resetMonths->setValue(object.configuration.resetParameters.months);
 	ui->resetVisitors->setChecked(object.configuration.resetParameters.visitors);
 	ui->resetRewards->setChecked(object.configuration.resetParameters.rewards);
 	
@@ -264,7 +267,9 @@ bool RewardsWidget::commitChanges()
 	object.configuration.canRefuse = ui->canRefuse->isChecked();
 	
 	//reset parameters
-	object.configuration.resetParameters.period = ui->resetPeriod->value();
+	object.configuration.resetParameters.days = ui->resetPeriod->value();
+	object.configuration.resetParameters.weeks = ui->resetWeeks->value();
+	object.configuration.resetParameters.months = ui->resetMonths->value();
 	object.configuration.resetParameters.visitors = ui->resetVisitors->isChecked();
 	object.configuration.resetParameters.rewards = ui->resetRewards->isChecked();
 	
@@ -640,8 +645,23 @@ void RewardsWidget::on_selectMode_currentIndexChanged(int index)
 
 void RewardsWidget::on_resetPeriod_valueChanged(int arg1)
 {
-	ui->resetRewards->setEnabled(arg1);
-	ui->resetVisitors->setEnabled(arg1);
+	bool anyPeriodSet = arg1 > 0 || ui->resetWeeks->value() > 0 || ui->resetMonths->value() > 0;
+	ui->resetRewards->setEnabled(anyPeriodSet);
+	ui->resetVisitors->setEnabled(anyPeriodSet);
+}
+
+void RewardsWidget::on_resetWeeks_valueChanged(int arg1)
+{
+	bool anyPeriodSet = arg1 > 0 || ui->resetPeriod->value() > 0 || ui->resetMonths->value() > 0;
+	ui->resetRewards->setEnabled(anyPeriodSet);
+	ui->resetVisitors->setEnabled(anyPeriodSet);
+}
+
+void RewardsWidget::on_resetMonths_valueChanged(int arg1)
+{
+	bool anyPeriodSet = arg1 > 0 || ui->resetPeriod->value() > 0 || ui->resetWeeks->value() > 0;
+	ui->resetRewards->setEnabled(anyPeriodSet);
+	ui->resetVisitors->setEnabled(anyPeriodSet);
 }
 
 

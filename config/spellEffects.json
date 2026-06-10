@@ -1,7 +1,8 @@
 {
 	"catapult" : {
-		"type" : "builtin",
-		"script" : "Catapult",
+		"type" : "lua",
+		"script" : "catapult",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -18,9 +19,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"clone" : { 
-		"type" : "builtin",
-		"script" : "Clone",
+	"clone" : {
+		"type" : "lua",
+		"script" : "clone",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -28,15 +30,15 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
 				"maxTier" : { "type" : "number" }
 			},
 			"additionalProperties" : false
 		}
 	},
 	"damage" : {
-		"type" : "builtin",
-		"script" : "Damage",
+		"type" : "lua",
+		"script" : "damage",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -52,8 +54,9 @@
 		}
 	},
 	"demonSummon" : {
-		"type" : "luaUnit",
+		"type" : "lua",
 		"script" : "demonSummon",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -61,16 +64,16 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
 				"id" : { "type" : "string" },
 				"permanent" : { "type" : "boolean" }
 			},
 			"additionalProperties" : false
 		}
 	},
-	"dispel" : { 
-		"type" : "builtin",
-		"script" : "Dispel",
+	"dispel" : {
+		"type" : "lua",
+		"script" : "dispel",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -78,7 +81,6 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
 				"dispelPositive" : { "type" : "boolean" },
 				"dispelNegative" : { "type" : "boolean" },
 				"dispelNeutral" : { "type" : "boolean" }
@@ -86,9 +88,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"heal" : { 
-		"type" : "builtin",
-		"script" : "Heal",
+	"heal" : {
+		"type" : "lua",
+		"script" : "heal",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -96,7 +99,6 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
 				"healLevel" : { "type" : "string" },
 				"healPower" : { "type" : "string" },
 				"minFullUnits" : { "type" : "number" }
@@ -104,9 +106,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"sacrifice" : { 
-		"type" : "builtin",
-		"script" : "Sacrifice",
+	"sacrifice" : {
+		"type" : "lua",
+		"script" : "sacrifice",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -114,7 +117,6 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
 				"healLevel" : { "type" : "string" },
 				"healPower" : { "type" : "string" },
 				"minFullUnits" : { "type" : "number" }
@@ -122,9 +124,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"moat" : { 
-		"type" : "builtin",
-		"script" : "Moat",
+	"moat" : {
+		"type" : "lua",
+		"script" : "moat",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -143,10 +146,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"obstacle" :
-	{ 
-		"type" : "builtin",
-		"script" : "Obstacle",
+	"obstacle" : {
+		"type" : "lua",
+		"script" : "obstacle",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -166,9 +169,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"removeObstacle" : { 
-		"type" : "builtin",
-		"script" : "RemoveObstacle",
+	"removeObstacle" : {
+		"type" : "lua",
+		"script" : "removeObstacle",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -185,6 +189,7 @@
 	"summon" : {
 		"type" : "lua",
 		"script" : "summon.lua",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -199,9 +204,10 @@
 			"additionalProperties" : false
 		}
 	},
-	"teleport" : { 
-		"type" : "builtin",
-		"script" : "Teleport",
+	"teleport" : {
+		"type" : "lua",
+		"script" : "teleport",
+		"patches" : [ ],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -209,17 +215,17 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
-				"triggerObstacles" : { "type" : "boolean" },
 				"isWallPassable" : { "type" : "boolean" },
 				"isMoatPassable" : { "type" : "boolean" }
 			},
 			"additionalProperties" : false
 		}
 	},
-	"timed" : { 
-		"type" : "builtin",
-		"script" : "Timed",
+	"timed" : {
+		"type" : "lua",
+		"script" : "timed",
+		"stringRegistrations" : ["battleLogSingular", "battleLogPlural"],
+		"patches" : ["patches/timedShield", "patches/timedBind"],
 		"schema" : {
 			"properties" : {
 				"type" : {},
@@ -227,16 +233,9 @@
 				"optional" : {},
 				"ignoreImmunity" : { "type" : "boolean" },
 				"chainLength" : { "type" : "number" },
-				"chainFactor" : { "type" : "number" },
 				"cumulative" : { "type" : "boolean" },
-				"battleLogMessage" : {
-					"type" : "object",
-					"additionalProperties" : false,
-					"properties" : {
-						"singular" : { "type" : "string" },
-						"plural" : { "type" : "string" }
-					}
-				},
+				"battleLogSingular" : { "type" : "string" },
+				"battleLogPlural" : { "type" : "string" },
 				"bonus" : { "additionalProperties" : { "$ref" : "bonusInstance.json" } }
 			},
 			"additionalProperties" : false

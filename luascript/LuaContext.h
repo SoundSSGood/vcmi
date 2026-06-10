@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "LuaScriptInstance.h"
 #include "LuaStack.h"
 #include "LuaReference.h"
 #include "../lib/json/JsonNode.h"
@@ -22,10 +23,12 @@ namespace scripting
 
 class LuaReference;
 
+/// Manages a single running Lua state for one script; created per-script by LuaScriptPool and does not survive map restarts.
+/// Exposes the VCMI C++ API to the script and dispatches calls to script-defined functions via callMethod.
 class LuaContext final : public Context
 {
 public:
-	LuaContext(const Script * source, const Environment * env_);
+	LuaContext(const LuaScriptInstance * source, const Environment * env_);
 	~LuaContext();
 
 	/// Runs script once to perform its initialization
@@ -45,21 +48,23 @@ private:
 	std::mutex mutex;
 	lua_State * L;
 
-	const Script * script;
+	const LuaScriptInstance * script;
 
 	const Environment * env;
 
 	std::shared_ptr<LuaReference> modules;
-	std::shared_ptr<LuaReference> scriptClosure;
 	std::shared_ptr<LuaReference> scriptTable;
+
+	/// Loads one Lua chunk from source. On success the chunk function is at the top of the stack.
+	/// Returns false on compile failure with the error string left on the stack.
+	bool loadLayerChunk(const std::string & sourceText, const std::string & identifier);
+
+	/// Replaces the environment of the chunk on top of the stack so that the global `Base`
+	/// resolves to the given base table, while other globals fall back through __index = _G.
+	void installChunkEnvWithBase(LuaReference & base);
 
 	//log error and return nil from LuaCFunction
 	int errorRetVoid(const std::string & message);
-
-	void popAll();
-
-	void push(const std::string & value);
-	void push(lua_CFunction f, void * opaque);
 
 	std::string toStringRaw(int index);
 
@@ -69,8 +74,17 @@ private:
 
 	//require global function
 	static int require(lua_State * L);
+	static int luaError(lua_State * L);
+	static int luaAssert(lua_State * L);
+
+	/// Custom text printing function for use in scripting
+	/// based on luaB_print (part of Lua source code)
+	/// adapted to C++ & VCMI logging facilities
+	static int luaPrint(lua_State * L);
 
 	//require function implementation
+	// Returns 1 on success (module table on stack).
+	// Returns -1 on error (error string on stack).
 	int loadModule();
 };
 
@@ -78,6 +92,15 @@ template<typename ReturnType, typename... Args>
 ReturnType LuaContext::callMethod(const std::string & name, const JsonNode & params, Args&&... args)
 {
 	std::lock_guard guard(mutex);
+
+	if(!scriptTable)
+	{
+		if constexpr (!std::is_void_v<ReturnType>)
+			return ReturnType{};
+		else
+			return;
+	}
+
 	LuaStack S(L);
 
 	scriptTable->push();               // stack: (table)
@@ -87,9 +110,11 @@ ReturnType LuaContext::callMethod(const std::string & name, const JsonNode & par
 	if(!S.isFunction(-1))
 	{
 		S.clear();
-		std::string error = "Function with name " + name + " was not found";
-		logGlobal->error(error);
-		throw LuaApiException(error);
+		logScript->error("Script '%s': function '%s' not found", script->getIdentifier(), name);
+		if constexpr (!std::is_void_v<ReturnType>)
+			return ReturnType{};
+		else
+			return;
 	}
 
 	// Build self: push params as Lua table, set __index = scriptTable via metatable
@@ -107,18 +132,27 @@ ReturnType LuaContext::callMethod(const std::string & name, const JsonNode & par
 	{
 		std::string error = lua_tostring(L, -1);
 		S.clear();
-
-		boost::format fmt("Lua function %s failed with message: %s");
-		fmt % name % error;
-		logGlobal->error(fmt.str());
-		throw LuaApiException(error);
+		logScript->error("Script '%s', function '%s': %s", script->getIdentifier(), name, error);
+		if constexpr (!std::is_void_v<ReturnType>)
+			return ReturnType{};
+		else
+			return;
 	}
 
 	if constexpr (!std::is_void_v<ReturnType>)
 	{
-		ReturnType ret;
-		S.getOrThrow(S.absindex(-1), ret);
-		S.balance();
+		ReturnType ret{};
+		try
+		{
+			S.get(S.absindex(-1), ret);
+		}
+		catch(const LuaApiException & e)
+		{
+			S.clear();
+			logScript->error("Script '%s', function '%s' returned unexpected value: %s", script->getIdentifier(), name, e.what());
+			return ReturnType{};
+		}
+		S.restoreInitialTop();
 		return ret;
 	}
 	else

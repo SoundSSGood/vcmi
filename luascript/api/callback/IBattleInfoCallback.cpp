@@ -1,0 +1,191 @@
+/*
+ * IBattleInfoCallback.cpp, part of VCMI engine
+ *
+ * Authors: listed in file AUTHORS in main folder
+ *
+ * License: GNU General Public License v2.0 or later
+ * Full text of license available in license.txt file, in main folder
+ *
+ */
+#include "StdInc.h"
+
+#include "IBattleInfoCallback.h"
+#include <vcmi/Entity.h>
+
+#include "../../LuaStack.h"
+#include "../../LuaCallWrapper.h"
+
+#include "../../../lib/GameConstants.h"
+#include "../../../lib/battle/Unit.h"
+#include "../../../lib/battle/AccessibilityInfo.h"
+#include "../../../lib/battle/CBattleInfoCallback.h"
+#include "../../../lib/battle/CBattleInfoEssentials.h"
+#include "../../../lib/battle/CObstacleInstance.h"
+#include "../../../lib/BattleFieldHandler.h"
+
+VCMI_LIB_NAMESPACE_BEGIN
+
+namespace scripting::api
+{
+
+const std::vector<IBattleInfoCallbackProxy::CustomRegType> IBattleInfoCallbackProxy::REGISTER_CUSTOM =
+{
+	{ "getTacticDistance", LuaMethodWrapper<&BattleCb::battleTacticDist>::invoke, false },
+	{ "isFinished",       LuaMethodWrapper<&BattleCb::battleIsFinished>::invoke,  false },
+
+	{ "getAvailableHex",      LuaCallWrapper<&IBattleInfoCallbackProxy::getAvailableHex>::invoke,         false },
+	{ "getUnitsIf",           LuaCallWrapper<&IBattleInfoCallbackProxy::getUnitsIf>::invoke,              false },
+	{ "isAccessibleForUnit",  LuaFunctionWrapper<&IBattleInfoCallbackProxy::isAccessibleForUnit>::invoke, false },
+	{ "hasPenaltyOnLine",     LuaFunctionWrapper<&IBattleInfoCallbackProxy::hasPenaltyOnLine>::invoke,    false },
+	{ "getUnitByPos",         LuaFunctionWrapper<&IBattleInfoCallbackProxy::getUnitByPos>::invoke,        false },
+	{ "getAllObstacles",      LuaFunctionWrapper<&IBattleInfoCallbackProxy::getAllObstacles>::invoke,     false },
+	{ "getObstaclesOnPos",    LuaFunctionWrapper<&IBattleInfoCallbackProxy::getObstaclesOnPos>::invoke,   false },
+	{ "hasFortifications",    LuaFunctionWrapper<&IBattleInfoCallbackProxy::hasFortifications>::invoke,   false },
+	{ "hasMoat",              LuaFunctionWrapper<&IBattleInfoCallbackProxy::hasMoat>::invoke,             false },
+	{ "hasNativeStack",       LuaFunctionWrapper<&IBattleInfoCallbackProxy::hasNativeStack>::invoke,      false },
+	{ "getAllPossibleHexes",  LuaFunctionWrapper<&IBattleInfoCallbackProxy::getAllPossibleHexes>::invoke, false },
+	{ "getWallState",         LuaFunctionWrapper<&IBattleInfoCallbackProxy::getWallState>::invoke,        false },
+	{ "isWallPartAttackable", LuaFunctionWrapper<&IBattleInfoCallbackProxy::isWallPartAttackable>::invoke,false },
+	{ "wallPartToBattleHex",  LuaFunctionWrapper<&IBattleInfoCallbackProxy::wallPartToBattleHex>::invoke, false },
+	{ "hexToWallPart",        LuaFunctionWrapper<&IBattleInfoCallbackProxy::hexToWallPart>::invoke,       false },
+	{ "getTowerShooterHex",   LuaFunctionWrapper<&IBattleInfoCallbackProxy::getTowerShooterHex>::invoke,  false },
+};
+
+bool IBattleInfoCallbackProxy::isAccessibleForUnit(const IBattleInfoCallback & object, const battle::Unit & unit, BattleHex hex)
+{
+	const auto * cb = dynamic_cast<const CBattleInfoCallback *>(&object);
+	if(!cb)
+		return false;
+	return cb->getAccessibility(&unit).accessible(hex, &unit);
+}
+
+bool IBattleInfoCallbackProxy::hasPenaltyOnLine(const IBattleInfoCallback & object, BattleHex from, BattleHex dest, bool checkWall, bool checkMoat)
+{
+	const auto * cb = dynamic_cast<const CBattleInfoCallback *>(&object);
+	if(!cb)
+		return false;
+	return cb->battleHasPenaltyOnLine(from, dest, checkWall, checkMoat);
+}
+
+int IBattleInfoCallbackProxy::getAvailableHex(lua_State * L)
+{
+	LuaStack S(L);
+
+	const IBattleInfoCallback * object;
+	S.getNonNull(1, object);
+
+	const Creature * creature;
+	BattleSide side;
+	si16 hexVal = BattleHex::INVALID;
+
+	S.get(2, creature);
+	S.get(3, side);
+
+	if(lua_gettop(L) >= 4 && !lua_isnil(L, 4))
+		S.get(4, hexVal);
+
+	S.clear();
+	BattleHex result = object->getAvailableHex(creature, side, hexVal);
+	S.push(result);
+	return 1;
+}
+
+const battle::Unit * IBattleInfoCallbackProxy::getUnitByPos(const IBattleInfoCallback & object, BattleHex hex, bool onlyAlive)
+{
+	return object.battleGetUnitByPos(hex, onlyAlive);
+}
+
+std::vector<std::shared_ptr<const CObstacleInstance>> IBattleInfoCallbackProxy::getAllObstacles(const IBattleInfoCallback & object)
+{
+	return object.battleGetAllObstacles(BattleSide::ALL_KNOWING);
+}
+
+std::vector<std::shared_ptr<const CObstacleInstance>> IBattleInfoCallbackProxy::getObstaclesOnPos(const IBattleInfoCallback & object, BattleHex hex, bool onlyBlocking)
+{
+	return object.battleGetAllObstaclesOnPos(hex, onlyBlocking);
+}
+
+bool IBattleInfoCallbackProxy::hasFortifications(const IBattleInfoCallback & object)
+{
+	return object.hasFortifications();
+}
+
+bool IBattleInfoCallbackProxy::hasMoat(const IBattleInfoCallback & object)
+{
+	return object.hasMoat();
+}
+
+bool IBattleInfoCallbackProxy::hasNativeStack(const IBattleInfoCallback & object, BattleSide side)
+{
+	return object.battleHasNativeStack(side);
+}
+
+BattleHexArray IBattleInfoCallbackProxy::getAllPossibleHexes(const IBattleInfoCallback &)
+{
+	BattleHexArray result;
+	for(int i = 0; i < GameConstants::BFIELD_SIZE; i++)
+		result.insert(BattleHex(static_cast<si16>(i)));
+	return result;
+}
+
+std::optional<EWallState> IBattleInfoCallbackProxy::getWallState(const IBattleInfoCallback & object, EWallPart part)
+{
+	EWallState state = object.battleGetWallState(part);
+	if(state == EWallState::NONE)
+		return std::nullopt;
+	return state;
+}
+
+bool IBattleInfoCallbackProxy::isWallPartAttackable(const IBattleInfoCallback & object, EWallPart part)
+{
+	return object.isWallPartAttackable(part);
+}
+
+BattleHex IBattleInfoCallbackProxy::wallPartToBattleHex(const IBattleInfoCallback & object, EWallPart part)
+{
+	return object.wallPartToBattleHex(part);
+}
+
+EWallPart IBattleInfoCallbackProxy::hexToWallPart(const IBattleInfoCallback & object, BattleHex hex)
+{
+	return object.battleHexToWallPart(hex);
+}
+
+BattleHex IBattleInfoCallbackProxy::getTowerShooterHex(const IBattleInfoCallback & object, EWallPart part)
+{
+	return object.getTowerShooterHex(part);
+}
+
+int IBattleInfoCallbackProxy::getUnitsIf(lua_State * L)
+{
+	LuaStack S(L);
+
+	const IBattleInfoCallback * object;
+	S.getNonNull(1, object);
+
+	if(!S.isFunction(2))
+		throw LuaApiException("Invalid parameters passed into getUnitsIf!");
+
+	battle::Units units = object->battleGetUnitsIf([&L](const battle::Unit * unit){
+		LuaStack S2(L);
+		lua_pushvalue(L, 2); // bring copy of the function to top of stack
+		S2.push(unit);
+
+		if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
+			std::string error = lua_tostring(L, S2.absindex(-1));
+			throw LuaApiException("Lua getUnitsIf callback failed with message: " + error);
+		}
+
+		bool result = lua_toboolean(L, S2.absindex(-1)) != 0;
+		S2.restoreInitialTop();
+		return result;
+	});
+
+	S.clear();
+	S.push(units);
+	return 1;
+}
+
+}
+
+VCMI_LIB_NAMESPACE_END

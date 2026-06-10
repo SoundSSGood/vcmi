@@ -30,7 +30,7 @@
 #include "../networkPacks/PacksForClientBattle.h"
 #include "../BattleFieldHandler.h"
 #include "../Rect.h"
-#include "../spells/effects/UnitEffect.h"
+#include "../spells/effects/Effect.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -202,6 +202,9 @@ bool CBattleInfoCallback::battleHasPenaltyOnLine(const BattleHex & from, const B
 	if (!from.isAvailable() || !dest.isAvailable())
 		throw std::runtime_error("Invalid hex (" + std::to_string(from.toInt()) + " and " + std::to_string(dest.toInt()) + ") received in battleHasPenaltyOnLine!" );
 
+	if(battleGetFortifications().wallsHealth == 0)
+		return false;
+
 	auto isTileBlocked = [&](const BattleHex & tile)
 	{
 		EWallPart wallPart = battleHexToWallPart(tile);
@@ -335,20 +338,37 @@ std::vector<PossiblePlayerBattleAction> CBattleInfoCallback::getClientActionsFor
 PossiblePlayerBattleAction CBattleInfoCallback::getCasterAction(const CSpell * spell, const spells::Caster * caster, spells::Mode mode) const
 {
 	RETURN_IF_NOT_BATTLE(PossiblePlayerBattleAction::INVALID);
-	auto spellSelMode = PossiblePlayerBattleAction::ANY_LOCATION;
 
-	const CSpell::TargetInfo ti(spell, caster->getSpellSchoolLevel(spell), mode);
+	const spells::BattleCast cast(this, caster, mode, spell);
+	auto targetTypes = spell->battleMechanics(&cast)->getTargetTypes();
 
-	if(ti.massive || ti.type == spells::AimType::NO_TARGET)
-		spellSelMode = PossiblePlayerBattleAction::NO_LOCATION;
-	else if(ti.type == spells::AimType::LOCATION && ti.clearAffected)
-		spellSelMode = PossiblePlayerBattleAction::FREE_LOCATION;
-	else if(ti.type == spells::AimType::CREATURE)
-		spellSelMode = PossiblePlayerBattleAction::AIMED_SPELL_CREATURE;
-	else if(ti.type == spells::AimType::OBSTACLE)
-		spellSelMode = PossiblePlayerBattleAction::OBSTACLE;
+	if(targetTypes.empty() || targetTypes.front() == spells::AimType::NOTHING)
+		return PossiblePlayerBattleAction(PossiblePlayerBattleAction::NO_LOCATION, spell->id);
 
-	return PossiblePlayerBattleAction(spellSelMode, spell->id);
+	if(targetTypes.size() >= 2)
+	{
+		if(targetTypes[1] == spells::AimType::CREATURE)
+			return PossiblePlayerBattleAction(PossiblePlayerBattleAction::SACRIFICE, spell->id);
+		if(targetTypes[1] == spells::AimType::LOCATION)
+			return PossiblePlayerBattleAction(PossiblePlayerBattleAction::TELEPORT, spell->id);
+	}
+
+	switch(targetTypes.front())
+	{
+		case spells::AimType::CREATURE:
+			return PossiblePlayerBattleAction(PossiblePlayerBattleAction::AIMED_SPELL_CREATURE, spell->id);
+		case spells::AimType::OBSTACLE:
+			return PossiblePlayerBattleAction(PossiblePlayerBattleAction::OBSTACLE, spell->id);
+		case spells::AimType::LOCATION:
+		{
+			const CSpell::TargetInfo ti(spell, caster->getSpellSchoolLevel(spell), mode);
+			if(ti.clearAffected)
+				return PossiblePlayerBattleAction(PossiblePlayerBattleAction::FREE_LOCATION, spell->id);
+			return PossiblePlayerBattleAction(PossiblePlayerBattleAction::ANY_LOCATION, spell->id);
+		}
+		default:
+			return PossiblePlayerBattleAction(PossiblePlayerBattleAction::NO_LOCATION, spell->id);
+	}
 }
 
 BattleHexArray CBattleInfoCallback::battleGetAttackedHexes(const battle::Unit * attacker, const BattleHex & destinationTile, const BattleHex & attackerPos) const

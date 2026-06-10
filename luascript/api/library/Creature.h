@@ -16,7 +16,7 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-namespace scripting::api::library
+namespace scripting::api
 {
 
 class CreatureProxy : public RawPointerWrapper<const Creature, CreatureProxy>
@@ -25,6 +25,8 @@ public:
 	using Wrapper = RawPointerWrapper<const Creature, CreatureProxy>;
 
 	static const std::vector<typename Wrapper::CustomRegType> REGISTER_CUSTOM;
+
+	static std::string getNameTextID(const Creature & creature, int amount);
 };
 
 }

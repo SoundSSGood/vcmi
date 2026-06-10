@@ -8,25 +8,29 @@ set(lualib_SRCS
 		LuaContext.cpp
 		LuaScriptPool.cpp
 		LuaSpellEffect.cpp
-		LuaUnitEffect.cpp
 		LuaStack.cpp
 
 		api/adventure/HeroInstance.cpp
 		api/adventure/StackInstance.cpp
 
-		api/battle/UnitProxy.cpp
-		api/battle/BattleHexArrayProxy.cpp
-		api/battle/BattleHexProxy.cpp
+		api/battle/Unit.cpp
+		api/battle/UnitState.cpp
+		api/battle/BattleHexArray.cpp
+		api/battle/BattleHex.cpp
+		api/battle/Obstacle.cpp
+		api/battle/SpellObstacleDescriptor.cpp
 
 		api/events/BattleEvents.cpp
-		api/events/EventBusProxy.cpp
+		api/events/EventBus.cpp
 		api/events/GenericEvents.cpp
-		api/events/SubscriptionRegistryProxy.cpp
+		api/events/SubscriptionRegistry.cpp
 
 		api/spells/Mechanics.cpp
 		api/spells/Problem.cpp
 
 		api/library/Artifact.cpp
+		api/library/Bonus.cpp
+		api/library/BonusDescriptor.cpp
 		api/library/Creature.cpp
 		api/library/Faction.cpp
 		api/library/HeroClass.cpp
@@ -35,11 +39,12 @@ set(lualib_SRCS
 		api/library/Skill.cpp
 		api/library/Spell.cpp
 
-		api/BattleCb.cpp
+		api/callback/IBattleInfoCallback.cpp
 		api/Enums.cpp
-		api/GameCb.cpp
+		api/LuaMetaString.cpp
+		api/callback/IGameInfoCallback.cpp
 		api/Registry.cpp
-		api/ServerCb.cpp
+		api/callback/ServerCallback.cpp
 )
 
 set(lualib_HDRS
@@ -50,7 +55,6 @@ set(lualib_HDRS
 		LuaScriptInstance.h
 		LuaContext.h
 		LuaSpellEffect.h
-		LuaUnitEffect.h
 		LuaScriptPool.h
 		LuaStack.h
 		LuaWrapper.h
@@ -58,16 +62,21 @@ set(lualib_HDRS
 		api/adventure/HeroInstance.h
 		api/adventure/StackInstance.h
 
-		api/battle/UnitProxy.h
-		api/battle/BattleHexArrayProxy.h
-		api/battle/BattleHexProxy.h
+		api/battle/Unit.h
+		api/battle/UnitState.h
+		api/battle/BattleHexArray.h
+		api/battle/BattleHex.h
+		api/battle/Obstacle.h
+		api/battle/SpellObstacleDescriptor.h
 
 		api/events/BattleEvents.h
-		api/events/EventBusProxy.h
+		api/events/EventBus.h
 		api/events/GenericEvents.h
-		api/events/SubscriptionRegistryProxy.h
+		api/events/SubscriptionRegistry.h
 
 		api/library/Artifact.h
+		api/library/Bonus.h
+		api/library/BonusDescriptor.h
 		api/library/Creature.h
 		api/library/Faction.h
 		api/library/HeroClass.h
@@ -79,11 +88,12 @@ set(lualib_HDRS
 		api/spells/Mechanics.h
 		api/spells/Problem.h
 
-		api/BattleCb.h
+		api/callback/IBattleInfoCallback.h
 		api/Enums.h
-		api/GameCb.h
+		api/LuaMetaString.h
+		api/callback/IGameInfoCallback.h
 		api/Registry.h
-		api/ServerCb.h
+		api/callback/ServerCallback.h
 )
 
 assign_source_group(${lualib_SRCS} ${lualib_HDRS})

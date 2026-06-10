@@ -11,25 +11,28 @@
 
 #include "Registry.h"
 
-#include "battle/UnitProxy.h"
-#include "battle/BattleHexProxy.h"
-#include "battle/BattleHexArrayProxy.h"
+#include "battle/Unit.h"
+#include "battle/UnitState.h"
+#include "battle/BattleHex.h"
+#include "battle/BattleHexArray.h"
+#include "battle/Obstacle.h"
 #include "events/BattleEvents.h"
-#include "events/EventBusProxy.h"
+#include "events/EventBus.h"
 #include "events/GenericEvents.h"
-#include "events/SubscriptionRegistryProxy.h"
+#include "events/SubscriptionRegistry.h"
 #include "spells/Mechanics.h"
 #include "spells/Problem.h"
 #include "library/Artifact.h"
-#include "BattleCb.h"
+#include "library/Bonus.h"
+#include "callback/IBattleInfoCallback.h"
 #include "library/Creature.h"
 #include "library/Faction.h"
-#include "GameCb.h"
+#include "callback/IGameInfoCallback.h"
 #include "library/HeroClass.h"
 #include "adventure/HeroInstance.h"
 #include "library/HeroType.h"
 #include "Registry.h"
-#include "ServerCb.h"
+#include "callback/ServerCallback.h"
 #include "library/Services.h"
 #include "library/Skill.h"
 #include "library/Spell.h"
@@ -42,34 +45,38 @@ namespace scripting::api
 
 Registry::Registry()
 {
-	registerPrivate<library::ServicesProxy>("library.Services");
-	registerPrivate<library::ArtifactProxy>("library.Artifact");
-	registerPrivate<library::CreatureProxy>("library.Creature");
-	registerPrivate<library::FactionProxy>("library.Faction");
-	registerPrivate<library::HeroClassProxy>("library.HeroClass");
-	registerPrivate<library::HeroTypeProxy>("library.HeroType");
-	registerPrivate<library::SkillProxy>("library.Skill");
-	registerPrivate<library::SpellProxy>("library.Spell");
+	registerPrivate<ServicesProxy>("library.Services");
+	registerPrivate<ArtifactProxy>("library.Artifact");
+	registerPrivate<BonusProxy>("library.Bonus");
+	registerPrivate<BonusListProxy>("library.BonusList");
+	registerPrivate<CreatureProxy>("library.Creature");
+	registerPrivate<FactionProxy>("library.Faction");
+	registerPrivate<HeroClassProxy>("library.HeroClass");
+	registerPrivate<HeroTypeProxy>("library.HeroType");
+	registerPrivate<SkillProxy>("library.Skill");
+	registerPrivate<SpellProxy>("library.Spell");
 
 	registerPrivate<HeroInstanceProxy>("adventure.HeroInstance");
 	registerPrivate<StackInstanceProxy>("adventure.StackInstance");
 
-	registerPrivate<battle::BattleHexProxy>("battle.BattleHex");
-	registerPrivate<battle::BattleHexArrayProxy>("battle.BattleHexArray");
-	registerPrivate<battle::UnitProxy>("battle.Unit");
-	registerPrivate<SpellProblemProxy>("battle.SpellProblem");
-	registerPrivate<SpellsMechanicsProxy>("battle.SpellMechanics");
+	registerPrivate<BattleHexProxy>("battle.BattleHex");
+	registerPrivate<BattleHexArrayProxy>("battle.BattleHexArray");
+	registerPrivate<UnitProxy>("battle.Unit");
+	registerPrivate<LuaUnitStateProxy>("battle.UnitState");
+	registerPrivate<ObstacleProxy>("battle.Obstacle");
+	registerPrivate<ProblemProxy>("battle.SpellProblem");
+	registerPrivate<MechanicsProxy>("battle.SpellMechanics");
 
-	registerPrivate<events::ApplyDamageProxy>("events.ApplyDamage");
-	registerPrivate<events::GameResumedProxy>("events.GameResumed");
-	registerPrivate<events::PlayerGotTurnProxy>("events.PlayerGotTurn");
-	registerPrivate<events::TurnStartedProxy>("events.TurnStarted");
+	registerPrivate<ApplyDamageProxy>("events.ApplyDamage");
+	registerPrivate<GameResumedProxy>("events.GameResumed");
+	registerPrivate<PlayerGotTurnProxy>("events.PlayerGotTurn");
+	registerPrivate<TurnStartedProxy>("events.TurnStarted");
 
-	registerPrivate<BattleCbProxy>("game.Battle");
-	registerPrivate<GameCbProxy>("game.Game");
-	registerPrivate<ServerCbProxy>("game.Server");
-	registerPrivate<events::EventBusProxy>("game.EventBus");
-	registerPrivate<events::EventSubscriptionProxy>("game.EventSubscription");
+	registerPrivate<IBattleInfoCallbackProxy>("game.Battle");
+	registerPrivate<IGameInfoCallbackProxy>("game.Game");
+	registerPrivate<ServerCallbackProxy>("game.Server");
+	registerPrivate<EventBusProxy>("game.EventBus");
+	registerPrivate<EventSubscriptionProxy>("game.EventSubscription");
 }
 
 const Registry * Registry::get()
