@@ -10,9 +10,6 @@
 
 #include "StdInc.h"
 
-#ifndef VCMI_NO_EXTRA_VERSION
-#include "../../Version.h"
-#endif
 #include <vcmi/Artifact.h>
 #include <vcmi/ArtifactService.h>
 #include <vcmi/Faction.h>
@@ -27,6 +24,7 @@
 
 #include <vcmi/spells/Spell.h>
 #include <vcmi/spells/Service.h>
+#include <vcmi/spells/SchoolService.h>
 
 #include "modding/IdentifierStorage.h"
 #include "modding/ModScope.h"
@@ -126,15 +124,6 @@ const MapLayerId MapLayerId::NONE(-1);
 const MapLayerId MapLayerId::SURFACE(0);
 const MapLayerId MapLayerId::UNDERGROUND(1);
 const MapLayerId MapLayerId::UNKNOWN(2);
-
-namespace GameConstants
-{
-#ifdef VCMI_NO_EXTRA_VERSION
-	const std::string VCMI_VERSION = "VCMI " VCMI_VERSION_STRING;
-#else
-	const std::string VCMI_VERSION = "VCMI " VCMI_VERSION_STRING "." + std::string{GIT_SHA1};
-#endif
-}
 
 BuildingTypeUniqueID::BuildingTypeUniqueID(FactionID factionID, BuildingID buildingID ):
 	BuildingTypeUniqueID(factionID.getNum() * 0x10000 + buildingID.getNum())
@@ -479,6 +468,9 @@ std::string PlayerColor::encode(const si32 index)
 	if (index == -1)
 		return "neutral";
 
+	if (index == PlayerColor::SPECTATOR.num)
+		return "spectator";
+
 	if (index < 0 || index >= std::size(GameConstants::PLAYER_COLOR_NAMES))
 	{
 		assert(0);
@@ -659,12 +651,17 @@ std::string SpellSchool::encode(const si32 index)
 	if (index == ANY.getNum())
 		return "any";
 
-	return LIBRARY->spellSchoolHandler->getById(SpellSchool(index))->getJsonKey();
+	return SpellSchool(index).toEntity(LIBRARY)->getJsonKey();
 }
 
 std::string SpellSchool::entityType()
 {
 	return "spellSchool";
+}
+
+const spells::SpellSchoolType * SpellSchool::toEntity(const Services * services) const
+{
+	return services->spellSchools()->getByIndex(getNum());
 }
 
 si32 GameResID::decode(const std::string & identifier)

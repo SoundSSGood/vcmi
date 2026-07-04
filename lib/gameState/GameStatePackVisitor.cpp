@@ -1331,12 +1331,10 @@ void GameStatePackVisitor::visitStartAction(StartAction & pack)
 		switch(pack.ba.actionType)
 		{
 			case EActionType::DEFEND:
-				st->waiting = false;
 				st->defending = true;
-				st->defendingAnim = true;
+				st->waiting = false;
 				break;
 			case EActionType::WAIT:
-				st->defendingAnim = false;
 				st->waiting = true;
 				st->waitedThisTurn = true;
 				break;
@@ -1350,7 +1348,6 @@ void GameStatePackVisitor::visitStartAction(StartAction & pack)
 				else
 				{
 					st->waiting = false;
-					st->defendingAnim = false;
 					st->movedThisRound = true;
 				}
 				st->castSpellThisTurn = true;
@@ -1360,7 +1357,6 @@ void GameStatePackVisitor::visitStartAction(StartAction & pack)
 				break;
 			default: //any active stack action - attack, catapult, heal, spell...
 				st->waiting = false;
-				st->defendingAnim = false;
 				st->movedThisRound = true;
 				break;
 		}
@@ -1403,7 +1399,7 @@ void GameStatePackVisitor::visitBattleUnitsChanged(BattleUnitsChanged & pack)
 
 void GameStatePackVisitor::restorePreBattleState(BattleID battleID)
 {
-	auto battleIter = boost::range::find_if(gs.currentBattles, [&](const auto & battle)
+	auto battleIter = std::ranges::find_if(gs.currentBattles, [&](const auto & battle)
 	{
 		return battle->battleID == battleID;
 	});
@@ -1427,7 +1423,7 @@ void GameStatePackVisitor::visitBattleCancelled(BattleCancelled & pack)
 {
 	restorePreBattleState(pack.battleID);
 
-	auto battleIter = boost::range::find_if(gs.currentBattles, [&](const auto & battle)
+	auto battleIter = std::ranges::find_if(gs.currentBattles, [&](const auto & battle)
 	{
 		return battle->battleID == pack.battleID;
 	});
@@ -1461,7 +1457,7 @@ void GameStatePackVisitor::visitBattleResultsApplied(BattleResultsApplied & pack
 	for(auto & movingPack : pack.movingArtifacts)
 		movingPack.visit(*this);
 
-	auto battleIter = boost::range::find_if(gs.currentBattles, [&](const auto & battle)
+	auto battleIter = std::ranges::find_if(gs.currentBattles, [&](const auto & battle)
 	{
 		return battle->battleID == pack.battleID;
 	});
@@ -1479,7 +1475,7 @@ void GameStatePackVisitor::visitBattleResultsApplied(BattleResultsApplied & pack
 
 void GameStatePackVisitor::visitBattleEnded(BattleEnded & pack)
 {
-	auto battleIter = boost::range::find_if(gs.currentBattles, [&](const auto & battle)
+	auto battleIter = std::ranges::find_if(gs.currentBattles, [&](const auto & battle)
 	{
 		return battle->battleID == pack.battleID;
 	});

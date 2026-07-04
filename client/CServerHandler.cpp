@@ -20,6 +20,7 @@
 #include "Discord.h"
 
 #include "globalLobby/GlobalLobbyClient.h"
+#include "globalLobby/GlobalLobbyRoomWindow.h"
 
 #include "gui/WindowHandler.h"
 
@@ -73,16 +74,36 @@ CServerHandler::~CServerHandler()
 {
 	if (serverRunner)
 		serverRunner->shutdown();
-	networkHandler->stop();
+	stopNetwork();
 
 	if (serverRunner)
 		serverRunner->wait();
 	serverRunner.reset();
+	waitForNetworkThread();
+}
+
+void CServerHandler::stopNetwork()
+{
+	networkHandler->stop();
+}
+
+void CServerHandler::waitForNetworkThread()
+{
 	if (threadNetwork.joinable())
 	{
+		if(threadNetwork.get_id() == std::this_thread::get_id())
+			return;
+
 		//ENGINE->interfaceMutex must have been locked by the current thread, otherwise an unlock will cause undefined behavior
-		auto unlockInterface = vstd::makeUnlockGuard(ENGINE->interfaceMutex);
-		threadNetwork.join();
+		if(ENGINE)
+		{
+			auto unlockInterface = vstd::makeUnlockGuard(ENGINE->interfaceMutex);
+			threadNetwork.join();
+		}
+		else
+		{
+			threadNetwork.join();
+		}
 	}
 }
 
@@ -90,14 +111,8 @@ void CServerHandler::endNetwork()
 {
 	if (client)
 		client->endNetwork();
-	networkHandler->stop();
-
-	if (threadNetwork.joinable())
-	{
-		//ENGINE->interfaceMutex must have been locked by the current thread, otherwise an unlock will cause undefined behavior
-		auto unlockInterface = vstd::makeUnlockGuard(ENGINE->interfaceMutex);
-		threadNetwork.join();
-	}
+	stopNetwork();
+	waitForNetworkThread();
 }
 
 CServerHandler::CServerHandler()
@@ -233,7 +248,9 @@ void CServerHandler::connectToServer(const std::string & addr, const ui16 port)
 void CServerHandler::onConnectionFailed(const std::string & errorMessage)
 {
 	assert(getState() == EClientState::CONNECTING);
-	std::scoped_lock interfaceLock(ENGINE->interfaceMutex);
+	std::unique_lock<std::mutex> interfaceLock;
+	if(ENGINE)
+		interfaceLock = std::unique_lock<std::mutex>(ENGINE->interfaceMutex);
 
 	if (isServerLocal())
 	{
@@ -251,14 +268,16 @@ void CServerHandler::onConnectionFailed(const std::string & errorMessage)
 
 void CServerHandler::onTimer()
 {
-	std::scoped_lock interfaceLock(ENGINE->interfaceMutex);
+	std::unique_lock<std::mutex> interfaceLock;
+	if(ENGINE)
+		interfaceLock = std::unique_lock<std::mutex>(ENGINE->interfaceMutex);
 
 	if(getState() == EClientState::CONNECTION_CANCELLED)
 	{
 		logNetwork->info("Connection aborted by player!");
 		serverRunner->wait();
 		serverRunner.reset();
-		if (ENGINE->windows().topWindow<CSimpleJoinScreen>() != nullptr)
+		if (ENGINE && ENGINE->windows().topWindow<CSimpleJoinScreen>() != nullptr)
 			ENGINE->windows().popWindows(1);
 		return;
 	}
@@ -271,7 +290,9 @@ void CServerHandler::onConnectionEstablished(const NetworkConnectionPtr & netCon
 {
 	assert(getState() == EClientState::CONNECTING);
 
-	std::scoped_lock interfaceLock(ENGINE->interfaceMutex);
+	std::unique_lock<std::mutex> interfaceLock;
+	if(ENGINE)
+		interfaceLock = std::unique_lock<std::mutex>(ENGINE->interfaceMutex);
 
 	networkConnection = netConnection;
 
@@ -286,7 +307,16 @@ void CServerHandler::onConnectionEstablished(const NetworkConnectionPtr & netCon
 	logicConnection = std::make_shared<GameConnection>(netConnection);
 	logicConnection->uuid = uuid;
 	logicConnection->enterLobbyConnectionMode();
-	sendClientConnecting();
+
+	if(lobbyPreviewMode)
+	{
+		LobbyQueryState lqs;
+		sendLobbyPack(lqs);
+	}
+	else
+	{
+		sendClientConnecting();
+	}
 }
 
 void CServerHandler::applyPackOnLobbyScreen(CPackForLobby & pack)
@@ -674,7 +704,8 @@ void CServerHandler::startGameplay(std::shared_ptr<CGameState> gameState)
 		throw std::runtime_error("Invalid mode");
 	}
 
-	ENGINE->discord().setPlayingStatus(si, &gameState->getMap(), howManyPlayerInterfaces());
+	if(ENGINE)
+		ENGINE->discord().setPlayingStatus(si, &gameState->getMap(), howManyPlayerInterfaces());
 
 	// After everything initialized we can accept CPackToClient netpacks
 	setState(EClientState::GAMEPLAY);
@@ -720,7 +751,8 @@ void CServerHandler::endGameplay()
 		GAME->mainmenu()->makeActiveInterface();
 	}
 
-	ENGINE->discord().setStatus("", "", {0, 0});
+	if(ENGINE)
+		ENGINE->discord().setStatus("", "", {0, 0});
 }
 
 std::optional<std::string> CServerHandler::canQuickLoadGame(const std::string & path) const
@@ -948,7 +980,9 @@ public:
 
 void CServerHandler::onPacketReceived(const std::shared_ptr<INetworkConnection> &, const std::vector<std::byte> & message)
 {
-	std::scoped_lock interfaceLock(ENGINE->interfaceMutex);
+	std::unique_lock<std::mutex> interfaceLock;
+	if(ENGINE)
+		interfaceLock = std::unique_lock<std::mutex>(ENGINE->interfaceMutex);
 
 	if(getState() == EClientState::DISCONNECTING)
 		return;
@@ -960,7 +994,9 @@ void CServerHandler::onPacketReceived(const std::shared_ptr<INetworkConnection> 
 
 void CServerHandler::onDisconnected(const std::shared_ptr<INetworkConnection> & connection, const std::string & errorMessage)
 {
-	std::scoped_lock interfaceLock(ENGINE->interfaceMutex);
+	std::unique_lock<std::mutex> interfaceLock;
+	if(ENGINE)
+		interfaceLock = std::unique_lock<std::mutex>(ENGINE->interfaceMutex);
 
 	if (connection != networkConnection)
 	{
@@ -1005,8 +1041,15 @@ void CServerHandler::waitForServerShutdown()
 	{
 		// Release interfaceMutex while waiting for server thread to finish
 		// to avoid blocking the GUI thread (same pattern as endNetwork())
-		auto unlockInterface = vstd::makeUnlockGuard(ENGINE->interfaceMutex);
-		serverRunner->wait();
+		if(ENGINE)
+		{
+			auto unlockInterface = vstd::makeUnlockGuard(ENGINE->interfaceMutex);
+			serverRunner->wait();
+		}
+		else
+		{
+			serverRunner->wait();
+		}
 	}
 	int exitCode = serverRunner->exitCode();
 	serverRunner.reset();
@@ -1071,4 +1114,55 @@ void CServerHandler::sendGamePack(const CPackForServer & pack) const
 		networkLagCompensator->tryPredictReply(pack);
 
 	logicConnection->sendPack(pack);
+}
+
+void CServerHandler::startLobbyPreview(const std::string & addr, ui16 port, std::function<void()> onJoin)
+{
+	lobbyPreviewMode = true;
+	onLobbyPreviewJoin = std::move(onJoin);
+	connectToServer(addr, port);
+}
+
+void CServerHandler::onLobbyPreviewResponse(LobbyModsCheck & pack)
+{
+	lobbyPreviewMode = false;
+
+	// Close the temporary query connection
+	if(networkConnection)
+	{
+		networkConnection->close();
+		networkConnection.reset();
+	}
+	logicConnection.reset();
+
+	GlobalLobbyRoom roomDescription;
+	roomDescription.gameVersion = pack.vcmiVersion;
+	roomDescription.statusID = "open";
+	roomDescription.playerLimit = 8;
+	roomDescription.modList = pack.mods;
+	roomDescription.hostAccountDisplayName = pack.hostAccountDisplayName;
+	roomDescription.description = "";
+
+	for(const auto & name : pack.participantNames)
+	{
+		GlobalLobbyAccount account;
+		account.displayName = name;
+		roomDescription.participants.push_back(account);
+	}
+
+	ENGINE->windows().createAndPushWindow<GlobalLobbyRoomWindow>(
+		roomDescription,
+		[this]()
+		{
+			ENGINE->windows().popWindows(1);
+			if(onLobbyPreviewJoin)
+				onLobbyPreviewJoin();
+		},
+		[]()
+		{
+			ENGINE->windows().popWindows(1);
+			// Also close the CSimpleJoinScreen that was underneath the preview
+			if(auto w = ENGINE->windows().topWindow<CSimpleJoinScreen>())
+				ENGINE->windows().popWindows(1);
+		});
 }
