@@ -24,8 +24,6 @@
 
 #include <vcmi/spells/Caster.h>
 
-VCMI_LIB_NAMESPACE_BEGIN
-
 static constexpr std::array LEVEL_NAMES = {"none", "basic", "advanced", "expert"};
 
 ///CSpell
@@ -38,7 +36,6 @@ CSpell::CSpell():
 	castOnSelf(false),
 	castOnlyOnSelf(false),
 	castWithoutSkip(false),
-	positiveness(ESpellPositiveness::NEUTRAL),
 	defaultProbability(0),
 	rising(false),
 	damage(false),
@@ -205,35 +202,22 @@ bool CSpell::isMagical() const
 
 bool CSpell::isPositive() const
 {
-	return positiveness == POSITIVE;
+	return positive;
 }
 
 bool CSpell::isNegative() const
 {
-	return positiveness == NEGATIVE;
+	return negative;
 }
 
 bool CSpell::isNeutral() const
 {
-	return positiveness == NEUTRAL;
+	return !positive && !negative;
 }
 
 bool CSpell::isPersistent() const
 {
 	return persistent;
-}
-
-boost::logic::tribool CSpell::getPositiveness() const
-{
-	switch (positiveness)
-	{
-	case CSpell::POSITIVE:
-		return true;
-	case CSpell::NEGATIVE:
-		return false;
-	default:
-		return boost::logic::indeterminate;
-	}
 }
 
 bool CSpell::isDamage() const
@@ -409,6 +393,15 @@ int64_t CSpell::adjustRawDamage(const spells::Caster * caster, const battle::Uni
 			ret = 0;
 	}
 	ret = caster->getSpellBonus(this, ret, affectedCreature);
+
+	//cap damage received per single creature (e.g. HotA war machines), same rule as melee/ranged damage
+	if(affectedCreature != nullptr)
+	{
+		int capPercentage = affectedCreature->valOfBonuses(BonusType::DAMAGE_RECEIVED_CAP);
+		if(capPercentage > 0)
+			ret = std::min<int64_t>(ret, affectedCreature->getMaxHealth() * capPercentage / 100);
+	}
+
 	return ret;
 }
 
@@ -423,7 +416,8 @@ void CSpell::setIsOffensive(const bool val)
 
 	if(val)
 	{
-		positiveness = CSpell::NEGATIVE;
+		positive = false;
+		negative = true;
 		damage = true;
 	}
 }
@@ -434,7 +428,8 @@ void CSpell::setIsRising(const bool val)
 
 	if(val)
 	{
-		positiveness = CSpell::POSITIVE;
+		positive = true;
+		negative = false;
 	}
 }
 
@@ -520,5 +515,3 @@ CSpell::TargetInfo::TargetInfo(const CSpell * spell, const int level, spells::Mo
 	massive = levelInfo.range.empty();
 	clearAffected = levelInfo.clearAffected;
 }
-
-VCMI_LIB_NAMESPACE_END

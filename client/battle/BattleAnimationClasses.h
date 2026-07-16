@@ -14,14 +14,10 @@
 #include "../../lib/Color.h"
 #include "BattleConstants.h"
 
-VCMI_LIB_NAMESPACE_BEGIN
-
 class CStack;
 class CCreature;
 class CSpell;
 class Point;
-
-VCMI_LIB_NAMESPACE_END
 
 class ColorFilter;
 class BattleHero;
@@ -363,10 +359,12 @@ class HeroCastAnimation : public BattleAnimation
 	const CSpell * spell;
 	BattleHex tile;
 	bool projectileEmitted;
+	bool hitEmitted = false;
 
 	void initializeProjectile();
 	void emitProjectile();
 	void emitAnimationEvent();
+	bool hasOngoingSpellEffectAnimation();
 
 public:
 	HeroCastAnimation(BattleInterface & owner, std::shared_ptr<BattleHero> hero, BattleHex dest, const CStack * defender, const CSpell * spell);

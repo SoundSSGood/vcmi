@@ -16,8 +16,6 @@
 #include "../filesystem/ResourcePath.h"
 #include "../int3.h"
 
-VCMI_LIB_NAMESPACE_BEGIN
-
 struct Component;
 class JsonSerializeFormat;
 class ObjectTemplate;
@@ -96,6 +94,9 @@ public:
 	virtual bool isCoastVisitable() const;
 
 	virtual BattleField getBattlefield() const;
+
+	/// terrain the battle at this object takes place on, or NONE to use the map tile's terrain
+	virtual TerrainId getBattleTerrain() const;
 
 	virtual bool isTile2Terrain() const { return false; }
 
@@ -178,5 +179,3 @@ protected:
 
 	void serializeJsonOwner(JsonSerializeFormat & handler);
 };
-
-VCMI_LIB_NAMESPACE_END

@@ -30,8 +30,6 @@
 
 #include <vstd/RNG.h>
 
-VCMI_LIB_NAMESPACE_BEGIN
-
 //TODO: remove constructor
 CGObjectInstance::CGObjectInstance(IGameInfoCallback *cb):
 	IObjectInterface(cb),
@@ -423,7 +421,7 @@ void CGObjectInstance::serializeJsonOwner(JsonSerializeFormat & handler)
 BattleField CGObjectInstance::getBattlefield() const
 {
 	auto currentLayer = cb->gameState().getMap().mapLayers.at(pos.z);
-	const auto & objectBattlefields = LIBRARY->objtypeh->getHandlerFor(ID, subID)->getBattlefields();
+	const auto & objectBattlefields = getObjectHandler()->getBattlefields();
 
 	if (objectBattlefields.empty())
 		return BattleField::NONE;
@@ -431,9 +429,12 @@ BattleField CGObjectInstance::getBattlefield() const
 	return BattleFieldHandler::selectRandomBattlefield(objectBattlefields, currentLayer, CRandomGenerator::getDefault());
 }
 
+TerrainId CGObjectInstance::getBattleTerrain() const
+{
+	return getObjectHandler()->getBattleTerrain();
+}
+
 const IOwnableObject * CGObjectInstance::asOwnable() const
 {
 	return nullptr;
 }
-
-VCMI_LIB_NAMESPACE_END
