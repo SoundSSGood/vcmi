@@ -18,6 +18,7 @@
 #include "../queries/QueriesProcessor.h"
 #include "../queries/BattleQueries.h"
 
+#include "../../lib/CStack.h"
 #include "../../lib/CPlayerState.h"
 #include "../../lib/TerrainHandler.h"
 #include "../../lib/battle/CBattleInfoCallback.h"
@@ -33,6 +34,7 @@
 #include "../../lib/networkPacks/PacksForClient.h"
 #include "../../lib/networkPacks/PacksForClientBattle.h"
 #include "../../lib/CPlayerState.h"
+#include "../../lib/spells/CSpell.h"
 #include <vstd/RNG.h>
 
 BattleProcessor::BattleProcessor(CGameHandler * gameHandler)
@@ -101,11 +103,11 @@ void BattleProcessor::restartBattle(const BattleID & battleID, const CArmedInsta
 	bc.battleID = battleID;
 	gameHandler->sendAndApply(bc);
 
-	startBattle(army1, army2, tile, hero1, hero2, layout, town);
+	startBattle(army1, army2, tile, hero1, hero2, layout, town, true);
 }
 
 void BattleProcessor::startBattle(const CArmedInstance *army1, const CArmedInstance *army2, int3 tile,
-								const CGHeroInstance *hero1, const CGHeroInstance *hero2, const BattleLayout & layout, const CGTownInstance *town)
+								const CGHeroInstance *hero1, const CGHeroInstance *hero2, const BattleLayout & layout, const CGTownInstance *town, bool restarted)
 {
 	assert(gameHandler->gameState().getBattle(army1->getOwner()) == nullptr);
 	assert(gameHandler->gameState().getBattle(army2->getOwner()) == nullptr);
@@ -148,7 +150,48 @@ void BattleProcessor::startBattle(const CArmedInstance *army1, const CArmedInsta
 		gameHandler->queries->addQuery(newBattleQuery);
 	}
 
+	if (!restarted)
+	{
+		tryLearnEnemySpellsPreBattle(battle, BattleSide::ATTACKER);
+		tryLearnEnemySpellsPreBattle(battle, BattleSide::DEFENDER);
+	}
+
 	flowProcessor->onBattleStarted(*battle);
+}
+
+void BattleProcessor::tryLearnEnemySpellsPreBattle(const BattleInfo * battle, BattleSide side)
+{
+	const auto * learner = battle->battleGetFightingHero(side);
+	const auto * enemy = battle->battleGetFightingHero(battle->otherSide(side));
+
+	if(!learner || !enemy || !learner->hasSpellbook())
+		return;
+
+	const auto eagleEyeLevel = learner->valOfBonuses(BonusType::LEARN_BATTLE_SPELL_LEVEL_LIMIT_PRE_BATTLE);
+	if(eagleEyeLevel <= 0)
+		return;
+
+	const auto eagleEyeChance = learner->valOfBonuses(BonusType::LEARN_BATTLE_SPELL_CHANCE_PRE_BATTLE);
+	if(eagleEyeChance <= 0)
+		return;
+
+	ChangeSpells learnedSpells;
+	learnedSpells.eagleEyeBonus = true;
+	learnedSpells.learn = true;
+	learnedSpells.hid = learner->id;
+
+	for(const auto spellID : enemy->getSpellsInSpellbook())
+	{
+		const auto * spell = spellID.toSpell();
+		if(!spell)
+			continue;
+
+		if(spell->getLevel() <= eagleEyeLevel && !learner->spellbookContainsSpell(spell->getId()) && gameHandler->getRandomGenerator().nextInt(99) < eagleEyeChance)
+			learnedSpells.spells.insert(spell->getId());
+	}
+
+	if(!learnedSpells.spells.empty())
+		gameHandler->sendAndApply(learnedSpells);
 }
 
 void BattleProcessor::startBattle(const CArmedInstance *army1, const CArmedInstance *army2)
@@ -316,6 +359,40 @@ bool BattleProcessor::makePlayerBattleAction(const BattleID & battleID, PlayerCo
 	if (gameHandler->gameState().getBattle(battleID) != nullptr && !resultProcessor->battleIsEnding(*battle))
 		flowProcessor->onActionMade(*battle, ba);
 	return result;
+}
+
+void BattleProcessor::cheatBattleVictory(PlayerColor player)
+{
+	auto * battle = gameHandler->gameState().getBattle(player);
+	if(!battle || resultProcessor->battleIsEnding(*battle))
+		return;
+
+	const BattleSide winningSide = battle->playerToSide(player);
+	if(winningSide != BattleSide::ATTACKER && winningSide != BattleSide::DEFENDER)
+		return;
+
+	BattleUnitsChanged killedUnits;
+	killedUnits.battleID = battle->getBattleID();
+
+	for(const CStack * stack : battle->battleGetAllStacks(true))
+	{
+		if(stack->unitSide() == winningSide || !stack->alive())
+			continue;
+
+		auto state = stack->acquireState();
+		int64_t damage = state->getAvailableHealth();
+		state->damage(damage);
+
+		UnitChanges info(stack->unitId(), UnitChanges::EOperation::UPDATE);
+		info.data = state->save();
+		info.healthDelta = -damage;
+		killedUnits.changedStacks.push_back(info);
+	}
+
+	if(!killedUnits.changedStacks.empty())
+		gameHandler->sendAndApply(killedUnits);
+
+	setBattleResult(*battle, EBattleResult::NORMAL, winningSide);
 }
 
 void BattleProcessor::setBattleResult(const CBattleInfoCallback & battle, EBattleResult resultType, BattleSide victoriusSide)

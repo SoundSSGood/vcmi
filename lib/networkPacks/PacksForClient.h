@@ -82,6 +82,24 @@ struct DLL_LINKAGE PackageApplied : public CPackForClient
 	}
 };
 
+struct DLL_LINKAGE QueryResolved : public CPackForClient
+{
+	QueryResolved() = default;
+	explicit QueryResolved(QueryID queryID)
+		: queryID(queryID)
+	{
+	}
+
+	void visitTyped(ICPackVisitor & visitor) override;
+
+	QueryID queryID = QueryID::NONE;
+
+	template <typename Handler> void serialize(Handler & h)
+	{
+		h & queryID;
+	}
+};
+
 struct DLL_LINKAGE PackageReceived : public CPackForClient
 {
 	PackageReceived() = default;
@@ -335,12 +353,14 @@ struct DLL_LINKAGE ChangeSpells : public CPackForClient
 	ui8 learn = 1; //1 - gives spell, 0 - takes
 	ObjectInstanceID hid;
 	std::set<SpellID> spells;
+	bool eagleEyeBonus = false;
 
 	template <typename Handler> void serialize(Handler & h)
 	{
 		h & learn;
 		h & hid;
 		h & spells;
+		h & eagleEyeBonus;
 	}
 };
 

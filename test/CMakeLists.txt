@@ -35,8 +35,9 @@ set(test_SRCS
 		events/ApplyDamageTest.cpp
 		events/EventBusTest.cpp
 
-		game/CGameStateTest.cpp
+		game/BattleSpellCastTest.cpp
 		game/HeroRecruitmentTest.cpp
+		game/HeroSecondarySkillsTest.cpp
 
 		json/JsonTests.cpp
 
@@ -51,8 +52,12 @@ set(test_SRCS
 		quest/QuestScenarios.cpp
 		quest/CQuestLoaderTest.cpp
 		quest/CQuestSeerTest.cpp
+		quest/CQuestSeerMultiTest.cpp
+		quest/CQuestVisibilityTest.cpp
+		quest/CQuestMarkerTest.cpp
 		quest/CQuestGuardTest.cpp
 		quest/CQuestBorderTest.cpp
+		quest/CQuestGateTest.cpp
 
 		netpacks/NetPackFixture.cpp
 
@@ -146,11 +151,14 @@ endif()
 
 if(ENABLE_NULLKILLER2_AI)
 	list(APPEND test_SRCS
+		nullkiller2/AIUtilityTest.cpp
+		nullkiller2/Analyzers/HeroManagerTest.cpp
 		nullkiller2/Analyzers/ObjectClusterizerTest.cpp
 		nullkiller2/Behaviors/DefenceBehaviorTest.cpp
 		nullkiller2/Behaviors/EscapeBehaviorTest.cpp
 		nullkiller2/Behaviors/ExplorationBehaviorTest.cpp
 		nullkiller2/Behaviors/RecruitHeroBehaviorTest.cpp
+		nullkiller2/Engine/PriorityEvaluatorTest.cpp
 		nullkiller2/Engine/TaskFailureTest.cpp
 		nullkiller2/Goals/BuyArmyTest.cpp
 		nullkiller2/Goals/CompositionTest.cpp
