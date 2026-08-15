@@ -1027,6 +1027,9 @@ std::vector<const CGObjectInstance *> AIGateway::getFlaggedObjects() const
 
 bool AIGateway::moveHeroToTile(const int3 dst, const HeroPtr & heroPtr)
 {
+	if(!heroPtr.isVerified())
+		throw cannotFulfillGoalException("Hero was lost!");
+
 	if(heroPtr->isGarrisoned() && heroPtr->getVisitedTown())
 	{
 		cc->swapGarrisonHero(heroPtr->getVisitedTown());
@@ -1476,7 +1479,6 @@ void AIStatus::addQuery(QueryID ID, std::string description)
 
 void AIStatus::removeQuery(QueryID ID)
 {
-	std::unique_lock<std::mutex> lock(mx);
 	assert(vstd::contains(remainingQueries, ID));
 
 	std::string description = remainingQueries[ID];
@@ -1533,6 +1535,7 @@ void AIStatus::attemptedAnsweringQuery(QueryID queryID, int answerRequestID)
 
 void AIStatus::receivedAnswerConfirmation(int answerRequestID, int result)
 {
+	std::unique_lock<std::mutex> lock(mx);
 	assert(vstd::contains(requestToQueryID, answerRequestID));
 	QueryID query = requestToQueryID[answerRequestID];
 	assert(vstd::contains(remainingQueries, query));
