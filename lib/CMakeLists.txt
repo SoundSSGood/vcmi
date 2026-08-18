@@ -74,6 +74,7 @@ set(lib_MAIN_SRCS
 	bonuses/BonusList.cpp
 	bonuses/BonusSelector.cpp
 	bonuses/BonusCustomTypes.cpp
+	bonuses/BonusMigration.cpp
 	bonuses/BonusParameters.cpp
 	bonuses/CBonusSystemNode.cpp
 	bonuses/IBonusBearer.cpp
@@ -136,6 +137,7 @@ set(lib_MAIN_SRCS
 	gameState/HighScore.cpp
 	gameState/InfoAboutArmy.cpp
 	gameState/QuestInfo.cpp
+	gameState/ReplayLog.cpp
 	gameState/RumorState.cpp
 	gameState/TavernHeroesPool.cpp
 	gameState/GameStatistics.cpp
@@ -294,10 +296,11 @@ set(lib_MAIN_SRCS
 	spells/adventure/TownPortalEffect.cpp
 	spells/adventure/ViewWorldEffect.cpp
 
+	scripting/ScriptHandler.cpp
+
 	spells/effects/Effect.cpp
 	spells/effects/Effects.cpp
 	spells/effects/LocationEffect.cpp
-	spells/effects/SpellEffectHandler.cpp
 
 	texts/CGeneralTextHandler.cpp
 	texts/CLegacyConfigParser.cpp
@@ -475,6 +478,7 @@ set(lib_MAIN_HEADERS
 	bonuses/BonusList.h
 	bonuses/BonusSelector.h
 	bonuses/BonusCustomTypes.h
+	bonuses/BonusMigration.h
 	bonuses/BonusParameters.h
 	bonuses/CBonusSystemNode.h
 	bonuses/IBonusBearer.h
@@ -560,6 +564,7 @@ set(lib_MAIN_HEADERS
 	gameState/GameStatePackVisitor.h
 	gameState/HighScore.h
 	gameState/InfoAboutArmy.h
+	gameState/ReplayLog.h
 	gameState/RumorState.h
 	gameState/SThievesGuildInfo.h
 	gameState/TavernHeroesPool.h
@@ -765,12 +770,17 @@ set(lib_MAIN_HEADERS
 	spells/adventure/TownPortalEffect.h
 	spells/adventure/ViewWorldEffect.h
 
+	combatScripts/CombatEventPayload.h
+	combatScripts/ICombatEventScript.h
+
+	scripting/ScriptHandler.h
+	scripting/ScriptService.h
+	scripting/ScriptTypeDescription.h
+
 	spells/effects/Effect.h
 	spells/effects/Effects.h
 	spells/effects/EffectsFwd.h
 	spells/effects/LocationEffect.h
-	spells/effects/SpellEffectHandler.h
-	spells/effects/SpellEffectService.h
 
 	texts/CGeneralTextHandler.h
 	texts/Languages.h
